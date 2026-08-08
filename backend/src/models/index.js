@@ -33,8 +33,17 @@ Report.belongsTo(Workspace, { foreignKey: 'workspaceId' });
 // ==========================================
 
 // Feedback <-> Theme (Many-to-Many via FeedbackTheme join table)
-Feedback.belongsToMany(Theme, { through: FeedbackTheme, foreignKey: 'feedbackId' });
-Theme.belongsToMany(Feedback, { through: FeedbackTheme, foreignKey: 'themeId' });
+Feedback.belongsToMany(Theme, {
+  through: FeedbackTheme,
+  foreignKey: 'feedbackId',
+  otherKey: 'themeId'
+});
+
+Theme.belongsToMany(Feedback, {
+  through: FeedbackTheme,
+  foreignKey: 'themeId',
+  otherKey: 'feedbackId'
+});
 
 // Feedback <-> Embedding (One-to-One: Each Feedback item has one Embedding vector)
 Feedback.hasOne(Embedding, { foreignKey: 'feedbackId', onDelete: 'CASCADE' });
