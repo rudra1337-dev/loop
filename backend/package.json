@@ -6,7 +6,8 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "seed": "node src/seeders/seed.js"
   },
   "keywords": [
     "loop",
@@ -27,7 +28,9 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "mysql2": "^3.23.2",
+    "sequelize": "^6.37.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
