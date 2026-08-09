@@ -7,12 +7,6 @@ node_modules/
 .env.*.local
 !.env.example
 
-# Build output
-dist/
-
-# Vite
-.vite/
-
 # Logs
 *.log
 npm-debug.log*
@@ -22,6 +16,10 @@ pnpm-debug.log*
 # Coverage
 coverage/
 
+# Build output
+dist/
+build/
+
 # Editor / IDE
 .vscode/
 .idea/
@@ -30,5 +28,6 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Vercel
-.vercel/
+# Runtime / temporary files
+*.tmp
+*.temp
