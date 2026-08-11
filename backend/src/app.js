@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import passport from "./config/passport.js";
+import workspaceRoutes from './routes/workspace.routes.js';
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.get("/", (req, res) => {
     message: "LOOP Backend API is running 🚀",
   });
 });
+app.use('/api/workspace', workspaceRoutes);
 
 export default app;

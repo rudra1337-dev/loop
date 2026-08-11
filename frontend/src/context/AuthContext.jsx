@@ -30,11 +30,12 @@ export const AuthProvider = ({ children }) => {
   };
 
 //   SignUp
-  const signup = async ({ name, email, password, workspaceName }) => {
-    const res = await api.post('/auth/signup', { name, email, password, workspaceName });
+  const signup = async ({ name, email, password, workspaceName, inviteCode }) => {
+    const res = await api.post('/auth/signup', { name, email, password, workspaceName, inviteCode });
     setUser(res.data.user);
     return res.data.user;
   };
+
 
 //   Logout
   const logout = async () => {

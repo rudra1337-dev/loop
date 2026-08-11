@@ -3,6 +3,7 @@ import { signup, login, logout, me } from '../controllers/auth.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import passport from '../config/passport.js';
 import { signToken } from '../utils/jwt.js';
+import { getInviteByCode } from '../controllers/workspace.controller.js';
 
 const router = express.Router();
 const COOKIE_OPTIONS = {
@@ -30,6 +31,7 @@ router.get(
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   }
 );
+router.get('/invite/:code', getInviteByCode);
 
 export default router;
 
