@@ -6,6 +6,7 @@ import Theme from './Theme.js';
 import FeedbackTheme from './FeedbackTheme.js';
 import Embedding from './Embedding.js';
 import Report from './Report.js';
+import WorkspaceInvite from './WorkspaceInvite.js';
 
 // ==========================================
 // 1. MULTI-TENANT WORKSPACE ISOLATION
@@ -27,6 +28,10 @@ Theme.belongsTo(Workspace, { foreignKey: 'workspaceId' });
 // Workspace <-> Reports (One Workspace has many Reports)
 Workspace.hasMany(Report, { foreignKey: 'workspaceId', onDelete: 'CASCADE' });
 Report.belongsTo(Workspace, { foreignKey: 'workspaceId' });
+
+// Workspace <-> WorkspaceInvite (One Workspace has many Invites)
+Workspace.hasMany(WorkspaceInvite, { foreignKey: 'workspaceId', onDelete: 'CASCADE' });
+WorkspaceInvite.belongsTo(Workspace, { foreignKey: 'workspaceId' });
 
 // ==========================================
 // 2. ENTITY RELATIONSHIPS
@@ -53,6 +58,10 @@ Embedding.belongsTo(Feedback, { foreignKey: 'feedbackId' });
 User.hasMany(Report, { foreignKey: 'generatedBy' });
 Report.belongsTo(User, { foreignKey: 'generatedBy' });
 
+// User <-> WorkspaceInvite (track who generated each invite)
+User.hasMany(WorkspaceInvite, { foreignKey: 'createdBy' });
+WorkspaceInvite.belongsTo(User, { foreignKey: 'createdBy' });
+
 // Export everything together
 export {
   sequelize,
@@ -63,4 +72,5 @@ export {
   FeedbackTheme,
   Embedding,
   Report,
+  WorkspaceInvite, // add to exports
 };
