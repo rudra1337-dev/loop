@@ -1,14 +1,12 @@
 import bcrypt from 'bcryptjs';
 import { Workspace, User } from '../models/index.js';
 import { signToken } from '../utils/jwt.js';
+import {
+  AUTH_COOKIE_NAME,
+  AUTH_COOKIE_OPTIONS,
+  CLEAR_AUTH_COOKIE_OPTIONS,
+} from '../config/authCookie.js';
 import { getInviteByCode } from '../services/workspace.service.js';
-
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-};
 
 // SignUp
 export const signup = async (req, res) => {
@@ -25,21 +23,21 @@ export const signup = async (req, res) => {
     }
 
     let workspaceId;
-    let role = 'ADMIN'; // default: creating a brand-new workspace
+    let role = 'ADMIN';
 
     if (inviteCode) {
-      // Joining an existing workspace — role and workspace come from
-      // the stored invite, never from client-submitted fields.
       const invite = await getInviteByCode(inviteCode);
       if (!invite) {
         return res.status(400).json({ error: 'Invalid or expired invite link' });
       }
+
       workspaceId = invite.workspaceId;
       role = invite.role;
     } else {
       if (!workspaceName) {
         return res.status(400).json({ error: 'Workspace name is required to create a new workspace' });
       }
+
       const workspace = await Workspace.create({ name: workspaceName });
       workspaceId = workspace.id;
     }
@@ -48,7 +46,7 @@ export const signup = async (req, res) => {
     const user = await User.create({ name, email, passwordHash, role, workspaceId });
 
     const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
-    res.cookie('token', token, COOKIE_OPTIONS);
+    res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
 
     res.status(201).json({ user: await buildUserResponse(user) });
   } catch (err) {
@@ -60,6 +58,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
     }
@@ -74,8 +73,8 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-     const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
-    res.cookie('token', token, COOKIE_OPTIONS);
+    const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
+    res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
 
     res.json({ user: await buildUserResponse(user) });
   } catch (err) {
@@ -83,10 +82,9 @@ export const login = async (req, res) => {
   }
 };
 
-
 // Logout
 export const logout = (req, res) => {
-  res.clearCookie('token', COOKIE_OPTIONS);
+  res.clearCookie(AUTH_COOKIE_NAME, CLEAR_AUTH_COOKIE_OPTIONS);
   res.json({ message: 'Logged out' });
 };
 
@@ -94,11 +92,9 @@ export const me = async (req, res) => {
   res.json({ user: await buildUserResponse(req.user) });
 };
 
-// Builds the consistent user response shape used across signup/login/me.
-// Centralizing this avoids drift if we ever add another field later —
-// change it once here instead of in three separate places.
 const buildUserResponse = async (user) => {
   const workspace = await Workspace.findByPk(user.workspaceId);
+
   return {
     id: user.id,
     name: user.name,

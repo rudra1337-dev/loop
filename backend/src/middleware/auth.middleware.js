@@ -1,9 +1,10 @@
 import { verifyToken } from '../utils/jwt.js';
 import { User } from '../models/index.js';
+import { AUTH_COOKIE_NAME } from '../config/authCookie.js';
 
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.cookies?.token;
+    const token = req.cookies?.[AUTH_COOKIE_NAME];
     if (!token) {
       return res.status(401).json({ error: 'Not authenticated' });
     }
