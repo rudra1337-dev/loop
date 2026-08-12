@@ -1,13 +1,11 @@
 import bcrypt from 'bcryptjs';
 import { Workspace, User } from '../models/index.js';
 import { signToken } from '../utils/jwt.js';
-
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-};
+import {
+  AUTH_COOKIE_NAME,
+  AUTH_COOKIE_OPTIONS,
+  CLEAR_AUTH_COOKIE_OPTIONS,
+} from '../config/authCookie.js';
 
 // SignUp
 export const signup = async (req, res) => {
@@ -36,7 +34,7 @@ export const signup = async (req, res) => {
     });
 
     const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
-    res.cookie('token', token, COOKIE_OPTIONS);
+    res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
 
     res.status(201).json({
       user: { id: user.id, name: user.name, email: user.email, role: user.role, workspaceId: user.workspaceId },
@@ -65,7 +63,7 @@ export const login = async (req, res) => {
     }
 
     const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
-    res.cookie('token', token, COOKIE_OPTIONS);
+    res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
 
     res.json({
       user: { id: user.id, name: user.name, email: user.email, role: user.role, workspaceId: user.workspaceId },
@@ -78,7 +76,7 @@ export const login = async (req, res) => {
 
 // Logout
 export const logout = (req, res) => {
-  res.clearCookie('token', COOKIE_OPTIONS);
+  res.clearCookie(AUTH_COOKIE_NAME, CLEAR_AUTH_COOKIE_OPTIONS);
   res.json({ message: 'Logged out' });
 };
 
