@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { useAuth } from "./context/AuthContext";
 import GuestRoute from "./components/auth/GuestRoute";
+import WorkspaceSettings from './pages/WorkspaceSettings';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -17,6 +18,7 @@ const Dashboard = () => {
       </p>
 
       <p>Role: {user?.role}</p>
+      <p>Workspace: {user?.workspaceName}</p>
       <p>Workspace ID: {user?.workspaceId}</p>
 
       <button onClick={logout}>Log out</button>
@@ -47,6 +49,14 @@ function App() {
 
       <Route path="/unauthorized" element={<Unauthorized />} />
 
+
+
+      {/* Inside the ADMIN-only ProtectedRoute block */}
+      <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+        <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+      </Route>
+
+      
       {/* Unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

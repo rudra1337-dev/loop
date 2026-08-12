@@ -6,14 +6,15 @@ import {
   AUTH_COOKIE_OPTIONS,
   CLEAR_AUTH_COOKIE_OPTIONS,
 } from '../config/authCookie.js';
+import { getInviteByCode } from '../services/workspace.service.js';
 
 // SignUp
 export const signup = async (req, res) => {
   try {
-    const { name, email, password, workspaceName } = req.body;
+    const { name, email, password, workspaceName, inviteCode } = req.body;
 
-    if (!name || !email || !password || !workspaceName) {
-      return res.status(400).json({ error: 'All fields are required' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required' });
     }
 
     const existing = await User.findOne({ where: { email } });
@@ -21,24 +22,33 @@ export const signup = async (req, res) => {
       return res.status(409).json({ error: 'Email already registered' });
     }
 
-    // Create workspace first, creator becomes ADMIN
-    const workspace = await Workspace.create({ name: workspaceName });
+    let workspaceId;
+    let role = 'ADMIN';
+
+    if (inviteCode) {
+      const invite = await getInviteByCode(inviteCode);
+      if (!invite) {
+        return res.status(400).json({ error: 'Invalid or expired invite link' });
+      }
+
+      workspaceId = invite.workspaceId;
+      role = invite.role;
+    } else {
+      if (!workspaceName) {
+        return res.status(400).json({ error: 'Workspace name is required to create a new workspace' });
+      }
+
+      const workspace = await Workspace.create({ name: workspaceName });
+      workspaceId = workspace.id;
+    }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({
-      name,
-      email,
-      passwordHash,
-      role: 'ADMIN',
-      workspaceId: workspace.id,
-    });
+    const user = await User.create({ name, email, passwordHash, role, workspaceId });
 
     const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
     res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
 
-    res.status(201).json({
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, workspaceId: user.workspaceId },
-    });
+    res.status(201).json({ user: await buildUserResponse(user) });
   } catch (err) {
     res.status(500).json({ error: 'Signup failed', detail: err.message });
   }
@@ -48,6 +58,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
     }
@@ -65,14 +76,11 @@ export const login = async (req, res) => {
     const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
     res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
 
-    res.json({
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, workspaceId: user.workspaceId },
-    });
+    res.json({ user: await buildUserResponse(user) });
   } catch (err) {
     res.status(500).json({ error: 'Login failed', detail: err.message });
   }
 };
-
 
 // Logout
 export const logout = (req, res) => {
@@ -80,7 +88,19 @@ export const logout = (req, res) => {
   res.json({ message: 'Logged out' });
 };
 
-export const me = (req, res) => {
-  const { id, name, email, role, workspaceId } = req.user;
-  res.json({ user: { id, name, email, role, workspaceId } });
+export const me = async (req, res) => {
+  res.json({ user: await buildUserResponse(req.user) });
+};
+
+const buildUserResponse = async (user) => {
+  const workspace = await Workspace.findByPk(user.workspaceId);
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    workspaceId: user.workspaceId,
+    workspaceName: workspace?.name || null,
+  };
 };
