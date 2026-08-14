@@ -15,12 +15,12 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div class="app-container">
-      <aside class="sidebar">
-        <div class="sidebar-brand">
+    <div className="app-container">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
           <span>🌀</span> LOOP
         </div>
-        <nav class="sidebar-menu">
+        <nav className="sidebar-menu">
           <NavLink 
             to="/dashboard" 
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
@@ -33,12 +33,16 @@ const Layout = ({ children }) => {
           >
             <span>💬</span> Feedback Explorer
           </NavLink>
-          <NavLink 
-            to="/ingestion" 
-            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-          >
-            <span>📥</span> Ingest Feedback
-          </NavLink>
+          {/* Viewers are read-only per brief C2 — hide ingest link so they don't
+              hit a dead-end 403 by clicking into a page they can't use. */}
+          {['ADMIN', 'ANALYST'].includes(user?.role) && (
+            <NavLink 
+              to="/ingestion" 
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            >
+              <span>📥</span> Ingest Feedback
+            </NavLink>
+          )}
           {user?.role === 'ADMIN' && (
             <NavLink 
               to="/settings/workspace" 
@@ -48,20 +52,20 @@ const Layout = ({ children }) => {
             </NavLink>
           )}
         </nav>
-        <div class="sidebar-footer">
-          <div class="sidebar-user">
-            <div class="sidebar-user-name">{user?.name || 'User'}</div>
-            <div class="sidebar-user-email">{user?.email || 'email@example.com'}</div>
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="sidebar-user-name">{user?.name || 'User'}</div>
+            <div className="sidebar-user-email">{user?.email || 'email@example.com'}</div>
             <div style={{ color: 'var(--color-primary)', fontSize: '10px', marginTop: '2px', fontWeight: 'bold' }}>
               💼 {user?.workspaceName || 'Default Workspace'} ({user?.role})
             </div>
           </div>
-          <button onClick={handleLogout} class="btn-logout">
+          <button onClick={handleLogout} className="btn-logout">
             Log Out
           </button>
         </div>
       </aside>
-      <main class="main-content">
+      <main className="main-content">
         {children}
       </main>
     </div>

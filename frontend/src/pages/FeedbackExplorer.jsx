@@ -69,12 +69,12 @@ const FeedbackExplorer = () => {
   const getSentimentBadge = (sentVal, score) => {
     const displayScore = score !== undefined && score !== null ? ` (${score > 0 ? '+' : ''}${score.toFixed(2)})` : '';
     if (sentVal === 'POS') {
-      return <span class="badge badge-pos">💚 POSITIVE{displayScore}</span>;
+      return <span className="badge badge-pos">💚 POSITIVE{displayScore}</span>;
     }
     if (sentVal === 'NEG') {
-      return <span class="badge badge-neg">💔 NEGATIVE{displayScore}</span>;
+      return <span className="badge badge-neg">💔 NEGATIVE{displayScore}</span>;
     }
-    return <span class="badge badge-neu">💛 NEUTRAL{displayScore}</span>;
+    return <span className="badge badge-neu">💛 NEUTRAL{displayScore}</span>;
   };
 
   const formatDate = (dateStr) => {
@@ -90,19 +90,19 @@ const FeedbackExplorer = () => {
     <div>
       <div style={{ marginBottom: '32px' }}>
         <h1>Feedback Explorer</h1>
-        <p class="subtitle">Search, filter, and audit customer testimonials in your secure tenant database</p>
+        <p className="subtitle">Search, filter, and audit customer testimonials in your secure tenant database</p>
       </div>
 
       {error && (
-        <div class="alert alert-error">
+        <div className="alert alert-error">
           <span>⚠️</span> {error}
         </div>
       )}
 
       {/* Filter Toolbar */}
-      <div class="glass-card" style={{ padding: '20px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="glass-card" style={{ padding: '20px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ flexGrow: 1, minWidth: '240px' }}>
-          <label class="form-label" style={{ marginBottom: '6px' }}>Search Content</label>
+          <label className="form-label" style={{ marginBottom: '6px' }}>Search Content</label>
           <input 
             type="text" 
             value={search} 
@@ -112,7 +112,7 @@ const FeedbackExplorer = () => {
         </div>
 
         <div style={{ width: '160px' }}>
-          <label class="form-label" style={{ marginBottom: '6px' }}>Channel</label>
+          <label className="form-label" style={{ marginBottom: '6px' }}>Channel</label>
           <select value={channel} onChange={(e) => { setChannel(e.target.value); setPage(1); }}>
             <option value="">All Channels</option>
             <option value="CSV Import">CSV Import</option>
@@ -125,7 +125,7 @@ const FeedbackExplorer = () => {
         </div>
 
         <div style={{ width: '160px' }}>
-          <label class="form-label" style={{ marginBottom: '6px' }}>Sentiment</label>
+          <label className="form-label" style={{ marginBottom: '6px' }}>Sentiment</label>
           <select value={sentiment} onChange={(e) => { setSentiment(e.target.value); setPage(1); }}>
             <option value="">All Sentiments</option>
             <option value="POS">Positive</option>
@@ -136,7 +136,7 @@ const FeedbackExplorer = () => {
       </div>
 
       {/* Feed Table */}
-      <div class="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '12px', animation: 'spin 1.5s linear infinite' }}>🌀</div>
@@ -152,7 +152,7 @@ const FeedbackExplorer = () => {
           </div>
         ) : (
           <>
-            <div class="table-container" style={{ border: 'none', borderRadius: 0, margin: 0 }}>
+            <div className="table-container" style={{ border: 'none', borderRadius: 0, margin: 0 }}>
               <table>
                 <thead>
                   <tr>
@@ -189,7 +189,7 @@ const FeedbackExplorer = () => {
                       <td>
                         <button 
                           onClick={() => handleDelete(f.id)} 
-                          class="btn btn-danger" 
+                          className="btn btn-danger" 
                           style={{ padding: '6px 10px', fontSize: '11px' }}
                         >
                           Delete
@@ -209,7 +209,7 @@ const FeedbackExplorer = () => {
               
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button 
-                  class="pagination-btn"
+                  className="pagination-btn"
                   disabled={page <= 1}
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                 >
@@ -219,7 +219,7 @@ const FeedbackExplorer = () => {
                   Page {page} of {pagination.totalPages || 1}
                 </span>
                 <button 
-                  class="pagination-btn"
+                  className="pagination-btn"
                   disabled={page >= pagination.totalPages}
                   onClick={() => setPage(p => p + 1)}
                 >

@@ -57,32 +57,32 @@ const Dashboard = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
           <h1>Feedback Dashboard</h1>
-          <p class="subtitle">AI-driven analysis of customer feedback for {user?.workspaceName}</p>
+          <p className="subtitle">AI-driven analysis of customer feedback for {user?.workspaceName}</p>
         </div>
-        <Link to="/ingestion" class="btn btn-primary" style={{ textDecoration: 'none' }}>
+        <Link to="/ingestion" className="btn btn-primary" style={{ textDecoration: 'none' }}>
           <span>📥</span> Ingest Feedback
         </Link>
       </div>
 
       {error && (
-        <div class="alert alert-error">
+        <div className="alert alert-error">
           <span>⚠️</span> {error}
         </div>
       )}
 
       {/* Metrics Grid */}
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <span class="metric-title">Total Ingested</span>
-          <span class="metric-value">{total}</span>
+      <div className="metrics-grid">
+        <div className="metric-card">
+          <span className="metric-title">Total Ingested</span>
+          <span className="metric-value">{total}</span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
             Across all active channels
           </span>
         </div>
 
-        <div class="metric-card" style={{ boxShadow: `0 0 16px ${getSentimentGlow(parseFloat(stats?.averageSentimentScore || 0))}` }}>
-          <span class="metric-title">Average Sentiment</span>
-          <span class="metric-value">
+        <div className="metric-card" style={{ boxShadow: `0 0 16px ${getSentimentGlow(parseFloat(stats?.averageSentimentScore || 0))}` }}>
+          <span className="metric-title">Average Sentiment</span>
+          <span className="metric-value">
             {stats?.averageSentimentScore > 0 ? '+' : ''}{stats?.averageSentimentScore || '0.00'}
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -90,9 +90,9 @@ const Dashboard = () => {
           </span>
         </div>
 
-        <div class="metric-card" style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}>
-          <span class="metric-title">Positive Feedback</span>
-          <span class="metric-value" style={{ color: 'var(--color-pos)' }}>
+        <div className="metric-card" style={{ borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+          <span className="metric-title">Positive Feedback</span>
+          <span className="metric-value" style={{ color: 'var(--color-pos)' }}>
             {stats?.sentiment.POS || 0}
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -100,9 +100,9 @@ const Dashboard = () => {
           </span>
         </div>
 
-        <div class="metric-card" style={{ borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-          <span class="metric-title">Negative Feedback</span>
-          <span class="metric-value" style={{ color: 'var(--color-neg)' }}>
+        <div className="metric-card" style={{ borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+          <span className="metric-title">Negative Feedback</span>
+          <span className="metric-value" style={{ color: 'var(--color-neg)' }}>
             {stats?.sentiment.NEG || 0}
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -113,17 +113,17 @@ const Dashboard = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px', marginBottom: '24px' }}>
         {/* Sentiment Distribution */}
-        <div class="glass-card">
+        <div className="glass-card">
           <h2>Sentiment Distribution</h2>
-          <p class="subtitle" style={{ marginBottom: '20px' }}>Breakdown of classifications computed by Gemini AI</p>
+          <p className="subtitle" style={{ marginBottom: '20px' }}>Breakdown of classifications computed by Gemini AI</p>
 
           <div style={{ marginBottom: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
               <span style={{ color: 'var(--color-pos)', fontWeight: '600' }}>Positive (POS)</span>
               <span>{stats?.sentiment.POS || 0} ({posPct}%)</span>
             </div>
-            <div class="progress-bar-container">
-              <div class="progress-bar" style={{ width: `${posPct}%`, background: 'var(--color-pos)' }}></div>
+            <div className="progress-bar-container">
+              <div className="progress-bar" style={{ width: `${posPct}%`, background: 'var(--color-pos)' }}></div>
             </div>
           </div>
 
@@ -132,8 +132,8 @@ const Dashboard = () => {
               <span style={{ color: 'var(--color-neu)', fontWeight: '600' }}>Neutral (NEU)</span>
               <span>{stats?.sentiment.NEU || 0} ({neuPct}%)</span>
             </div>
-            <div class="progress-bar-container">
-              <div class="progress-bar" style={{ width: `${neuPct}%`, background: 'var(--color-neu)' }}></div>
+            <div className="progress-bar-container">
+              <div className="progress-bar" style={{ width: `${neuPct}%`, background: 'var(--color-neu)' }}></div>
             </div>
           </div>
 
@@ -142,16 +142,16 @@ const Dashboard = () => {
               <span style={{ color: 'var(--color-neg)', fontWeight: '600' }}>Negative (NEG)</span>
               <span>{stats?.sentiment.NEG || 0} ({negPct}%)</span>
             </div>
-            <div class="progress-bar-container">
-              <div class="progress-bar" style={{ width: `${negPct}%`, background: 'var(--color-neg)' }}></div>
+            <div className="progress-bar-container">
+              <div className="progress-bar" style={{ width: `${negPct}%`, background: 'var(--color-neg)' }}></div>
             </div>
           </div>
         </div>
 
         {/* Channels Distribution */}
-        <div class="glass-card">
+        <div className="glass-card">
           <h2>Ingestion Channels</h2>
-          <p class="subtitle" style={{ marginBottom: '20px' }}>Volume statistics across data sources</p>
+          <p className="subtitle" style={{ marginBottom: '20px' }}>Volume statistics across data sources</p>
 
           {stats?.channels && stats.channels.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -165,7 +165,7 @@ const Dashboard = () => {
                     </span>
                     <span style={{ fontWeight: '500' }}>{chan.channel}</span>
                   </div>
-                  <span class="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255, 255, 255, 0.08)' }}>
+                  <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255, 255, 255, 0.08)' }}>
                     {chan.count} items
                   </span>
                 </div>
@@ -180,7 +180,7 @@ const Dashboard = () => {
       </div>
 
       {/* Ingestion Guidelines and Quick Access */}
-      <div class="glass-card" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05))', borderColor: 'var(--border-hover)' }}>
+      <div className="glass-card" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05))', borderColor: 'var(--border-hover)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ fontSize: '32px' }}>💡</div>
           <div>
@@ -189,10 +189,10 @@ const Dashboard = () => {
               Ingest client feedback directly using our CSV importer or channel webhooks. Our integrated AI will classify sentiment and assign emotional scores automatically in real-time.
             </p>
             <div style={{ marginTop: '12px', display: 'flex', gap: '12px' }}>
-              <Link to="/ingestion" class="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '12px', textDecoration: 'none' }}>
+              <Link to="/ingestion" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '12px', textDecoration: 'none' }}>
                 Go to Ingestor
               </Link>
-              <Link to="/feedback" class="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '12px', textDecoration: 'none', background: 'transparent' }}>
+              <Link to="/feedback" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '12px', textDecoration: 'none', background: 'transparent' }}>
                 Explore Feedback
               </Link>
             </div>

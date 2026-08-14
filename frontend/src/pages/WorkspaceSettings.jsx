@@ -106,12 +106,12 @@ const WorkspaceSettings = () => {
     <div style={{ maxWidth: '800px' }}>
       <div style={{ marginBottom: '32px' }}>
         <h1>Workspace Settings</h1>
-        <p class="subtitle">Manage member permissions and invite collaborators to {user?.workspaceName}</p>
+        <p className="subtitle">Manage member permissions and invite collaborators to {user?.workspaceName}</p>
       </div>
 
-      {error && <div class="alert alert-error"><span>⚠️</span> {error}</div>}
+      {error && <div className="alert alert-error"><span>⚠️</span> {error}</div>}
 
-      <div class="glass-card">
+      <div className="glass-card">
         <h2>Rename Workspace</h2>
         <form onSubmit={handleRename} style={{ display: 'flex', gap: '12px' }}>
           <input
@@ -121,16 +121,16 @@ const WorkspaceSettings = () => {
             placeholder="Workspace Name"
             style={{ flex: 1 }}
           />
-          <button type="submit" class="btn btn-primary" disabled={renaming}>
+          <button type="submit" className="btn btn-primary" disabled={renaming}>
             {renaming ? 'Saving...' : 'Rename'}
           </button>
         </form>
         {renameSuccess && <p style={{ color: 'var(--color-pos)', marginTop: '8px', fontSize: '13px' }}>✓ Workspace renamed successfully!</p>}
       </div>
 
-      <div class="glass-card">
+      <div className="glass-card">
         <h2>Workspace Members</h2>
-        <div class="table-container" style={{ margin: 0 }}>
+        <div className="table-container" style={{ margin: 0 }}>
           <table>
             <thead>
               <tr>
@@ -159,7 +159,7 @@ const WorkspaceSettings = () => {
                   </td>
                   <td>
                     {member.id !== user.id && (
-                      <button onClick={() => handleRemove(member.id)} class="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                      <button onClick={() => handleRemove(member.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
                         Remove
                       </button>
                     )}
@@ -171,9 +171,9 @@ const WorkspaceSettings = () => {
         </div>
       </div>
 
-      <div class="glass-card">
+      <div className="glass-card">
         <h2>Invite Collaborators</h2>
-        <p class="subtitle">Generate secure invite links with predefined roles for new team members.</p>
+        <p className="subtitle">Generate secure invite links with predefined roles for new team members.</p>
         <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
           <select 
             value={newInviteRole} 
@@ -184,7 +184,7 @@ const WorkspaceSettings = () => {
             <option value="ANALYST">Analyst</option>
             <option value="VIEWER">Viewer</option>
           </select>
-          <button onClick={handleCreateInvite} class="btn btn-primary">
+          <button onClick={handleCreateInvite} className="btn btn-primary">
             Generate Link
           </button>
         </div>
@@ -198,16 +198,16 @@ const WorkspaceSettings = () => {
               {invites.map((invite) => (
                 <li key={invite.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-light)', borderRadius: '8px' }}>
                   <div>
-                    <span class="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.1)', marginRight: '12px' }}>
+                    <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.1)', marginRight: '12px' }}>
                       {invite.role}
                     </span>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Code: {invite.code}</span>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => copyInviteLink(invite.code)} class="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                    <button onClick={() => copyInviteLink(invite.code)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>
                       Copy
                     </button>
-                    <button onClick={() => handleRevoke(invite.id)} class="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                    <button onClick={() => handleRevoke(invite.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
                       Revoke
                     </button>
                   </div>

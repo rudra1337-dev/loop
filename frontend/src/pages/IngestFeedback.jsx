@@ -131,26 +131,26 @@ const IngestFeedback = () => {
     <div>
       <div style={{ marginBottom: '32px' }}>
         <h1>Ingest Customer Feedback</h1>
-        <p class="subtitle">Import user testimonials, support tickets, and reviews into your isolation workspace</p>
+        <p className="subtitle">Import user testimonials, support tickets, and reviews into your isolation workspace</p>
       </div>
 
       {/* Tabs */}
-      <div class="tabs">
+      <div className="tabs">
         <button 
           onClick={() => setActiveTab('csv')} 
-          class={`tab-btn ${activeTab === 'csv' ? 'active' : ''}`}
+          className={`tab-btn ${activeTab === 'csv' ? 'active' : ''}`}
         >
           📁 CSV File Uploader
         </button>
         <button 
           onClick={() => setActiveTab('channels')} 
-          class={`tab-btn ${activeTab === 'channels' ? 'active' : ''}`}
+          className={`tab-btn ${activeTab === 'channels' ? 'active' : ''}`}
         >
           🔌 Channel Integrations
         </button>
         <button 
           onClick={() => setActiveTab('manual')} 
-          class={`tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
+          className={`tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
         >
           ✍️ Manual Feedback
         </button>
@@ -158,18 +158,18 @@ const IngestFeedback = () => {
 
       {/* 1. CSV Ingest */}
       {activeTab === 'csv' && (
-        <div class="glass-card">
+        <div className="glass-card">
           <h2>Upload CSV Document</h2>
-          <p class="subtitle">Upload a batch list of feedback. The importer detects <strong>content</strong> (or <strong>description</strong> / <strong>desc</strong>), <strong>channel</strong>, <strong>customerLabel</strong>, and <strong>sentiment</strong> columns.</p>
+          <p className="subtitle">Upload a batch list of feedback. The importer detects <strong>content</strong> (or <strong>description</strong> / <strong>desc</strong>), <strong>channel</strong>, <strong>customerLabel</strong>, and <strong>sentiment</strong> columns.</p>
 
           {csvError && (
-            <div class="alert alert-error">
+            <div className="alert alert-error">
               <span>⚠️</span> {csvError}
             </div>
           )}
 
           {csvResult && (
-            <div class="alert alert-success" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div className="alert alert-success" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>✅</span> <strong>{csvResult.message}</strong>
               </div>
@@ -191,7 +191,7 @@ const IngestFeedback = () => {
 
           <form onSubmit={handleCSVUpload}>
             <div 
-              class="upload-zone"
+              className="upload-zone"
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current.click()}
@@ -203,13 +203,13 @@ const IngestFeedback = () => {
                 accept=".csv"
                 style={{ display: 'none' }}
               />
-              <div class="upload-icon">📂</div>
+              <div className="upload-icon">📂</div>
               {csvFile ? (
-                <div class="file-pill">
+                <div className="file-pill">
                   <span>📄 {csvFile.name} ({(csvFile.size / 1024).toFixed(1)} KB)</span>
                   <button 
                     type="button" 
-                    class="file-remove" 
+                    className="file-remove" 
                     onClick={(e) => {
                       e.stopPropagation();
                       setCsvFile(null);
@@ -220,14 +220,14 @@ const IngestFeedback = () => {
                 </div>
               ) : (
                 <>
-                  <p class="upload-text">Drag and drop your CSV file here, or click to browse</p>
-                  <p class="upload-hint">Limit: 5MB. Standard Columns: content/description (required), channel, customerLabel</p>
+                  <p className="upload-text">Drag and drop your CSV file here, or click to browse</p>
+                  <p className="upload-hint">Limit: 5MB. Standard Columns: content/description (required), channel, customerLabel</p>
                 </>
               )}
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Default Channel Source</label>
+            <div className="form-group">
+              <label className="form-label">Default Channel Source</label>
               <input 
                 type="text" 
                 value={defaultChannel} 
@@ -239,7 +239,7 @@ const IngestFeedback = () => {
               </p>
             </div>
 
-            <button type="submit" class="btn btn-primary" disabled={csvLoading || !csvFile}>
+            <button type="submit" className="btn btn-primary" disabled={csvLoading || !csvFile}>
               {csvLoading ? 'Parsing & Analyzing...' : '🚀 Start CSV Ingestion'}
             </button>
           </form>
@@ -247,7 +247,7 @@ const IngestFeedback = () => {
           {/* Sample CSV preview format */}
           <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-light)' }}>
             <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>Supported CSV Format Example (Using 'description')</h3>
-            <div class="table-container" style={{ margin: 0 }}>
+            <div className="table-container" style={{ margin: 0 }}>
               <table>
                 <thead>
                   <tr>
@@ -286,21 +286,21 @@ const IngestFeedback = () => {
       {/* 2. Channel Integrations */}
       {activeTab === 'channels' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div class="glass-card">
+          <div className="glass-card">
             <h2>Webhook Ingestion Sources</h2>
-            <p class="subtitle">Stream live customer feedback automatically from external platforms into your LOOP Workspace.</p>
+            <p className="subtitle">Stream live customer feedback automatically from external platforms into your LOOP Workspace.</p>
 
-            <div class="ingest-grid" style={{ marginBottom: '24px' }}>
-              <div class="channel-card">
-                <div class="channel-header">
-                  <div class="channel-icon">💬</div>
-                  <span class="channel-title">Slack Integration</span>
+            <div className="ingest-grid" style={{ marginBottom: '24px' }}>
+              <div className="channel-card">
+                <div className="channel-header">
+                  <div className="channel-icon">💬</div>
+                  <span className="channel-title">Slack Integration</span>
                 </div>
-                <p class="channel-desc">Send feedback comments to a channel webhook to automatically ingest them with sentiment tags.</p>
+                <p className="channel-desc">Send feedback comments to a channel webhook to automatically ingest them with sentiment tags.</p>
                 <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
                   <button 
                     onClick={() => copyToClipboard(mockWebhookUrl, 'slack')}
-                    class="btn btn-secondary" 
+                    className="btn btn-secondary" 
                     style={{ padding: '8px 12px', fontSize: '11px', width: '100%' }}
                   >
                     {copiedText === 'slack' ? 'Copied! ✅' : 'Copy Webhook URL'}
@@ -308,16 +308,16 @@ const IngestFeedback = () => {
                 </div>
               </div>
 
-              <div class="channel-card">
-                <div class="channel-header">
-                  <div class="channel-icon">✉️</div>
-                  <span class="channel-title">Email Forwarder</span>
+              <div className="channel-card">
+                <div className="channel-header">
+                  <div className="channel-icon">✉️</div>
+                  <span className="channel-title">Email Forwarder</span>
                 </div>
-                <p class="channel-desc">Forward support emails to this dedicated address to catalog customer concerns dynamically.</p>
+                <p className="channel-desc">Forward support emails to this dedicated address to catalog customer concerns dynamically.</p>
                 <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
                   <button 
                     onClick={() => copyToClipboard(`ingest+${user?.workspaceId}@loop-feedback.com`, 'email')}
-                    class="btn btn-secondary" 
+                    className="btn btn-secondary" 
                     style={{ padding: '8px 12px', fontSize: '11px', width: '100%' }}
                   >
                     {copiedText === 'email' ? 'Copied! ✅' : 'Copy Ingestion Email'}
@@ -325,16 +325,16 @@ const IngestFeedback = () => {
                 </div>
               </div>
 
-              <div class="channel-card">
-                <div class="channel-header">
-                  <div class="channel-icon">🔌</div>
-                  <span class="channel-title">Rest API</span>
+              <div className="channel-card">
+                <div className="channel-header">
+                  <div className="channel-icon">🔌</div>
+                  <span className="channel-title">Rest API</span>
                 </div>
-                <p class="channel-desc">Submit feedback items directly from your mobile app, backend servers, or websites.</p>
+                <p className="channel-desc">Submit feedback items directly from your mobile app, backend servers, or websites.</p>
                 <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
                   <button 
                     onClick={() => copyToClipboard(user?.workspaceId || '', 'apiKey')}
-                    class="btn btn-secondary" 
+                    className="btn btn-secondary" 
                     style={{ padding: '8px 12px', fontSize: '11px', width: '100%' }}
                   >
                     {copiedText === 'apiKey' ? 'Copied! ✅' : 'Copy Workspace ID'}
@@ -363,25 +363,25 @@ const IngestFeedback = () => {
 
       {/* 3. Manual Feedback */}
       {activeTab === 'manual' && (
-        <div class="glass-card">
+        <div className="glass-card">
           <h2>Ingest Feedback Record Manually</h2>
-          <p class="subtitle">Manually record a client note, call snippet, or testimonial. Gemini AI will run classification after saving.</p>
+          <p className="subtitle">Manually record a client note, call snippet, or testimonial. Gemini AI will run classification after saving.</p>
 
           {manualError && (
-            <div class="alert alert-error">
+            <div className="alert alert-error">
               <span>⚠️</span> {manualError}
             </div>
           )}
 
           {manualSuccess && (
-            <div class="alert alert-success">
+            <div className="alert alert-success">
               <span>✅</span> Feedback item recorded successfully! Go to the explorer to check its sentiment classification.
             </div>
           )}
 
           <form onSubmit={handleManualSubmit}>
-            <div class="form-group">
-              <label class="form-label">Feedback Content</label>
+            <div className="form-group">
+              <label className="form-label">Feedback Content</label>
               <textarea 
                 rows="4"
                 value={manualData.content}
@@ -392,8 +392,8 @@ const IngestFeedback = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div class="form-group">
-                <label class="form-label">Channel Source</label>
+              <div className="form-group">
+                <label className="form-label">Channel Source</label>
                 <select 
                   value={manualData.channel}
                   onChange={(e) => setManualData({ ...manualData, channel: e.target.value })}
@@ -407,8 +407,8 @@ const IngestFeedback = () => {
                 </select>
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Customer Label (Optional)</label>
+              <div className="form-group">
+                <label className="form-label">Customer Label (Optional)</label>
                 <input 
                   type="text" 
                   value={manualData.customerLabel}
@@ -418,7 +418,7 @@ const IngestFeedback = () => {
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" disabled={manualLoading}>
+            <button type="submit" className="btn btn-primary" disabled={manualLoading}>
               {manualLoading ? 'Ingesting feedback...' : '💾 Save Feedback'}
             </button>
           </form>
