@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import passport from "./config/passport.js";
 import workspaceRoutes from './routes/workspace.routes.js';
+import feedbackRoutes from './routes/feedback.routes.js';
 
 const app = express();
 const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || "")
@@ -31,6 +32,8 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use("/api/auth", authRoutes);
+app.use('/api/workspace', workspaceRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -38,6 +41,5 @@ app.get("/", (req, res) => {
     message: "LOOP Backend API is running 🚀",
   });
 });
-app.use('/api/workspace', workspaceRoutes);
 
 export default app;

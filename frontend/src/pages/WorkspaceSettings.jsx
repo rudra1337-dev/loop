@@ -103,85 +103,120 @@ const WorkspaceSettings = () => {
   if (loading) return <p>Loading workspace settings...</p>;
 
   return (
-    <div style={{ padding: '40px', maxWidth: '700px' }}>
-      <h1>Workspace Settings</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div style={{ maxWidth: '800px' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <h1>Workspace Settings</h1>
+        <p className="subtitle">Manage member permissions and invite collaborators to {user?.workspaceName}</p>
+      </div>
 
-        <form onSubmit={handleRename} style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
-            <input
+      {error && <div className="alert alert-error"><span>⚠️</span> {error}</div>}
+
+      <div className="glass-card">
+        <h2>Rename Workspace</h2>
+        <form onSubmit={handleRename} style={{ display: 'flex', gap: '12px' }}>
+          <input
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             required
+            placeholder="Workspace Name"
             style={{ flex: 1 }}
-            />
-            <button type="submit" disabled={renaming}>
-            {renaming ? 'Saving...' : 'Save'}
-            </button>
+          />
+          <button type="submit" className="btn btn-primary" disabled={renaming}>
+            {renaming ? 'Saving...' : 'Rename'}
+          </button>
         </form>
-        {renameSuccess && <p style={{ color: 'green' }}>Workspace renamed!</p>}
-
-      <h2>Members</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th style={{ textAlign: 'left' }}>Name</th>
-            <th style={{ textAlign: 'left' }}>Email</th>
-            <th style={{ textAlign: 'left' }}>Role</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {members.map((member) => (
-            <tr key={member.id}>
-              <td>{member.name}</td>
-              <td>{member.email}</td>
-              <td>
-                {/* Prevent editing your own role from this dropdown to avoid
-                    accidental self-lockout — backend also guards this. */}
-                <select
-                  value={member.role}
-                  disabled={member.id === user.id}
-                  onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                >
-                  <option value="ADMIN">Admin</option>
-                  <option value="ANALYST">Analyst</option>
-                  <option value="VIEWER">Viewer</option>
-                </select>
-              </td>
-              <td>
-                {member.id !== user.id && (
-                  <button onClick={() => handleRemove(member.id)}>Remove</button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <h2 style={{ marginTop: '32px' }}>Invite Links</h2>
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-        <select value={newInviteRole} onChange={(e) => setNewInviteRole(e.target.value)}>
-          <option value="ADMIN">Admin</option>
-          <option value="ANALYST">Analyst</option>
-          <option value="VIEWER">Viewer</option>
-        </select>
-        <button onClick={handleCreateInvite}>Generate Invite Link</button>
+        {renameSuccess && <p style={{ color: 'var(--color-pos)', marginTop: '8px', fontSize: '13px' }}>✓ Workspace renamed successfully!</p>}
       </div>
 
-      {invites.length === 0 && <p>No active invite links.</p>}
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {invites.map((invite) => (
-          <li key={invite.id} style={{ marginBottom: '8px' }}>
-            <strong>{invite.role}</strong>
-            <button onClick={() => copyInviteLink(invite.code)} style={{ marginLeft: '8px' }}>
-              Copy Link
-            </button>
-            <button onClick={() => handleRevoke(invite.id)} style={{ marginLeft: '8px' }}>
-              Revoke
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="glass-card">
+        <h2>Workspace Members</h2>
+        <div className="table-container" style={{ margin: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th style={{ width: '100px' }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {members.map((member) => (
+                <tr key={member.id}>
+                  <td><strong>{member.name}</strong></td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{member.email}</td>
+                  <td>
+                    <select
+                      value={member.role}
+                      disabled={member.id === user.id}
+                      onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                      style={{ padding: '6px 12px', fontSize: '13px' }}
+                    >
+                      <option value="ADMIN">Admin</option>
+                      <option value="ANALYST">Analyst</option>
+                      <option value="VIEWER">Viewer</option>
+                    </select>
+                  </td>
+                  <td>
+                    {member.id !== user.id && (
+                      <button onClick={() => handleRemove(member.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                        Remove
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="glass-card">
+        <h2>Invite Collaborators</h2>
+        <p className="subtitle">Generate secure invite links with predefined roles for new team members.</p>
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+          <select 
+            value={newInviteRole} 
+            onChange={(e) => setNewInviteRole(e.target.value)}
+            style={{ width: '160px' }}
+          >
+            <option value="ADMIN">Admin</option>
+            <option value="ANALYST">Analyst</option>
+            <option value="VIEWER">Viewer</option>
+          </select>
+          <button onClick={handleCreateInvite} className="btn btn-primary">
+            Generate Link
+          </button>
+        </div>
+
+        {invites.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No active invite links generated yet.</p>
+        ) : (
+          <div>
+            <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '8px' }}>Active Invites</h3>
+            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {invites.map((invite) => (
+                <li key={invite.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-light)', borderRadius: '8px' }}>
+                  <div>
+                    <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.1)', marginRight: '12px' }}>
+                      {invite.role}
+                    </span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Code: {invite.code}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => copyInviteLink(invite.code)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                      Copy
+                    </button>
+                    <button onClick={() => handleRevoke(invite.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                      Revoke
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

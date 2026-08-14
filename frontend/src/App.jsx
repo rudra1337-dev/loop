@@ -2,33 +2,22 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import { useAuth } from "./context/AuthContext";
 import GuestRoute from "./components/auth/GuestRoute";
-import WorkspaceSettings from './pages/WorkspaceSettings';
-
-const Dashboard = () => {
-  const { user, logout } = useAuth();
-
-  return (
-    <div style={{ padding: "40px" }}>
-      <h1>Dashboard</h1>
-
-      <p>
-        Logged in as: {user?.name} ({user?.email})
-      </p>
-
-      <p>Role: {user?.role}</p>
-      <p>Workspace: {user?.workspaceName}</p>
-      <p>Workspace ID: {user?.workspaceId}</p>
-
-      <button onClick={logout}>Log out</button>
-    </div>
-  );
-};
+import WorkspaceSettings from "./pages/WorkspaceSettings";
+import Dashboard from "./pages/Dashboard";
+import FeedbackExplorer from "./pages/FeedbackExplorer";
+import IngestFeedback from "./pages/IngestFeedback";
+import Layout from "./components/Layout";
 
 const Unauthorized = () => (
-  <div style={{ padding: "40px" }}>
-    <h1>Unauthorized</h1>
+  <div style={{ padding: "40px", textAlign: "center" }}>
+    <h1 style={{ color: "var(--color-neg)", marginBottom: "16px" }}>
+      ⚠️ Unauthorized Access
+    </h1>
+
+    <p style={{ color: "var(--text-secondary)" }}>
+      You do not have the required permissions to view this resource.
+    </p>
   </div>
 );
 
@@ -37,28 +26,79 @@ function App() {
     <Routes>
       {/* Guest-only routes */}
       <Route element={<GuestRoute />}>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route
+          path="/"
+          element={<Navigate to="/login" replace />}
+        />
+
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Route>
 
-      {/* Authenticated routes */}
+      {/* Authenticated routes — any logged-in user */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <Layout>
+              <Dashboard />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/feedback"
+          element={
+            <Layout>
+              <FeedbackExplorer />
+            </Layout>
+          }
+        />
       </Route>
 
-      <Route path="/unauthorized" element={<Unauthorized />} />
-
-
-
-      {/* Inside the ADMIN-only ProtectedRoute block */}
-      <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-        <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+      {/* Analyst + Admin only — Viewers cannot ingest */}
+      <Route
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN", "ANALYST"]} />
+        }
+      >
+        <Route
+          path="/ingestion"
+          element={
+            <Layout>
+              <IngestFeedback />
+            </Layout>
+          }
+        />
       </Route>
 
-      
+      {/* Admin only */}
+      <Route
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN"]} />
+        }
+      >
+        <Route
+          path="/settings/workspace"
+          element={
+            <Layout>
+              <WorkspaceSettings />
+            </Layout>
+          }
+        />
+      </Route>
+
+      {/* Unauthorized page */}
+      <Route
+        path="/unauthorized"
+        element={<Unauthorized />}
+      />
+
       {/* Unknown routes */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
     </Routes>
   );
 }
