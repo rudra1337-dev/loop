@@ -18,3 +18,5 @@ export const ingestCSV = (file, defaultChannel) => {
 };
 
 export const deleteFeedback = (id) => api.delete(`/feedback/${id}`);
+
+export const ingestChannel = (channel) => api.post('/feedback/ingest/channel', { channel });

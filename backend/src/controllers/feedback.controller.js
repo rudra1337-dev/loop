@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 import fs from 'fs';
 import csvParser from 'csv-parser';
 import { analyzeFeedbackSentiment } from '../utils/ai.js';
+import { getSimulatedItems, channelTemplates } from '../data/channelTemplates.js';
 
 /**
  * Get feedback items for the current workspace with pagination, search, and filters.
@@ -308,5 +309,49 @@ export const getStats = async (req, res) => {
   } catch (error) {
     console.error('Error fetching feedback stats:', error);
     res.status(500).json({ error: 'Failed to retrieve feedback stats' });
+  }
+};
+
+
+/**
+ * Simulates a channel integration by bulk-creating realistic feedback
+ * items for the given channel. No real third-party connection is made —
+ * this satisfies the brief's "simulated channel" requirement (C3 #3)
+ * without building actual Zendesk/Slack/API infrastructure, which is
+ * explicitly out of scope.
+ */
+export const ingestChannel = async (req, res) => {
+  try {
+    const { workspaceId } = req.user;
+    const { channel } = req.body;
+
+    const validChannels = Object.keys(channelTemplates);
+    if (!channel || !validChannels.includes(channel)) {
+      return res.status(400).json({
+        error: `Invalid channel. Must be one of: ${validChannels.join(', ')}`,
+      });
+    }
+
+    const items = getSimulatedItems(channel, 10);
+
+    const feedbackRecords = items.map((item) => ({
+      content: item.content,
+      channel,
+      sentiment: item.sentiment,
+      sentimentScore: item.sentimentScore,
+      workspaceId,
+      status: 'NEW',
+    }));
+
+    const created = await Feedback.bulkCreate(feedbackRecords);
+
+    res.status(201).json({
+      success: true,
+      message: `Simulated ${created.length} items from ${channel}`,
+      count: created.length,
+    });
+  } catch (error) {
+    console.error('Error simulating channel ingestion:', error);
+    res.status(500).json({ error: 'Failed to simulate channel ingestion' });
   }
 };

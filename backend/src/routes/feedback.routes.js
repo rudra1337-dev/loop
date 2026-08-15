@@ -94,4 +94,6 @@ router.delete(
   feedbackController.deleteFeedback
 );
 
+router.post('/ingest/channel', authorize('ADMIN', 'ANALYST'), feedbackController.ingestChannel);
+
 export default router;
