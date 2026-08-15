@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { ingestCSV, ingestSingle } from '../services/feedbackService';
 import { useAuth } from '../context/AuthContext';
+import { ingestChannel } from '../services/feedbackService';
 
 const IngestFeedback = () => {
   const { user } = useAuth();
@@ -24,6 +25,11 @@ const IngestFeedback = () => {
   const [manualSuccess, setManualSuccess] = useState(false);
   const [manualError, setManualError] = useState('');
 
+  // Channel simulation state
+  const [simulating, setSimulating] = useState(null); // tracks which channel is loading
+  const [simulateResult, setSimulateResult] = useState(null);
+  const [simulateError, setSimulateError] = useState('');
+
   // Webhook integration state
   const [copiedText, setCopiedText] = useState('');
 
@@ -31,6 +37,22 @@ const IngestFeedback = () => {
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
+  };
+
+  const handleSimulateChannel = async (channelName) => {
+    setSimulating(channelName);
+    setSimulateError('');
+    setSimulateResult(null);
+    try {
+      const res = await ingestChannel(channelName);
+      if (res.data.success) {
+        setSimulateResult(res.data);
+      }
+    } catch (err) {
+      setSimulateError(err.response?.data?.error || `Failed to simulate ${channelName} import`);
+    } finally {
+      setSimulating(null);
+    }
   };
 
   const handleDrop = (e) => {
@@ -287,80 +309,183 @@ const IngestFeedback = () => {
       {activeTab === 'channels' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div className="glass-card">
-            <h2>Webhook Ingestion Sources</h2>
-            <p className="subtitle">Stream live customer feedback automatically from external platforms into your LOOP Workspace.</p>
+            <h2>Channel Integrations</h2>
 
-            <div className="ingest-grid" style={{ marginBottom: '24px' }}>
+            <p className="subtitle">
+              Import customer feedback from external platforms into your LOOP Workspace.
+            </p>
+
+            {simulateResult && (
+              <div className="alert alert-success">
+                <span>✅</span> {simulateResult.message}
+              </div>
+            )}
+
+            {simulateError && (
+              <div className="alert alert-error">
+                <span>⚠️</span> {simulateError}
+              </div>
+            )}
+
+            <div
+              className="ingest-grid"
+              style={{ marginBottom: '24px' }}
+            >
+
+              {/* Slack */}
               <div className="channel-card">
                 <div className="channel-header">
                   <div className="channel-icon">💬</div>
-                  <span className="channel-title">Slack Integration</span>
+                  <span className="channel-title">
+                    Slack Integration
+                  </span>
                 </div>
-                <p className="channel-desc">Send feedback comments to a channel webhook to automatically ingest them with sentiment tags.</p>
-                <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
-                  <button 
-                    onClick={() => copyToClipboard(mockWebhookUrl, 'slack')}
-                    className="btn btn-secondary" 
-                    style={{ padding: '8px 12px', fontSize: '11px', width: '100%' }}
-                  >
-                    {copiedText === 'slack' ? 'Copied! ✅' : 'Copy Webhook URL'}
-                  </button>
-                </div>
+
+                <p className="channel-desc">
+                  Simulate importing recent Slack messages containing
+                  customer feedback.
+                </p>
+
+                <button
+                  onClick={() => handleSimulateChannel('Slack Chat')}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: '11px',
+                    width: '100%',
+                    marginTop: 'auto'
+                  }}
+                  disabled={simulating === 'Slack Chat'}
+                >
+                  {simulating === 'Slack Chat'
+                    ? 'Importing...'
+                    : '🚀 Simulate Slack Import'}
+                </button>
               </div>
 
+
+              {/* Email */}
               <div className="channel-card">
                 <div className="channel-header">
                   <div className="channel-icon">✉️</div>
-                  <span className="channel-title">Email Forwarder</span>
+                  <span className="channel-title">
+                    Email Forwarder
+                  </span>
                 </div>
-                <p className="channel-desc">Forward support emails to this dedicated address to catalog customer concerns dynamically.</p>
-                <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
-                  <button 
-                    onClick={() => copyToClipboard(`ingest+${user?.workspaceId}@loop-feedback.com`, 'email')}
-                    className="btn btn-secondary" 
-                    style={{ padding: '8px 12px', fontSize: '11px', width: '100%' }}
-                  >
-                    {copiedText === 'email' ? 'Copied! ✅' : 'Copy Ingestion Email'}
-                  </button>
-                </div>
+
+                <p className="channel-desc">
+                  Simulate importing customer feedback from support emails.
+                </p>
+
+                <button
+                  onClick={() => handleSimulateChannel('Support Email')}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: '11px',
+                    width: '100%',
+                    marginTop: 'auto'
+                  }}
+                  disabled={simulating === 'Support Email'}
+                >
+                  {simulating === 'Support Email'
+                    ? 'Importing...'
+                    : '🚀 Simulate Email Import'}
+                </button>
               </div>
 
+
+              {/* API */}
               <div className="channel-card">
                 <div className="channel-header">
                   <div className="channel-icon">🔌</div>
-                  <span className="channel-title">Rest API</span>
+                  <span className="channel-title">
+                    REST API
+                  </span>
                 </div>
-                <p className="channel-desc">Submit feedback items directly from your mobile app, backend servers, or websites.</p>
-                <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
-                  <button 
-                    onClick={() => copyToClipboard(user?.workspaceId || '', 'apiKey')}
-                    className="btn btn-secondary" 
-                    style={{ padding: '8px 12px', fontSize: '11px', width: '100%' }}
-                  >
-                    {copiedText === 'apiKey' ? 'Copied! ✅' : 'Copy Workspace ID'}
-                  </button>
-                </div>
-              </div>
-            </div>
 
-            <div style={{ backgroundColor: 'rgba(15, 22, 42, 0.9)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-primary)' }}>DEVELOPER QUICK-START CURL</span>
-                <button 
-                  onClick={() => copyToClipboard(mockApiCode, 'curl')}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '12px' }}
+                <p className="channel-desc">
+                  Simulate feedback arriving through the LOOP REST API.
+                </p>
+
+                <button
+                  onClick={() => handleSimulateChannel('API')}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: '11px',
+                    width: '100%',
+                    marginTop: 'auto'
+                  }}
+                  disabled={simulating === 'API'}
                 >
-                  {copiedText === 'curl' ? 'Copied! ✅' : 'Copy Code'}
+                  {simulating === 'API'
+                    ? 'Importing...'
+                    : '🚀 Simulate API Import'}
                 </button>
               </div>
-              <pre style={{ margin: 0, overflowX: 'auto', fontSize: '12px', color: '#e2e8f0', fontFamily: 'monospace' }}>
+
+            </div>
+
+            {/* Developer Quick Start */}
+            <div
+              style={{
+                backgroundColor: 'rgba(15, 22, 42, 0.9)',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '1px solid var(--border-light)'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '8px'
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: 'var(--color-primary)'
+                  }}
+                >
+                  DEVELOPER QUICK-START CURL
+                </span>
+
+                <button
+                  onClick={() => copyToClipboard(mockApiCode, 'curl')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                >
+                  {copiedText === 'curl'
+                    ? 'Copied! ✅'
+                    : 'Copy Code'}
+                </button>
+              </div>
+
+              <pre
+                style={{
+                  margin: 0,
+                  overflowX: 'auto',
+                  fontSize: '12px',
+                  color: '#e2e8f0',
+                  fontFamily: 'monospace'
+                }}
+              >
                 {mockApiCode}
               </pre>
             </div>
           </div>
         </div>
       )}
-
+      
       {/* 3. Manual Feedback */}
       {activeTab === 'manual' && (
         <div className="glass-card">
