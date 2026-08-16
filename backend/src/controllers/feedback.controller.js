@@ -1,4 +1,4 @@
-import { Feedback, sequelize } from '../models/index.js';
+import { Feedback, Theme, FeedbackTheme, sequelize } from '../models/index.js';
 import { Op } from 'sequelize';
 import fs from 'fs';
 import csvParser from 'csv-parser';
@@ -17,11 +17,43 @@ export const getFeedbacks = async (req, res) => {
       search = '', 
       channel, 
       sentiment, 
-      status 
+      status,
+      theme,
+      from,
+      to
     } = req.query;
 
-    const offset = (page - 1) * limit;
+    // Validate page & limit
+    const parsedPage = parseInt(page);
+    const parsedLimit = parseInt(limit);
+    if (isNaN(parsedPage) || parsedPage <= 0) {
+      return res.status(400).json({ error: 'Page must be a positive integer' });
+    }
+    if (isNaN(parsedLimit) || parsedLimit <= 0) {
+      return res.status(400).json({ error: 'Limit must be a positive integer' });
+    }
 
+    // Validate status
+    const validStatuses = ['NEW', 'REVIEWED', 'ACTIONED'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status value' });
+    }
+
+    // Validate sentiment
+    const validSentiments = ['POS', 'NEU', 'NEG'];
+    if (sentiment && !validSentiments.includes(sentiment)) {
+      return res.status(400).json({ error: 'Invalid sentiment value' });
+    }
+
+    // Validate dates
+    if (from && isNaN(Date.parse(from))) {
+      return res.status(400).json({ error: 'Invalid "from" date format' });
+    }
+    if (to && isNaN(Date.parse(to))) {
+      return res.status(400).json({ error: 'Invalid "to" date format' });
+    }
+
+    const offset = (parsedPage - 1) * parsedLimit;
     const whereClause = { workspaceId };
 
     if (search && search.trim() !== '') {
@@ -42,23 +74,57 @@ export const getFeedbacks = async (req, res) => {
       whereClause.status = status;
     }
 
+    if (from || to) {
+      whereClause.createdAt = {};
+      if (from) {
+        whereClause.createdAt[Op.gte] = new Date(from);
+      }
+      if (to) {
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+        whereClause.createdAt[Op.lte] = toDate;
+      }
+    }
+
+    const includeOptions = [];
+    if (theme) {
+      includeOptions.push({
+        model: Theme,
+        where: { name: theme },
+        through: { attributes: [] },
+        required: true
+      });
+    } else {
+      includeOptions.push({
+        model: Theme,
+        through: { attributes: [] },
+        required: false
+      });
+    }
+
     const { rows: feedbacks, count } = await Feedback.findAndCountAll({
       where: whereClause,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      order: [['createdAt', 'DESC']]
+      include: includeOptions,
+      limit: parsedLimit,
+      offset: offset,
+      order: [['createdAt', 'DESC']],
+      distinct: true
     });
 
-    const totalPages = Math.ceil(count / limit);
+    const totalPages = Math.ceil(count / parsedLimit);
 
     res.json({
       success: true,
-      feedbacks,
+      data: feedbacks,
+      feedbacks, // for backward compatibility
       pagination: {
-        totalItems: count,
+        page: parsedPage,
+        limit: parsedLimit,
+        total: count,
         totalPages,
-        currentPage: parseInt(page),
-        limit: parseInt(limit)
+        // for backward compatibility
+        currentPage: parsedPage,
+        totalItems: count
       }
     });
   } catch (error) {
@@ -353,5 +419,63 @@ export const ingestChannel = async (req, res) => {
   } catch (error) {
     console.error('Error simulating channel ingestion:', error);
     res.status(500).json({ error: 'Failed to simulate channel ingestion' });
+  }
+};
+
+/**
+ * Get all themes for the current workspace.
+ */
+export const getThemes = async (req, res) => {
+  try {
+    const { workspaceId } = req.user;
+    const themes = await Theme.findAll({
+      where: { workspaceId },
+      order: [['name', 'ASC']]
+    });
+    res.json({
+      success: true,
+      themes
+    });
+  } catch (error) {
+    console.error('Error fetching themes:', error);
+    res.status(500).json({ error: 'Failed to retrieve themes' });
+  }
+};
+
+/**
+ * Update the status of a specific feedback item.
+ */
+export const updateStatus = async (req, res) => {
+  try {
+    const { workspaceId } = req.user;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['NEW', 'REVIEWED', 'ACTIONED'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+      });
+    }
+
+    const feedback = await Feedback.findOne({
+      where: { id, workspaceId }
+    });
+
+    if (!feedback) {
+      return res.status(404).json({ error: 'Feedback item not found' });
+    }
+
+    feedback.status = status;
+    await feedback.save();
+
+    res.json({
+      success: true,
+      message: 'Feedback status updated successfully',
+      feedback
+    });
+  } catch (error) {
+    console.error('Error updating feedback status:', error);
+    res.status(500).json({ error: 'Failed to update feedback status' });
   }
 };

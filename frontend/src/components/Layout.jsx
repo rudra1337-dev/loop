@@ -31,7 +31,7 @@ const Layout = ({ children }) => {
             to="/feedback" 
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
           >
-            <span>💬</span> Feedback Explorer
+            <span>📥</span> Feedback Inbox
           </NavLink>
           {/* Viewers are read-only per brief C2 — hide ingest link so they don't
               hit a dead-end 403 by clicking into a page they can't use. */}

@@ -68,6 +68,7 @@ router.use(authenticate);
 
 router.get('/', feedbackController.getFeedbacks);
 router.get('/stats', feedbackController.getStats);
+router.get('/themes', feedbackController.getThemes);
 
 // ==================================================
 // WRITE ACCESS
@@ -95,5 +96,11 @@ router.delete(
 );
 
 router.post('/ingest/channel', authorize('ADMIN', 'ANALYST'), feedbackController.ingestChannel);
+
+router.patch(
+  '/:id/status',
+  authorize('ADMIN', 'ANALYST'),
+  feedbackController.updateStatus
+);
 
 export default router;
