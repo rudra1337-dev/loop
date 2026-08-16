@@ -1,50 +1,122 @@
 import { useState, useEffect } from 'react';
-import { getFeedbacks, deleteFeedback } from '../services/feedbackService';
+import { useSearchParams } from 'react-router-dom';
+import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus } from '../services/feedbackService';
+import { useAuth } from '../context/AuthContext';
 
 const FeedbackExplorer = () => {
+  const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Get filter state from URL parameters
+  const search = searchParams.get('search') || '';
+  const channel = searchParams.get('channel') || '';
+  const sentiment = searchParams.get('sentiment') || '';
+  const theme = searchParams.get('theme') || '';
+  const status = searchParams.get('status') || '';
+  const from = searchParams.get('from') || '';
+  const to = searchParams.get('to') || '';
+  const page = parseInt(searchParams.get('page') || '1');
+
+  // Input states for inputs that shouldn't search instantly on every key stroke
+  const [searchInput, setSearchInput] = useState(search);
+  const [fromInput, setFromInput] = useState(from);
+  const [toInput, setToInput] = useState(to);
+
+  // Options states
+  const [themesList, setThemesList] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  // Filtering & Pagination State
-  const [search, setSearch] = useState('');
-  const [channel, setChannel] = useState('');
-  const [sentiment, setSentiment] = useState('');
-  const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ totalPages: 1, totalItems: 0 });
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 1, limit: 10 });
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
 
-  // Debouncing search
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  
+  const isReadOnly = user?.role === 'VIEWER';
+
+  // Sync state with URL parameter updates (e.g. back navigation or resets)
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  useEffect(() => {
+    setFromInput(from);
+  }, [from]);
+
+  useEffect(() => {
+    setToInput(to);
+  }, [to]);
+
+  // Load themes once on component mount
+  useEffect(() => {
+    const loadThemes = async () => {
+      try {
+        const res = await getThemes();
+        if (res.data.success) {
+          setThemesList(res.data.themes || []);
+        }
+      } catch (err) {
+        console.error('Failed to load themes:', err);
+      }
+    };
+    loadThemes();
+  }, []);
+
+  // Update query params in URL
+  const updateParams = (newParams) => {
+    const current = Object.fromEntries(searchParams.entries());
+    const updated = { ...current, ...newParams };
+    
+    // Clean up empty params
+    Object.keys(updated).forEach(key => {
+      if (updated[key] === undefined || updated[key] === null || updated[key] === '') {
+        delete updated[key];
+      }
+    });
+
+    setSearchParams(updated);
+  };
+
+  // Debounced search trigger
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1); // Reset to page 1 on search change
+      if (searchInput !== search) {
+        updateParams({ search: searchInput, page: 1 });
+      }
     }, 400);
 
     return () => clearTimeout(handler);
-  }, [search]);
+  }, [searchInput, search]);
 
+  // Fetch feedback records based on searchParams
   const loadFeedbacks = async () => {
     try {
       setLoading(true);
       setError('');
+
       const params = {
         page,
         limit: 10,
-        search: debouncedSearch,
+        search: search || undefined,
         channel: channel || undefined,
         sentiment: sentiment || undefined,
+        theme: theme || undefined,
+        status: status || undefined,
+        from: from || undefined,
+        to: to || undefined
       };
 
       const res = await getFeedbacks(params);
       if (res.data.success) {
-        setFeedbacks(res.data.feedbacks);
-        setPagination(res.data.pagination);
+        setFeedbacks(res.data.data || res.data.feedbacks || []);
+        const pag = res.data.pagination;
+        setPagination({
+          total: pag.total !== undefined ? pag.total : pag.totalItems,
+          totalPages: pag.totalPages,
+          limit: pag.limit
+        });
       }
     } catch (err) {
       console.error(err);
-      setError('Failed to load feedback records.');
+      setError('Unable to load feedback. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -52,18 +124,43 @@ const FeedbackExplorer = () => {
 
   useEffect(() => {
     loadFeedbacks();
-  }, [page, debouncedSearch, channel, sentiment]);
+  }, [searchParams]);
 
+  // Handle status update
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      setStatusUpdatingId(id);
+      const res = await updateFeedbackStatus(id, newStatus);
+      if (res.data.success) {
+        setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to update status. Please try again.');
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
+
+  // Handle deletion
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to permanently delete this feedback?')) return;
 
     try {
       await deleteFeedback(id);
-      loadFeedbacks(); // Reload current page
+      loadFeedbacks();
     } catch (err) {
       console.error(err);
       alert('Failed to delete feedback item');
     }
+  };
+
+  // Reset filters
+  const handleResetFilters = () => {
+    setSearchInput('');
+    setFromInput('');
+    setToInput('');
+    setSearchParams({ page: 1 });
   };
 
   const getSentimentBadge = (sentVal, score) => {
@@ -86,11 +183,47 @@ const FeedbackExplorer = () => {
     });
   };
 
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    // Safeguard startPage
+    startPage = Math.max(1, startPage);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          className={`pagination-btn ${i === page ? 'active' : ''}`}
+          style={{
+            backgroundColor: i === page ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.03)',
+            color: i === page ? '#fff' : 'var(--text-secondary)',
+            border: i === page ? '1px solid var(--color-primary)' : '1px solid var(--border-light)',
+            margin: '0 4px',
+            fontWeight: i === page ? '600' : 'normal'
+          }}
+          onClick={() => updateParams({ page: i })}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pages;
+  };
+
+  const showingStart = pagination.total === 0 ? 0 : (page - 1) * pagination.limit + 1;
+  const showingEnd = Math.min(page * pagination.limit, pagination.total);
+
   return (
     <div>
       <div style={{ marginBottom: '32px' }}>
-        <h1>Feedback Explorer</h1>
-        <p className="subtitle">Search, filter, and audit customer testimonials in your secure tenant database</p>
+        <h1>Feedback Inbox</h1>
+        <p className="subtitle">Search, filter, and manage customer insights in your secure tenant database</p>
       </div>
 
       {error && (
@@ -100,20 +233,20 @@ const FeedbackExplorer = () => {
       )}
 
       {/* Filter Toolbar */}
-      <div className="glass-card" style={{ padding: '20px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ flexGrow: 1, minWidth: '240px' }}>
-          <label className="form-label" style={{ marginBottom: '6px' }}>Search Content</label>
+      <div className="glass-card" style={{ padding: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '24px' }}>
+        <div style={{ flex: '2 1 240px', minWidth: '200px' }}>
+          <label className="form-label">Search Content</label>
           <input 
             type="text" 
-            value={search} 
-            onChange={(e) => setSearch(e.target.value)} 
-            placeholder="Search feedback keywords..."
+            value={searchInput} 
+            onChange={(e) => setSearchInput(e.target.value)} 
+            placeholder="Search feedback..."
           />
         </div>
 
-        <div style={{ width: '160px' }}>
-          <label className="form-label" style={{ marginBottom: '6px' }}>Channel</label>
-          <select value={channel} onChange={(e) => { setChannel(e.target.value); setPage(1); }}>
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Channel</label>
+          <select value={channel} onChange={(e) => { updateParams({ channel: e.target.value, page: 1 }); }}>
             <option value="">All Channels</option>
             <option value="CSV Import">CSV Import</option>
             <option value="Manual Ingest">Manual Entry</option>
@@ -121,17 +254,70 @@ const FeedbackExplorer = () => {
             <option value="Support Email">Support Email</option>
             <option value="Client Call">Client Call</option>
             <option value="Intercom Chat">Intercom Chat</option>
+            <option value="Support Ticket">Support Ticket</option>
+            <option value="App Store Review">App Store Review</option>
+            <option value="NPS Survey">NPS Survey</option>
+            <option value="Sales Call Note">Sales Call Note</option>
+            <option value="Community Post">Community Post</option>
           </select>
         </div>
 
-        <div style={{ width: '160px' }}>
-          <label className="form-label" style={{ marginBottom: '6px' }}>Sentiment</label>
-          <select value={sentiment} onChange={(e) => { setSentiment(e.target.value); setPage(1); }}>
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Sentiment</label>
+          <select value={sentiment} onChange={(e) => { updateParams({ sentiment: e.target.value, page: 1 }); }}>
             <option value="">All Sentiments</option>
             <option value="POS">Positive</option>
             <option value="NEU">Neutral</option>
             <option value="NEG">Negative</option>
           </select>
+        </div>
+
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Theme</label>
+          <select value={theme} onChange={(e) => { updateParams({ theme: e.target.value, page: 1 }); }}>
+            <option value="">All Themes</option>
+            {themesList.map((t) => (
+              <option key={t.id} value={t.name}>{t.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Status</label>
+          <select value={status} onChange={(e) => { updateParams({ status: e.target.value, page: 1 }); }}>
+            <option value="">All Statuses</option>
+            <option value="NEW">New</option>
+            <option value="REVIEWED">Reviewed</option>
+            <option value="ACTIONED">Actioned</option>
+          </select>
+        </div>
+
+        <div style={{ flex: '1 1 130px' }}>
+          <label className="form-label">From</label>
+          <input 
+            type="date" 
+            value={fromInput} 
+            onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value, page: 1 }); }}
+          />
+        </div>
+
+        <div style={{ flex: '1 1 130px' }}>
+          <label className="form-label">To</label>
+          <input 
+            type="date" 
+            value={toInput} 
+            onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value, page: 1 }); }}
+          />
+        </div>
+
+        <div>
+          <button 
+            onClick={handleResetFilters} 
+            className="btn btn-secondary"
+            style={{ height: '42px', padding: '0 16px', whiteSpace: 'nowrap' }}
+          >
+            Clear Filters
+          </button>
         </div>
       </div>
 
@@ -140,14 +326,14 @@ const FeedbackExplorer = () => {
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '12px', animation: 'spin 1.5s linear infinite' }}>🌀</div>
-            <p style={{ color: 'var(--text-secondary)' }}>Loading catalog...</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Loading feedback...</p>
           </div>
         ) : feedbacks.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '12px' }}>📭</div>
-            <p style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>No feedback found</p>
+            <p style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>No feedback found.</p>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px' }}>
-              Try removing filters, searching other terms, or ingesting a CSV file.
+              Try removing filters, searching other terms, or ingesting feedback.
             </p>
           </div>
         ) : (
@@ -156,22 +342,23 @@ const FeedbackExplorer = () => {
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: '45%' }}>Feedback Content</th>
-                    <th>Customer</th>
-                    <th>Source Channel</th>
-                    <th>AI Sentiment</th>
-                    <th>Recorded</th>
-                    <th style={{ width: '60px' }}></th>
+                    <th style={{ width: '40%' }}>Feedback Content</th>
+                    <th>Source</th>
+                    <th>Sentiment</th>
+                    <th>Theme</th>
+                    <th style={{ width: '130px' }}>Status</th>
+                    <th>Date</th>
+                    {!isReadOnly && <th style={{ width: '80px' }}></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {feedbacks.map((f) => (
                     <tr key={f.id}>
                       <td style={{ lineHeight: '1.5', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '13.5px' }}>
-                        {f.content}
-                      </td>
-                      <td style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
-                        {f.customerLabel || <span style={{ color: 'var(--text-muted)' }}>Anonymous</span>}
+                        <div style={{ fontWeight: '500', marginBottom: '4px' }}>{f.content}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                          Customer: <span style={{ color: 'var(--text-secondary)' }}>{f.customerLabel || 'Anonymous'}</span>
+                        </div>
                       </td>
                       <td>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: '500' }}>
@@ -183,18 +370,72 @@ const FeedbackExplorer = () => {
                       <td>
                         {getSentimentBadge(f.sentiment, f.sentimentScore)}
                       </td>
+                      <td>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {f.Themes && f.Themes.length > 0 ? (
+                            f.Themes.map((t) => (
+                              <span 
+                                key={t.id} 
+                                className="badge" 
+                                style={{ 
+                                  backgroundColor: `${t.color || '#6366f1'}20`, 
+                                  color: t.color || '#6366f1',
+                                  border: `1px solid ${t.color || '#6366f1'}40`
+                                }}
+                              >
+                                {t.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>—</span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        {isReadOnly ? (
+                          <span 
+                            className="badge" 
+                            style={{ 
+                              backgroundColor: f.status === 'ACTIONED' ? 'rgba(16, 185, 129, 0.15)' : f.status === 'REVIEWED' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                              color: f.status === 'ACTIONED' ? '#10b981' : f.status === 'REVIEWED' ? '#6366f1' : 'var(--text-secondary)',
+                              border: '1px solid var(--border-light)'
+                            }}
+                          >
+                            {f.status}
+                          </span>
+                        ) : (
+                          <select 
+                            value={f.status} 
+                            disabled={statusUpdatingId === f.id}
+                            onChange={(e) => handleStatusChange(f.id, e.target.value)}
+                            style={{ 
+                              padding: '6px 10px', 
+                              fontSize: '12px', 
+                              width: '100%', 
+                              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                              borderColor: statusUpdatingId === f.id ? 'var(--color-primary)' : 'var(--border-light)'
+                            }}
+                          >
+                            <option value="NEW">NEW</option>
+                            <option value="REVIEWED">REVIEWED</option>
+                            <option value="ACTIONED">ACTIONED</option>
+                          </select>
+                        )}
+                      </td>
                       <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
                         {formatDate(f.createdAt)}
                       </td>
-                      <td>
-                        <button 
-                          onClick={() => handleDelete(f.id)} 
-                          className="btn btn-danger" 
-                          style={{ padding: '6px 10px', fontSize: '11px' }}
-                        >
-                          Delete
-                        </button>
-                      </td>
+                      {!isReadOnly && (
+                        <td>
+                          <button 
+                            onClick={() => handleDelete(f.id)} 
+                            className="btn btn-danger" 
+                            style={{ padding: '6px 10px', fontSize: '11px' }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -202,28 +443,28 @@ const FeedbackExplorer = () => {
             </div>
 
             {/* Pagination footer */}
-            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
               <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                Showing <strong>{feedbacks.length}</strong> of <strong>{pagination.totalItems}</strong> feedback items
+                Showing <strong>{showingStart}</strong>–<strong>{showingEnd}</strong> of <strong>{pagination.total}</strong> feedback items
               </span>
               
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button 
                   className="pagination-btn"
                   disabled={page <= 1}
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  onClick={() => updateParams({ page: page - 1 })}
                 >
-                  ◀ Previous
+                  ← Previous
                 </button>
-                <span style={{ display: 'flex', alignItems: 'center', px: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                  Page {page} of {pagination.totalPages || 1}
-                </span>
+                
+                {renderPageNumbers()}
+
                 <button 
                   className="pagination-btn"
                   disabled={page >= pagination.totalPages}
-                  onClick={() => setPage(p => p + 1)}
+                  onClick={() => updateParams({ page: page + 1 })}
                 >
-                  Next ▶
+                  Next →
                 </button>
               </div>
             </div>
