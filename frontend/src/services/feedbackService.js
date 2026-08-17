@@ -1,7 +1,7 @@
 import api from './api';
 
 export const getFeedbacks = (params) => api.get('/feedback', { params });
-export const getStats = () => api.get('/feedback/stats');
+export const getStats = (params) => api.get('/feedback/stats', { params });
 export const ingestSingle = (data) => api.post('/feedback/ingest/single', data);
 
 export const ingestCSV = (file, defaultChannel) => {

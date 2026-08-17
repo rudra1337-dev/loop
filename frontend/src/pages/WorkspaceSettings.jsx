@@ -115,6 +115,7 @@ const WorkspaceSettings = () => {
         <h2>Rename Workspace</h2>
         <form onSubmit={handleRename} style={{ display: 'flex', gap: '12px' }}>
           <input
+            type="text"
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             required
