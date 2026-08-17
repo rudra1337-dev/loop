@@ -1,46 +1,47 @@
 import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { aiConfig } from '../config/ai.config.js';
 
 let aiInstance = null;
-if (process.env.GEMINI_API_KEY) {
+
+if (aiConfig.apiKey) {
   try {
-    aiInstance = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    aiInstance = new GoogleGenAI({ apiKey: aiConfig.apiKey });
+    console.log(`[AI] ${aiConfig.providerName} initialized with model: ${aiConfig.model}`);
   } catch (err) {
-    console.error('Failed to initialize Google Gen AI:', err.message);
+    console.error(`[AI ERROR] Failed to initialize ${aiConfig.providerName}:`, err.message);
   }
 }
 
 /**
  * Fallback local sentiment analysis based on keyword counting.
+ * Only used if the AI provider is unavailable or the API call fails.
  */
 function localAnalyze(content) {
   if (!content) return { sentiment: 'NEU', sentimentScore: 0.0 };
 
   const positiveWords = [
-    'great', 'love', 'amazing', 'good', 'happy', 'excellent', 'awesome', 'best', 
-    'satisfied', 'perfect', 'fantastic', 'beautiful', 'cool', 'helpful', 'useful', 
-    'smooth', 'fast', 'quick', 'easy', 'recommend', 'thanks', 'thank you', 'delightful'
+    'great', 'love', 'amazing', 'good', 'happy', 'excellent', 'awesome', 'best',
+    'satisfied', 'perfect', 'fantastic', 'beautiful', 'cool', 'helpful', 'useful',
+    'smooth', 'fast', 'quick', 'easy', 'recommend', 'thanks', 'thank you', 'delightful',
+    'worth', 'changed', 'productive' // expanded slightly based on real test cases
   ];
-
   const negativeWords = [
-    'bad', 'hate', 'issue', 'problem', 'broken', 'fail', 'slow', 'error', 'worst', 
-    'poor', 'annoyed', 'frustrated', 'disappointed', 'terrible', 'useless', 'difficult', 
-    'crash', 'bug', 'glitch', 'expensive', 'useless', 'waste', 'hate', 'defect'
+    'bad', 'hate', 'issue', 'problem', 'broken', 'fail', 'failure', 'failed', 'slow',
+    'error', 'worst', 'poor', 'annoyed', 'frustrated', 'disappointed', 'terrible',
+    'useless', 'difficult', 'crash', 'crashed', 'bug', 'glitch', 'expensive', 'waste',
+    'defect', 'cancel', 'cancelled', 'lost'
   ];
 
   const text = content.toLowerCase();
   let posCount = 0;
   let negCount = 0;
 
-  positiveWords.forEach(word => {
+  positiveWords.forEach((word) => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
     const matches = text.match(regex);
     if (matches) posCount += matches.length;
   });
-
-  negativeWords.forEach(word => {
+  negativeWords.forEach((word) => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
     const matches = text.match(regex);
     if (matches) negCount += matches.length;
@@ -53,22 +54,17 @@ function localAnalyze(content) {
     return { sentiment: 'NEU', sentimentScore: 0.0 };
   }
 
-  const score = diff / total; // between -1 and 1
-
+  const score = diff / total;
   let sentiment = 'NEU';
-  if (score > 0.15) {
-    sentiment = 'POS';
-  } else if (score < -0.15) {
-    sentiment = 'NEG';
-  }
+  if (score > 0.15) sentiment = 'POS';
+  else if (score < -0.15) sentiment = 'NEG';
 
   return { sentiment, sentimentScore: parseFloat(score.toFixed(2)) };
 }
 
 /**
- * Analyzes content sentiment.
- * @param {string} content 
- * @returns {Promise<{ sentiment: 'POS'|'NEU'|'NEG', sentimentScore: number }>}
+ * Analyzes content sentiment using the configured AI provider,
+ * falling back to local keyword analysis if unavailable.
  */
 export async function analyzeFeedbackSentiment(content) {
   if (!content || !content.trim()) {
@@ -76,12 +72,13 @@ export async function analyzeFeedbackSentiment(content) {
   }
 
   if (!aiInstance) {
+    console.warn('[AI] No active AI instance — using local fallback analysis.');
     return localAnalyze(content);
   }
 
   try {
-    const prompt = `Analyze the sentiment of the following customer feedback text. 
-Respond ONLY with a JSON object in this format: 
+    const prompt = `Analyze the sentiment of the following customer feedback text.
+Respond ONLY with a JSON object in this format:
 {
   "sentiment": "POS" | "NEU" | "NEG",
   "score": <float between -1.0 and 1.0>
@@ -89,12 +86,11 @@ Respond ONLY with a JSON object in this format:
 Feedback text: "${content.replace(/"/g, '\\"')}"`;
 
     const response = await aiInstance.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: aiConfig.model, // now driven entirely by .env
       contents: prompt,
     });
 
     const responseText = response.text || '';
-    // Strip markdown formatting if any (like ```json ... ```)
     const jsonStr = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
     const result = JSON.parse(jsonStr);
 
@@ -104,7 +100,9 @@ Feedback text: "${content.replace(/"/g, '\\"')}"`;
 
     return { sentiment, sentimentScore };
   } catch (error) {
-    console.warn('Gemini sentiment analysis failed, falling back to local analysis:', error.message);
+    // This is the log line you need to check in your terminal —
+    // it will tell us exactly why Gemini is failing.
+    console.error(`[AI ERROR] ${aiConfig.providerName} sentiment analysis failed:`, error.message);
     return localAnalyze(content);
   }
 }

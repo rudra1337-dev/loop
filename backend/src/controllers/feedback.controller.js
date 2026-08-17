@@ -4,6 +4,7 @@ import fs from 'fs';
 import csvParser from 'csv-parser';
 import { analyzeFeedbackSentiment } from '../utils/ai.js';
 import { getSimulatedItems, channelTemplates } from '../data/channelTemplates.js';
+import { matchThemeByKeywords, pickRandomFallbackTheme } from '../utils/themeMatcher.js';
 
 /**
  * Get feedback items for the current workspace with pagination, search, and filters.
@@ -167,6 +168,13 @@ export const ingestSingle = async (req, res) => {
       status: 'NEW'
     });
 
+    // Auto assign theme
+    try {
+      await assignThemesToFeedbacks([feedback], workspaceId);
+    } catch (err) {
+      console.error('Failed to auto-assign theme to manual feedback:', err);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Feedback ingested successfully',
@@ -256,6 +264,13 @@ export const ingestCSV = async (req, res) => {
     if (feedbackRecords.length > 0) {
       const created = await Feedback.bulkCreate(feedbackRecords);
       createdCount = created.length;
+
+      // Auto assign themes
+      try {
+        await assignThemesToFeedbacks(created, workspaceId);
+      } catch (err) {
+        console.error('Failed to auto-assign themes to CSV feedback:', err);
+      }
     }
 
     res.json({
@@ -309,66 +324,217 @@ export const deleteFeedback = async (req, res) => {
 export const getStats = async (req, res) => {
   try {
     const { workspaceId } = req.user;
+    const { channel, sentiment, status, theme, from, to } = req.query;
 
-    // Total counts
-    const totalCount = await Feedback.count({ where: { workspaceId } });
+    // Build filters for Feedbacks
+    const whereClause = { workspaceId };
+    if (channel) {
+      whereClause.channel = channel;
+    }
+    if (sentiment) {
+      whereClause.sentiment = sentiment;
+    }
+    if (status) {
+      whereClause.status = status;
+    }
+    if (from || to) {
+      whereClause.createdAt = {};
+      if (from) {
+        whereClause.createdAt[Op.gte] = new Date(from);
+      }
+      if (to) {
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+        whereClause.createdAt[Op.lte] = toDate;
+      }
+    }
 
-    // Sentiment breakdown
+    // Build theme inclusion
+    const includeOptions = [];
+    if (theme) {
+      includeOptions.push({
+        model: Theme,
+        where: { name: theme },
+        through: { attributes: [] },
+        required: true,
+        attributes: [] // Critical: Prevents selecting Theme columns in aggregates violating ONLY_FULL_GROUP_BY
+      });
+    }
+
+    // 1. Total Count (matching active filters)
+    const totalCount = await Feedback.count({
+      where: whereClause,
+      include: includeOptions,
+      distinct: true,
+      col: 'id'
+    });
+
+    // 2. Sentiment Breakdown
     const sentimentCounts = await Feedback.findAll({
-      where: { workspaceId },
-      attributes: ['sentiment', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
-      group: ['sentiment']
-    });
-
-    // Channel breakdown
-    const channelCounts = await Feedback.findAll({
-      where: { workspaceId },
-      attributes: ['channel', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
-      group: ['channel']
-    });
-
-    // Recent average sentiment score
-    const avgSentiment = await Feedback.findOne({
-      where: { workspaceId },
-      attributes: [[sequelize.fn('AVG', sequelize.col('sentimentScore')), 'avgScore']]
-    });
-
-    // Daily/Weekly trend (last 30 days)
-    // We group by date formatted string
-    const dailyTrend = await Feedback.findAll({
-      where: {
-        workspaceId,
-        createdAt: {
-          [Op.gte]: new Date(new Date() - 30 * 24 * 60 * 60 * 1000)
-        }
-      },
+      where: whereClause,
+      include: includeOptions,
       attributes: [
-        [sequelize.fn('DATE', sequelize.col('createdAt')), 'date'],
-        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
-        [sequelize.fn('AVG', sequelize.col('sentimentScore')), 'avgScore']
+        'sentiment',
+        [sequelize.fn('COUNT', sequelize.literal('DISTINCT Feedback.id')), 'count']
       ],
-      group: [sequelize.fn('DATE', sequelize.col('createdAt'))],
-      order: [[sequelize.fn('DATE', sequelize.col('createdAt')), 'ASC']]
+      group: ['sentiment'],
+      raw: true
     });
+
+    const sentimentObj = sentimentCounts.reduce(
+      (acc, curr) => {
+        acc[curr.sentiment] = parseInt(curr.count || 0);
+        return acc;
+      },
+      { POS: 0, NEU: 0, NEG: 0 }
+    );
+
+    // Calculate negative percentage
+    const negativePct = totalCount > 0 ? Math.round((sentimentObj.NEG / totalCount) * 100) : 0;
+
+    // 3. Channel Breakdown
+    const channelCounts = await Feedback.findAll({
+      where: whereClause,
+      include: includeOptions,
+      attributes: [
+        'channel',
+        [sequelize.fn('COUNT', sequelize.literal('DISTINCT Feedback.id')), 'count']
+      ],
+      group: ['channel'],
+      raw: true
+    });
+
+    const channels = channelCounts.map(c => ({
+      channel: c.channel,
+      count: parseInt(c.count || 0)
+    }));
+
+    // 4. Average Sentiment Score
+    const avgSentiment = await Feedback.findOne({
+      where: whereClause,
+      include: includeOptions,
+      attributes: [
+        [sequelize.fn('AVG', sequelize.col('Feedback.sentimentScore')), 'avgScore']
+      ],
+      raw: true,
+      subQuery: false // prevents Sequelize's derived-subquery wrapping, which
+                      // auto-injects Feedback.id into the SELECT and breaks
+                      // MySQL's ONLY_FULL_GROUP_BY when a Theme include is active
+    });
+    const averageSentimentScore = parseFloat(avgSentiment?.avgScore || 0).toFixed(2);
+
+    // 5. Top Themes
+    const themeWhere = { workspaceId };
+    if (theme) {
+      themeWhere.name = theme;
+    }
+    const themeCounts = await Theme.findAll({
+      where: themeWhere,
+      attributes: [
+        'id',
+        'name',
+        'color',
+        [sequelize.fn('COUNT', sequelize.col('Feedbacks.id')), 'feedbackCount']
+      ],
+      include: [{
+        model: Feedback,
+        where: whereClause,
+        through: { attributes: [] },
+        required: true,
+        attributes: [] // Critical: Prevents selecting Feedback columns in aggregates violating ONLY_FULL_GROUP_BY
+      }],
+      group: ['Theme.id', 'Theme.name', 'Theme.color'],
+      order: [[sequelize.literal('feedbackCount'), 'DESC']],
+      limit: 10,
+      subQuery: false
+    });
+
+    const topThemes = themeCounts.map(t => ({
+      id: t.id,
+      name: t.name,
+      color: t.color || '#6366f1',
+      count: parseInt(t.get('feedbackCount') || 0)
+    }));
+
+    // 6. New This Week (ignoring search date filter bounds, last 7 days velocity)
+    const newThisWeekWhere = {
+      workspaceId,
+      createdAt: {
+        [Op.gte]: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)
+      }
+    };
+    if (channel) newThisWeekWhere.channel = channel;
+    if (sentiment) newThisWeekWhere.sentiment = sentiment;
+    if (status) newThisWeekWhere.status = status;
+
+    const newThisWeek = await Feedback.count({
+      where: newThisWeekWhere,
+      include: includeOptions,
+      distinct: true,
+      col: 'id'
+    });
+
+    // 7. Daily Trend
+    const dailyTrendRows = await Feedback.findAll({
+      where: whereClause,
+      include: includeOptions,
+      attributes: [
+        [sequelize.fn('DATE', sequelize.col('Feedback.createdAt')), 'dateLabel'],
+        [sequelize.fn('COUNT', sequelize.literal('DISTINCT Feedback.id')), 'count']
+      ],
+      group: [sequelize.fn('DATE', sequelize.col('Feedback.createdAt'))],
+      order: [[sequelize.fn('DATE', sequelize.col('Feedback.createdAt')), 'ASC']],
+      raw: true
+    });
+
+    // Pad daily trend dates
+    let startDate = from ? new Date(from) : null;
+    let endDate = to ? new Date(to) : new Date();
+
+    if (!startDate && dailyTrendRows.length > 0) {
+      const dates = dailyTrendRows.map(r => new Date(r.dateLabel));
+      startDate = new Date(Math.min(...dates));
+    } else if (!startDate) {
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+    }
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    const trendMap = {};
+    const tempDate = new Date(startDate);
+    while (tempDate <= endDate) {
+      const dateStr = tempDate.toISOString().split('T')[0];
+      trendMap[dateStr] = 0;
+      tempDate.setDate(tempDate.getDate() + 1);
+    }
+
+    dailyTrendRows.forEach(row => {
+      if (row.dateLabel) {
+        const dateStr = new Date(row.dateLabel).toISOString().split('T')[0];
+        if (trendMap[dateStr] !== undefined) {
+          trendMap[dateStr] = parseInt(row.count || 0);
+        }
+      }
+    });
+
+    const trend = Object.keys(trendMap).map(dateStr => ({
+      date: dateStr,
+      count: trendMap[dateStr]
+    }));
 
     res.json({
       success: true,
       stats: {
         total: totalCount,
-        sentiment: sentimentCounts.reduce((acc, curr) => {
-          acc[curr.sentiment] = parseInt(curr.get('count'));
-          return acc;
-        }, { POS: 0, NEU: 0, NEG: 0 }),
-        channels: channelCounts.map(c => ({
-          channel: c.channel,
-          count: parseInt(c.get('count'))
-        })),
-        averageSentimentScore: parseFloat(avgSentiment?.get('avgScore') || 0).toFixed(2),
-        trend: dailyTrend.map(t => ({
-          date: t.get('date'),
-          count: parseInt(t.get('count')),
-          avgScore: parseFloat(t.get('avgScore') || 0).toFixed(2)
-        }))
+        negativePercentage: negativePct,
+        newThisWeek,
+        averageSentimentScore,
+        sentiment: sentimentObj,
+        channels,
+        topThemes,
+        trend
       }
     });
 
@@ -410,6 +576,13 @@ export const ingestChannel = async (req, res) => {
     }));
 
     const created = await Feedback.bulkCreate(feedbackRecords);
+
+    // Auto assign themes
+    try {
+      await assignThemesToFeedbacks(created, workspaceId);
+    } catch (err) {
+      console.error('Failed to auto-assign themes to channel feedback:', err);
+    }
 
     res.status(201).json({
       success: true,
@@ -479,3 +652,36 @@ export const updateStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update feedback status' });
   }
 };
+
+
+/**
+ * Automatically assigns themes to feedback records based on keyword matching.
+ * Falls back to a random theme (not always the same one) when no keyword
+ * rule matches, to avoid skewing theme distribution charts toward whichever
+ * theme happens to load first from the database.
+ */
+async function assignThemesToFeedbacks(feedbacks, workspaceId) {
+  const themes = await Theme.findAll({ where: { workspaceId } });
+  if (themes.length === 0) return;
+
+  const feedbackThemesToCreate = [];
+
+  for (const item of feedbacks) {
+    const matchedTheme =
+      matchThemeByKeywords(item.content, themes) || pickRandomFallbackTheme(themes);
+
+    if (!matchedTheme) continue; // no themes exist at all — skip rather than crash
+
+    feedbackThemesToCreate.push({
+      feedbackId: item.id,
+      themeId: matchedTheme.id,
+      // Lower confidence for the random fallback vs. a real keyword match —
+      // this is more honest than claiming 1.0 certainty on a guess.
+      confidence: matchThemeByKeywords(item.content, themes) ? 1.0 : 0.3,
+    });
+  }
+
+  if (feedbackThemesToCreate.length > 0) {
+    await FeedbackTheme.bulkCreate(feedbackThemesToCreate);
+  }
+}
