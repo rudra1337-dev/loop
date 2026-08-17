@@ -2,6 +2,9 @@ import express from 'express';
 import multer from 'multer';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import * as feedbackController from '../controllers/feedback.controller.js';
+import * as ingestionController from '../controllers/ingestion.controller.js';
+import * as statsController from '../controllers/stats.controller.js';
+import * as themeController from '../controllers/theme.controller.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -61,46 +64,16 @@ const upload = multer({
 // All feedback routes require authentication
 router.use(authenticate);
 
-// ==================================================
-// READ ACCESS
-// Everyone, including VIEWER, can view feedback
-// ==================================================
-
+// Read access
 router.get('/', feedbackController.getFeedbacks);
-router.get('/stats', feedbackController.getStats);
-router.get('/themes', feedbackController.getThemes);
+router.get('/stats', statsController.getStats);
+router.get('/themes', themeController.getThemes);
 
-// ==================================================
-// WRITE ACCESS
-// VIEWER is read-only.
-// ADMIN and ANALYST can ingest/delete feedback.
-// ==================================================
-
-router.post(
-  '/ingest/single',
-  authorize('ADMIN', 'ANALYST'),
-  feedbackController.ingestSingle
-);
-
-router.post(
-  '/ingest/csv',
-  authorize('ADMIN', 'ANALYST'),
-  upload.single('file'),
-  feedbackController.ingestCSV
-);
-
-router.delete(
-  '/:id',
-  authorize('ADMIN', 'ANALYST'),
-  feedbackController.deleteFeedback
-);
-
-router.post('/ingest/channel', authorize('ADMIN', 'ANALYST'), feedbackController.ingestChannel);
-
-router.patch(
-  '/:id/status',
-  authorize('ADMIN', 'ANALYST'),
-  feedbackController.updateStatus
-);
+// Write access — ADMIN/ANALYST only
+router.post('/ingest/single', authorize('ADMIN', 'ANALYST'), ingestionController.ingestSingle);
+router.post('/ingest/csv', authorize('ADMIN', 'ANALYST'), upload.single('file'), ingestionController.ingestCSV);
+router.post('/ingest/channel', authorize('ADMIN', 'ANALYST'), ingestionController.ingestChannel);
+router.patch('/:id/status', authorize('ADMIN', 'ANALYST'), feedbackController.updateStatus);
+router.delete('/:id', authorize('ADMIN', 'ANALYST'), feedbackController.deleteFeedback);
 
 export default router;
