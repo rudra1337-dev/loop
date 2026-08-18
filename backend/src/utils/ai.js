@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { aiConfig } from '../config/ai.config.js';
+import { ClassificationSchema } from '../lib/validation/classification.js';
 
 let aiInstance = null;
 
@@ -23,8 +24,9 @@ function localAnalyze(content) {
     'great', 'love', 'amazing', 'good', 'happy', 'excellent', 'awesome', 'best',
     'satisfied', 'perfect', 'fantastic', 'beautiful', 'cool', 'helpful', 'useful',
     'smooth', 'fast', 'quick', 'easy', 'recommend', 'thanks', 'thank you', 'delightful',
-    'worth', 'changed', 'productive' // expanded slightly based on real test cases
+    'worth', 'changed', 'productive'
   ];
+
   const negativeWords = [
     'bad', 'hate', 'issue', 'problem', 'broken', 'fail', 'failure', 'failed', 'slow',
     'error', 'worst', 'poor', 'annoyed', 'frustrated', 'disappointed', 'terrible',
@@ -41,6 +43,7 @@ function localAnalyze(content) {
     const matches = text.match(regex);
     if (matches) posCount += matches.length;
   });
+
   negativeWords.forEach((word) => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
     const matches = text.match(regex);
@@ -63,8 +66,9 @@ function localAnalyze(content) {
 }
 
 /**
- * Analyzes content sentiment using the configured AI provider,
- * falling back to local keyword analysis if unavailable.
+ * Analyzes content sentiment using the configured AI provider.
+ * Validates the response schema using Zod before returning.
+ * Falls back to local keyword analysis if unavailable or validation fails.
  */
 export async function analyzeFeedbackSentiment(content) {
   if (!content || !content.trim()) {
@@ -78,30 +82,39 @@ export async function analyzeFeedbackSentiment(content) {
 
   try {
     const prompt = `Analyze the sentiment of the following customer feedback text.
-Respond ONLY with a JSON object in this format:
+Respond ONLY with a JSON object in this exact format:
 {
   "sentiment": "POS" | "NEU" | "NEG",
-  "score": <float between -1.0 and 1.0>
+  "sentimentScore": <number between -1 and 1>
 }
+Rules:
+- sentiment must be exactly one of: "POS", "NEU", or "NEG"
+- sentimentScore must be a number between -1 and 1
+- Do NOT wrap in \`\`\`json fences
+- Return JSON only, no explanations
 Feedback text: "${content.replace(/"/g, '\\"')}"`;
 
     const response = await aiInstance.models.generateContent({
-      model: aiConfig.model, // now driven entirely by .env
+      model: aiConfig.model,
       contents: prompt,
     });
 
     const responseText = response.text || '';
+    // Strip accidental Markdown fences if the AI adds them
     const jsonStr = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const result = JSON.parse(jsonStr);
+    const parsed = JSON.parse(jsonStr);
 
-    const validSentiments = ['POS', 'NEU', 'NEG'];
-    const sentiment = validSentiments.includes(result.sentiment) ? result.sentiment : 'NEU';
-    const sentimentScore = typeof result.score === 'number' ? result.score : 0.0;
+    // Validate against schema using Zod
+    const validation = ClassificationSchema.safeParse(parsed);
+    if (!validation.success) {
+      console.warn('[AI] Response failed schema validation:', validation.error.format());
+      return localAnalyze(content);
+    }
 
+    const { sentiment, sentimentScore } = validation.data;
     return { sentiment, sentimentScore };
   } catch (error) {
-    // This is the log line you need to check in your terminal —
-    // it will tell us exactly why Gemini is failing.
+    // Any error (API call, JSON parse, Zod validation) → fallback
     console.error(`[AI ERROR] ${aiConfig.providerName} sentiment analysis failed:`, error.message);
     return localAnalyze(content);
   }

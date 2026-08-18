@@ -22,9 +22,16 @@ export const ingestSingle = async (req, res) => {
     }
 
     if (!sentiment || !['POS', 'NEU', 'NEG'].includes(sentiment)) {
-      const analysis = await analyzeFeedbackSentiment(content);
-      sentiment = analysis.sentiment;
-      sentimentScore = analysis.sentimentScore;
+      try {
+        const analysis = await analyzeFeedbackSentiment(content);
+        sentiment = analysis.sentiment;
+        sentimentScore = analysis.sentimentScore;
+      } catch (err) {
+        if (err.message === 'AI classification returned invalid data') {
+          return res.status(502).json({ error: 'AI classification returned invalid data' });
+        }
+        throw err;
+      }
     }
 
     const feedback = await Feedback.create({
@@ -97,24 +104,28 @@ export const ingestCSV = async (req, res) => {
         continue;
       }
 
-      if (!sentiment || !['POS', 'NEU', 'NEG'].includes(sentiment.toUpperCase())) {
-        const analysis = await analyzeFeedbackSentiment(content);
-        sentiment = analysis.sentiment;
-        sentimentScore = analysis.sentimentScore;
-      } else {
-        sentiment = sentiment.toUpperCase();
-        sentimentScore = sentimentScore !== undefined ? parseFloat(sentimentScore) : (sentiment === 'POS' ? 0.8 : sentiment === 'NEG' ? -0.8 : 0.0);
-      }
+      try {
+        if (!sentiment || !['POS', 'NEU', 'NEG'].includes(sentiment.toUpperCase())) {
+          const analysis = await analyzeFeedbackSentiment(content);
+          sentiment = analysis.sentiment;
+          sentimentScore = analysis.sentimentScore;
+        } else {
+          sentiment = sentiment.toUpperCase();
+          sentimentScore = sentimentScore !== undefined ? parseFloat(sentimentScore) : (sentiment === 'POS' ? 0.8 : sentiment === 'NEG' ? -0.8 : 0.0);
+        }
 
-      feedbackRecords.push({
-        content: content.trim(),
-        channel: channel.trim(),
-        customerLabel: customerLabel ? customerLabel.trim() : null,
-        sentiment,
-        sentimentScore: parseFloat(sentimentScore),
-        workspaceId,
-        status: 'NEW',
-      });
+        feedbackRecords.push({
+          content: content.trim(),
+          channel: channel.trim(),
+          customerLabel: customerLabel ? customerLabel.trim() : null,
+          sentiment,
+          sentimentScore: parseFloat(sentimentScore),
+          workspaceId,
+          status: 'NEW',
+        });
+      } catch (err) {
+        errors.push({ row: i + 1, error: err.message || 'AI Classification failed' });
+      }
     }
 
     let createdCount = 0;
