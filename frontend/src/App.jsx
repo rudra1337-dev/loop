@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Trends from "./pages/Trends";
 import FeedbackExplorer from "./pages/FeedbackExplorer";
 import IngestFeedback from "./pages/IngestFeedback";
+import Landing from "./pages/Landing";
 import Layout from "./components/Layout";
 
 const Unauthorized = () => (
@@ -25,13 +26,11 @@ const Unauthorized = () => (
 function App() {
   return (
     <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Landing />} />
+
       {/* Guest-only routes */}
       <Route element={<GuestRoute />}>
-        <Route
-          path="/"
-          element={<Navigate to="/login" replace />}
-        />
-
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Route>
