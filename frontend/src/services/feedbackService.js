@@ -2,6 +2,7 @@ import api from './api';
 
 export const getFeedbacks = (params) => api.get('/feedback', { params });
 export const getStats = (params) => api.get('/feedback/stats', { params });
+export const getTrends = (params) => api.get('/feedback/trends', { params });
 export const ingestSingle = (data) => api.post('/feedback/ingest/single', data);
 
 export const ingestCSV = (file, defaultChannel) => {

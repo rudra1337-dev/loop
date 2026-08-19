@@ -28,6 +28,12 @@ const Layout = ({ children }) => {
             <span>📊</span> Dashboard
           </NavLink>
           <NavLink 
+            to="/trends" 
+            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+          >
+            <span>📈</span> Trends
+          </NavLink>
+          <NavLink 
             to="/feedback" 
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
           >

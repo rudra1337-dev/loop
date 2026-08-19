@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import GuestRoute from "./components/auth/GuestRoute";
 import WorkspaceSettings from "./pages/WorkspaceSettings";
 import Dashboard from "./pages/Dashboard";
+import Trends from "./pages/Trends";
 import FeedbackExplorer from "./pages/FeedbackExplorer";
 import IngestFeedback from "./pages/IngestFeedback";
 import Layout from "./components/Layout";
@@ -42,6 +43,15 @@ function App() {
           element={
             <Layout>
               <Dashboard />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/trends"
+          element={
+            <Layout>
+              <Trends />
             </Layout>
           }
         />

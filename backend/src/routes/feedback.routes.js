@@ -67,6 +67,7 @@ router.use(authenticate);
 // Read access
 router.get('/', feedbackController.getFeedbacks);
 router.get('/stats', statsController.getStats);
+router.get('/trends', statsController.getTrends);
 router.get('/themes', themeController.getThemes);
 
 // Write access — ADMIN/ANALYST only
