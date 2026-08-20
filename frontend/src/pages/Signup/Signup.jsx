@@ -1,7 +1,8 @@
+import "./Signup.css";
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { getInviteByCode } from '../services/workspaceService';
+import { useAuth } from '../../context/AuthContext';
+import { getInviteByCode } from '../../services/workspaceService';
 
 const Signup = () => {
   const { signup, loginWithGoogle } = useAuth();

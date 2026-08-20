@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import GuestRoute from "./components/auth/GuestRoute";
-import WorkspaceSettings from "./pages/WorkspaceSettings";
-import Dashboard from "./pages/Dashboard";
-import FeedbackExplorer from "./pages/FeedbackExplorer";
-import IngestFeedback from "./pages/IngestFeedback";
-import Layout from "./components/Layout";
+import ProtectedRoute from "./components/auth/ProtectedRoute/ProtectedRoute";
+import Login from "./pages/Login/Login";
+import Signup from "./pages/Signup/Signup";
+import GuestRoute from "./components/auth/GuestRoute/GuestRoute";
+import WorkspaceSettings from "./pages/WorkspaceSettings/WorkspaceSettings";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import FeedbackExplorer from "./pages/FeedbackExplorer/FeedbackExplorer";
+import IngestFeedback from "./pages/IngestFeedback/IngestFeedback";
+import Layout from "./components/Layout/Layout";
 
 const Unauthorized = () => (
   <div style={{ padding: "40px", textAlign: "center" }}>

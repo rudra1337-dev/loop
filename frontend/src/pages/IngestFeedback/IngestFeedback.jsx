@@ -1,7 +1,8 @@
+import "./IngestFeedback.css";
 import { useState, useRef } from 'react';
-import { ingestCSV, ingestSingle } from '../services/feedbackService';
-import { useAuth } from '../context/AuthContext';
-import { ingestChannel } from '../services/feedbackService';
+import { ingestCSV, ingestSingle } from '../../services/feedbackService';
+import { useAuth } from '../../context/AuthContext';
+import { ingestChannel } from '../../services/feedbackService';
 
 const IngestFeedback = () => {
   const { user } = useAuth();

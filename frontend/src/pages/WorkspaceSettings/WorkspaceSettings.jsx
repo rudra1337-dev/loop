@@ -1,6 +1,7 @@
+import "./WorkspaceSettings.css";
 import { useState, useEffect } from 'react';
-import * as workspaceService from '../services/workspaceService';
-import { useAuth } from '../context/AuthContext';
+import * as workspaceService from '../../services/workspaceService';
+import { useAuth } from '../../context/AuthContext';
 
 const WorkspaceSettings = () => {
     const { user, refetch } = useAuth(); // refetch lets us refresh the name in AuthContext after rename
