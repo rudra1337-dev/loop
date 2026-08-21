@@ -1,12 +1,13 @@
+import "./Dashboard.css";
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { getStats, getThemes } from '../services/feedbackService';
-import { useAuth } from '../context/AuthContext';
+import { getStats, getThemes } from '../../services/feedbackService';
+import { useAuth } from '../../context/AuthContext';
 
 // Chart components
-import FeedbackVolumeChart from '../components/charts/FeedbackVolumeChart';
-import SentimentBreakdownChart from '../components/charts/SentimentBreakdownChart';
-import TopThemesChart from '../components/charts/TopThemesChart';
+import FeedbackVolumeChart from '../../components/charts/FeedbackVolumeChart/FeedbackVolumeChart';
+import SentimentBreakdownChart from '../../components/charts/SentimentBreakdownChart/SentimentBreakdownChart';
+import TopThemesChart from '../../components/charts/TopThemesChart/TopThemesChart';
 
 const Dashboard = () => {
   const { user } = useAuth();

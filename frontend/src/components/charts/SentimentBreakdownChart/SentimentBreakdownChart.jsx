@@ -1,3 +1,4 @@
+import "./SentimentBreakdownChart.css";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
 const SentimentBreakdownChart = ({ data, loading }) => {
