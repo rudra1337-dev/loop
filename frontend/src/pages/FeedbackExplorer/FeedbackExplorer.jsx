@@ -1,7 +1,8 @@
+import "./FeedbackExplorer.css";
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus } from '../services/feedbackService';
-import { useAuth } from '../context/AuthContext';
+import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus } from '../../services/feedbackService';
+import { useAuth } from '../../context/AuthContext';
 
 const FeedbackExplorer = () => {
   const { user } = useAuth();

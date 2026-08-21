@@ -1,3 +1,4 @@
+import "./TopThemesChart.css";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 
 const CustomTooltip = ({ active, payload }) => {
