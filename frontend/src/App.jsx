@@ -5,8 +5,10 @@ import Signup from "./pages/Signup/Signup";
 import GuestRoute from "./components/auth/GuestRoute/GuestRoute";
 import WorkspaceSettings from "./pages/WorkspaceSettings/WorkspaceSettings";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Trends from "./pages/Trends/Trends";
 import FeedbackExplorer from "./pages/FeedbackExplorer/FeedbackExplorer";
 import IngestFeedback from "./pages/IngestFeedback/IngestFeedback";
+import Landing from "./pages/Landing/Landing";
 import Layout from "./components/Layout/Layout";
 
 const Unauthorized = () => (
@@ -24,13 +26,11 @@ const Unauthorized = () => (
 function App() {
   return (
     <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Landing />} />
+
       {/* Guest-only routes */}
       <Route element={<GuestRoute />}>
-        <Route
-          path="/"
-          element={<Navigate to="/login" replace />}
-        />
-
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Route>
@@ -42,6 +42,15 @@ function App() {
           element={
             <Layout>
               <Dashboard />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/trends"
+          element={
+            <Layout>
+              <Trends />
             </Layout>
           }
         />
