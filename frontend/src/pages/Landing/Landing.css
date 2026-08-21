@@ -620,3 +620,28 @@ a:hover .logo-spinner {
   from { opacity: 0; transform: translateY(-20px); filter: blur(5px); }
   to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
+
+.landing-signin-link {
+  color: #e5e7eb;
+  @apply transition-colors duration-200;
+}
+
+.landing-signin-link:hover {
+  color: #818cf8;
+}
+
+.hero-signin-btn {
+  @apply py-3.5 px-10 text-sm rounded-[30px] font-bold transition-all duration-300;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #f3f4f6;
+  text-decoration: none;
+}
+
+.hero-signin-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
+  color: #fff;
+}

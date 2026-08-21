@@ -124,7 +124,7 @@ const Landing = () => {
               </Link>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <Link to="/login" style={{ color: '#e5e7eb', textDecoration: 'none', fontSize: '13.5px', fontWeight: '600', transition: 'color 0.2s' }}>Sign In</Link>
+                <Link to="/login" className="landing-signin-link" style={{ textDecoration: 'none', fontSize: '13.5px', fontWeight: '600' }}>Sign In</Link>
                 <Link to="/signup" className="btn btn-primary premium-cta" style={{ padding: '8px 22px', borderRadius: '20px', fontSize: '13.5px' }}>
                   Start Free
                 </Link>
@@ -167,7 +167,7 @@ const Landing = () => {
                 <Link to="/signup" className="btn btn-primary premium-cta" style={{ padding: '14px 40px', fontSize: '15px', borderRadius: '30px' }}>
                   Create Account Free
                 </Link>
-                <Link to="/login" className="btn btn-secondary" style={{ padding: '14px 40px', fontSize: '15px', borderRadius: '30px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                <Link to="/login" className="hero-signin-btn">
                   Sign in to Demo
                 </Link>
               </>
@@ -463,7 +463,7 @@ const Landing = () => {
                   <Link to="/signup" className="btn btn-primary premium-cta" style={{ padding: '14px 44px', borderRadius: '30px', fontWeight: '700' }}>
                     Create Account Free
                   </Link>
-                  <Link to="/login" className="btn btn-secondary" style={{ padding: '14px 44px', borderRadius: '30px', fontWeight: '700', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <Link to="/login" className="hero-signin-btn">
                     Explore Demo
                   </Link>
                 </>
