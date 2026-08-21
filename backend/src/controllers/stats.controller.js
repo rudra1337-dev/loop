@@ -144,60 +144,67 @@ export const getStats = async (req, res) => {
 /**
  * Get feedback trends: theme volume changes and spikes over a period (7d, 30d, 90d)
  */
+
+// Explicit map instead of parseInt("7d") — parseInt happens to work because it stops
+// at the first non-digit, but that's implicit and would break silently if the set of
+// allowed period values ever changes without this line being updated too.
+const PERIOD_DAYS = { '7d': 7, '30d': 30, '90d': 90 };
+
 export const getTrends = async (req, res) => {
   try {
     const { workspaceId } = req.user;
-    const { period } = req.query;
+    const { period = '30d' } = req.query;
 
-    if (!['7d', '30d', '90d'].includes(period)) {
+    if (!PERIOD_DAYS[period]) {
       return res.status(400).json({ error: 'Invalid period parameter. Allowed values: 7d, 30d, 90d' });
     }
-
-    const days = parseInt(period);
+    const days = PERIOD_DAYS[period];
 
     // Current period and previous period date calculations in UTC to prevent timezone shifts
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
     const currentEndDate = new Date(`${todayStr}T23:59:59.999Z`);
-    
+
     const currentStartDate = new Date(currentEndDate);
     currentStartDate.setUTCDate(currentStartDate.getUTCDate() - days + 1);
     currentStartDate.setUTCHours(0, 0, 0, 0);
-    
+
     const previousEndDate = new Date(currentStartDate);
     previousEndDate.setUTCDate(previousEndDate.getUTCDate() - 1);
     previousEndDate.setUTCHours(23, 59, 59, 999);
-    
+
     const previousStartDate = new Date(previousEndDate);
     previousStartDate.setUTCDate(previousStartDate.getUTCDate() - days + 1);
     previousStartDate.setUTCHours(0, 0, 0, 0);
 
-    // 1. Fetch all themes in the workspace
+    // 1. Fetch all themes in the workspace — workspace-scoped, no cross-tenant leakage
     const themes = await Theme.findAll({
       where: { workspaceId },
-      attributes: ['id', 'name', 'color']
+      attributes: ['id', 'name', 'color'],
     });
 
-    // 2. Fetch all feedback items in the range previousStartDate to currentEndDate
+    // 2. Fetch all feedback items in range [previousStartDate, currentEndDate], workspace-scoped.
+    //    NOTE: confirm the association alias in models/index.js (Feedback.belongsToMany(Theme, { as: ... })).
+    //    If no explicit alias is set there, Sequelize defaults to the model name "Themes" — that's what's
+    //    used below. Update this `as` if your models/index.js defines something different.
     const feedbacks = await Feedback.findAll({
       where: {
         workspaceId,
-        createdAt: {
-          [Op.between]: [previousStartDate, currentEndDate]
-        }
+        createdAt: { [Op.between]: [previousStartDate, currentEndDate] },
       },
       attributes: ['id', 'createdAt'],
       include: [
         {
           model: Theme,
+          as: 'Themes',
           attributes: ['id', 'name'],
-          through: { attributes: [] }
-        }
-      ]
+          through: { attributes: [] },
+        },
+      ],
     });
 
-    // 3. Create all dates for current period for daily padding
+    // 3. Build the list of dates in the current period for daily padding
     const datesList = [];
     const tempDate = new Date(currentStartDate);
     while (tempDate <= currentEndDate) {
@@ -205,65 +212,61 @@ export const getTrends = async (req, res) => {
       tempDate.setUTCDate(tempDate.getUTCDate() + 1);
     }
 
-    // Initialize mapping
-    const themeTrends = themes.map(theme => {
+    // Initialize per-theme trend buckets
+    const themeTrends = themes.map((theme) => {
       const dailyVolumeMap = {};
-      datesList.forEach(d => {
-        dailyVolumeMap[d] = 0;
-      });
-
+      datesList.forEach((d) => { dailyVolumeMap[d] = 0; });
       return {
         themeId: theme.id,
         themeName: theme.name,
         color: theme.color || '#6366f1',
         currentCount: 0,
         previousCount: 0,
-        dailyVolumeMap
+        dailyVolumeMap,
       };
     });
-
     const trendsMap = themeTrends.reduce((acc, curr) => {
       acc[curr.themeId] = curr;
       return acc;
     }, {});
 
     // 4. Populate counts
-    feedbacks.forEach(feedback => {
+    feedbacks.forEach((feedback) => {
       const createdAt = new Date(feedback.createdAt);
       const isCurrent = createdAt >= currentStartDate && createdAt <= currentEndDate;
       const isPrevious = createdAt >= previousStartDate && createdAt <= previousEndDate;
+      if (!isCurrent && !isPrevious) return;
 
-      if (isCurrent || isPrevious) {
-        const dateStr = createdAt.toISOString().split('T')[0];
-        const associatedThemes = feedback.Themes || feedback.themes || [];
-        associatedThemes.forEach(theme => {
-          const themeTrend = trendsMap[theme.id];
-          if (themeTrend) {
-            if (isCurrent) {
-              themeTrend.currentCount += 1;
-              if (themeTrend.dailyVolumeMap[dateStr] !== undefined) {
-                themeTrend.dailyVolumeMap[dateStr] += 1;
-              }
-            } else if (isPrevious) {
-              themeTrend.previousCount += 1;
-            }
+      const dateStr = createdAt.toISOString().split('T')[0];
+      const associatedThemes = feedback.Themes || [];
+      associatedThemes.forEach((theme) => {
+        const themeTrend = trendsMap[theme.id];
+        if (!themeTrend) return;
+        if (isCurrent) {
+          themeTrend.currentCount += 1;
+          if (themeTrend.dailyVolumeMap[dateStr] !== undefined) {
+            themeTrend.dailyVolumeMap[dateStr] += 1;
           }
-        });
-      }
+        } else {
+          themeTrend.previousCount += 1;
+        }
+      });
     });
 
     // 5. Final percentage change and spike check
-    const formattedThemes = themeTrends.map(t => {
+    const SPIKE_THRESHOLD = 30;
+    const formattedThemes = themeTrends.map((t) => {
+      // previousCount === 0 && currentCount > 0 is treated as a 100% "new activity" case —
+      // this is a convention, not a literal doubling, so it's flagged separately via
+      // isNewActivity so the frontend can label it distinctly from a real 30%+ increase.
+      const isNewActivity = t.previousCount === 0 && t.currentCount > 0;
       const pctChange = t.previousCount === 0
         ? (t.currentCount > 0 ? 100 : 0)
         : Math.round(((t.currentCount - t.previousCount) / t.previousCount) * 100);
 
-      const isSpiking = pctChange >= 30;
+      const isSpiking = pctChange >= SPIKE_THRESHOLD;
 
-      const dailyVolume = datesList.map(date => ({
-        date,
-        count: t.dailyVolumeMap[date]
-      }));
+      const dailyVolume = datesList.map((date) => ({ date, count: t.dailyVolumeMap[date] }));
 
       return {
         themeId: t.themeId,
@@ -273,7 +276,8 @@ export const getTrends = async (req, res) => {
         previousCount: t.previousCount,
         pctChange,
         isSpiking,
-        dailyVolume
+        isNewActivity,
+        dailyVolume,
       };
     });
 
@@ -282,12 +286,11 @@ export const getTrends = async (req, res) => {
       period,
       startDate: currentStartDate.toISOString().split('T')[0],
       endDate: currentEndDate.toISOString().split('T')[0],
-      spikeThreshold: 30,
-      themes: formattedThemes
+      spikeThreshold: SPIKE_THRESHOLD,
+      themes: formattedThemes,
     });
-
   } catch (error) {
     console.error('Error fetching trends:', error);
     res.status(500).json({ error: 'Failed to retrieve feedback trends' });
   }
-};
+};

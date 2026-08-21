@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getTrends } from '../services/feedbackService';
 import { useAuth } from '../context/AuthContext';
@@ -27,52 +27,42 @@ const Trends = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const period = searchParams.get('period') || '30d';
-  
+
   const [trendsData, setTrendsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Update query params in URL
-  const updateParams = (newParams) => {
-    const current = Object.fromEntries(searchParams.entries());
-    const updated = { ...current, ...newParams };
-    
-    // Clean up empty params
-    Object.keys(updated).forEach(key => {
-      if (updated[key] === undefined || updated[key] === null || updated[key] === '') {
-        delete updated[key];
+  // FIX: loadTrends is now a stable callback keyed only on `period`. The Refresh
+  // button calls it directly instead of nudging a `_ref` search param that the
+  // effect below never listened to (that was the original bug — the effect only
+  // depended on [period], so bumping an unrelated param did nothing).
+  const loadTrends = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const res = await getTrends({ period });
+      if (res.data.success) {
+        setTrendsData(res.data);
+      } else {
+        setError(res.data.error || 'Failed to retrieve trends');
       }
-    });
-
-    setSearchParams(updated);
-  };
-
-  useEffect(() => {
-    const loadTrends = async () => {
-      try {
-        setLoading(true);
-        setError('');
-        const res = await getTrends({ period });
-        if (res.data.success) {
-          setTrendsData(res.data);
-        } else {
-          setError(res.data.error || 'Failed to retrieve trends');
-        }
-      } catch (err) {
-        console.error('Error loading trends:', err);
-        setError(err.response?.data?.error || 'Failed to retrieve feedback trends.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadTrends();
+    } catch (err) {
+      console.error('Error loading trends:', err);
+      setError(err.response?.data?.error || 'Failed to retrieve feedback trends.');
+    } finally {
+      setLoading(false);
+    }
   }, [period]);
 
+  useEffect(() => {
+    loadTrends();
+  }, [loadTrends]);
+
   const handlePeriodChange = (value) => {
-    updateParams({ period: value });
+    const current = Object.fromEntries(searchParams.entries());
+    setSearchParams({ ...current, period: value });
   };
 
   const handleThemeClick = (themeName) => {
@@ -81,7 +71,7 @@ const Trends = () => {
 
   // Extract themes
   const themes = trendsData?.themes || [];
-  
+
   // Check if there is any feedback at all in the active themes
   const totalFeedbackCount = themes.reduce((acc, t) => acc + t.currentCount + t.previousCount, 0);
 
@@ -93,19 +83,19 @@ const Trends = () => {
   // Transform daily volume data for Recharts LineChart
   const transformChartData = () => {
     if (topThemesForChart.length === 0) return [];
-    
+
     const dates = topThemesForChart[0].dailyVolume.map(v => v.date);
-    
+
     return dates.map(date => {
       const dateObj = new Date(date);
       const displayDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
       const row = { date, displayDate };
-      
+
       topThemesForChart.forEach(t => {
         const volEntry = t.dailyVolume.find(v => v.date === date);
         row[t.themeName] = volEntry ? volEntry.count : 0;
       });
-      
+
       return row;
     });
   };
@@ -132,9 +122,11 @@ const Trends = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button 
-            onClick={() => updateParams({ _ref: Date.now() })} 
-            className="btn btn-secondary" 
+          {/* FIX: calls loadTrends() directly instead of routing through a dead search param */}
+          <button
+            onClick={loadTrends}
+            disabled={loading}
+            className="btn btn-secondary"
             style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}
             title="Refresh trends data"
           >
@@ -198,10 +190,11 @@ const Trends = () => {
                 {spikingThemesCount}
               </span>
               <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Themes with &le; 30% volume increase
+                {/* FIX: was &le; (≤), which contradicted the backend's pctChange >= 30 rule */}
+                Themes with &ge; 30% volume increase
               </span>
             </div>
-            
+
             <div className="metric-card">
               <span className="metric-title">Total Active Themes</span>
               <span className="metric-value">{themes.filter(t => t.currentCount > 0).length}</span>
@@ -226,16 +219,16 @@ const Trends = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
-                    <XAxis 
-                      dataKey="displayDate" 
-                      stroke="var(--text-muted)" 
+                    <XAxis
+                      dataKey="displayDate"
+                      stroke="var(--text-muted)"
                       fontSize={11}
                       tickLine={false}
                       axisLine={false}
                       dy={10}
                     />
-                    <YAxis 
-                      stroke="var(--text-muted)" 
+                    <YAxis
+                      stroke="var(--text-muted)"
                       fontSize={11}
                       tickLine={false}
                       axisLine={false}
@@ -243,12 +236,12 @@ const Trends = () => {
                       dx={-5}
                     />
                     <Tooltip content={<CustomTooltip />} />
-                    <Legend 
-                      verticalAlign="top" 
-                      height={36} 
+                    <Legend
+                      verticalAlign="top"
+                      height={36}
                       iconType="circle"
                       iconSize={8}
-                      wrapperStyle={{ fontSize: '12px', color: 'var(--text-secondary)' }} 
+                      wrapperStyle={{ fontSize: '12px', color: 'var(--text-secondary)' }}
                     />
                     {topThemesForChart.map((theme) => (
                       <Line
@@ -276,19 +269,19 @@ const Trends = () => {
                 ℹ️ No themes are currently spiking.
               </div>
             ) : null}
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
               {sortedThemes.map(theme => {
                 const isPositive = theme.pctChange > 0;
                 const isNegative = theme.pctChange < 0;
-                
+
                 return (
-                  <div 
+                  <div
                     key={theme.themeId}
-                    className="glass-card" 
+                    className="glass-card"
                     tabIndex={0}
-                    style={{ 
-                      margin: 0, 
+                    style={{
+                      margin: 0,
                       cursor: 'pointer',
                       border: theme.isSpiking ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-light)',
                       boxShadow: theme.isSpiking ? '0 0 16px rgba(239, 68, 68, 0.1)' : 'none',
@@ -313,26 +306,40 @@ const Trends = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span 
-                          style={{ 
-                            width: '12px', 
-                            height: '12px', 
-                            borderRadius: '50%', 
+                        <span
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            borderRadius: '50%',
                             backgroundColor: theme.color || '#6366f1',
                             display: 'inline-block'
-                          }} 
+                          }}
                         />
                         <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
                           {theme.themeName}
                         </h3>
                       </div>
-                      
-                      {theme.isSpiking && (
-                        <span 
-                          className="badge" 
-                          style={{ 
-                            backgroundColor: 'rgba(239, 68, 68, 0.15)', 
-                            color: '#ef4444', 
+
+                      {/* Distinguish a brand-new theme from a real 30%+ increase on an existing one */}
+                      {theme.isSpiking && theme.isNewActivity ? (
+                        <span
+                          className="badge"
+                          style={{
+                            backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                            color: '#818cf8',
+                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                            fontSize: '11px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          🆕 New
+                        </span>
+                      ) : theme.isSpiking ? (
+                        <span
+                          className="badge"
+                          style={{
+                            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                            color: '#ef4444',
                             border: '1px solid rgba(239, 68, 68, 0.3)',
                             fontSize: '11px',
                             fontWeight: 'bold'
@@ -340,7 +347,7 @@ const Trends = () => {
                         >
                           🔥 Spiking
                         </span>
-                      )}
+                      ) : null}
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -357,10 +364,10 @@ const Trends = () => {
                       </div>
 
                       <div style={{ textAlign: 'right' }}>
-                        <span 
-                          style={{ 
-                            fontSize: '20px', 
-                            fontWeight: 'bold', 
+                        <span
+                          style={{
+                            fontSize: '20px',
+                            fontWeight: 'bold',
                             color: theme.isSpiking || isPositive ? '#10b981' : isNegative ? '#ef4444' : 'var(--text-secondary)'
                           }}
                         >
