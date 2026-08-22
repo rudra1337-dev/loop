@@ -270,14 +270,22 @@ const IngestFeedback = () => {
           {/* Sample CSV preview format */}
           <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-light)' }}>
             <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>Supported CSV Format Example (Using 'description')</h3>
+            <p className="subtitle" style={{ marginBottom: '16px', maxWidth: '640px' }}>
+              Only <code>description</code> and <code>channel</code> are required. <code>sentiment</code>,{' '}
+              <code>sentimentScore</code>, and <code>theme</code> are optional — leave any of them blank and
+              our AI will classify that row automatically. Filling them in yourself skips the AI call for
+              that row entirely, which is faster and uses less API quota on large files.
+            </p>
             <div className="table-container" style={{ margin: 0 }}>
               <table>
                 <thead>
                   <tr>
-                    <th>description</th>
-                    <th>channel</th>
-                    <th>customerLabel</th>
-                    <th>sentiment</th>
+                    <th>description <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(required)</span></th>
+                    <th>channel <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(required)</span></th>
+                    <th>customerLabel <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
+                    <th>sentiment <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
+                    <th>sentimentScore <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
+                    <th>theme <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -286,22 +294,35 @@ const IngestFeedback = () => {
                     <td>Slack</td>
                     <td>customer@company.com</td>
                     <td>POS</td>
+                    <td>0.8</td>
+                    <td>Feature Requests</td>
                   </tr>
                   <tr>
                     <td>"The system lags during database exports."</td>
                     <td>Email</td>
                     <td>user@domain.com</td>
                     <td>NEG</td>
+                    <td>-0.7</td>
+                    <td>App Performance</td>
                   </tr>
                   <tr>
                     <td>"How can I reset my team password?"</td>
                     <td>Zendesk</td>
                     <td>client@app.net</td>
                     <td>NEU</td>
+                    <td></td>
+                    <td></td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '12px' }}>
+              <strong>sentiment</strong> must be exactly one of <code>POS</code>, <code>NEU</code>, or{' '}
+              <code>NEG</code>. <strong>sentimentScore</strong> is a number between -1 and 1 — leave it blank
+              (as in row 3 above) to have it auto-filled from your sentiment value. <strong>theme</strong>{' '}
+              can be an existing theme name in this workspace, or a new one — it'll be created automatically
+              if it doesn't exist yet.
+            </p>
           </div>
         </div>
       )}
