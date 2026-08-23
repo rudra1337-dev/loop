@@ -1,0 +1,111 @@
+.theme-selector-dropdown {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-primary);
+  width: 100%;
+}
+
+.theme-selector-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-align: left;
+}
+
+.theme-selector-btn:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-sidebar-hover);
+}
+
+.theme-selector-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.theme-icon {
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.theme-label {
+  flex-grow: 1;
+}
+
+.theme-chevron {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.theme-options-list {
+  position: absolute;
+  bottom: 105%; /* Position dropdown above in layout footer or below in header depending on space */
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  box-shadow: var(--shadow-premium);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Adjust position if we need it to drop down instead of drop up */
+.theme-selector-dropdown.drop-down .theme-options-list {
+  bottom: auto;
+  top: 105%;
+}
+
+.theme-option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  outline: none;
+}
+
+.theme-option-item:hover,
+.theme-option-item:focus-visible {
+  color: var(--text-primary);
+  background-color: var(--bg-sidebar-hover);
+}
+
+.theme-option-item.active {
+  color: var(--text-primary);
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+.option-icon {
+  font-size: 15px;
+}
+
+.option-label {
+  flex-grow: 1;
+}
+
+.option-checkmark {
+  color: var(--color-primary);
+  font-weight: bold;
+  font-size: 12px;
+}

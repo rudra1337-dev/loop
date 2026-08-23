@@ -1,11 +1,12 @@
 import "./ProtectedRoute.css";
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import LoadingSpinner from "../../LoadingSpinner/LoadingSpinner";
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>; // swap for a spinner later
+  if (loading) return <LoadingSpinner />;
 
   if (!user) return <Navigate to="/login" replace />;
 
