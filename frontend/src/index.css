@@ -9,6 +9,20 @@
   --bg-main: #060913;
   --bg-card: rgba(15, 22, 42, 0.65);
   --bg-sidebar: #0b0f19;
+  --bg-input: rgba(15, 23, 42, 0.8);
+  --bg-table: rgba(15, 22, 42, 0.3);
+  --bg-th: rgba(15, 22, 42, 0.7);
+  --bg-tr-hover: rgba(255, 255, 255, 0.01);
+  --bg-scrollbar-thumb: #1e293b;
+  --bg-sidebar-hover: rgba(255, 255, 255, 0.03);
+  --bg-btn-secondary: rgba(255, 255, 255, 0.05);
+  --bg-btn-secondary-hover: rgba(255, 255, 255, 0.1);
+  --bg-channel: rgba(15, 22, 42, 0.4);
+  --bg-channel-hover: rgba(15, 22, 42, 0.6);
+  --bg-channel-active: rgba(99, 102, 241, 0.05);
+  --bg-upload: rgba(15, 22, 42, 0.2);
+  --bg-pagination: rgba(255, 255, 255, 0.03);
+  --bg-progress-track: rgba(255, 255, 255, 0.05);
   
   --border-light: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(99, 102, 241, 0.3);
@@ -35,6 +49,36 @@
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Light Theme Variables Override */
+[data-theme="light"] {
+  --bg-main: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-sidebar: #f1f5f9;
+  --bg-input: #ffffff;
+  --bg-table: rgba(255, 255, 255, 0.6);
+  --bg-th: rgba(241, 245, 249, 0.9);
+  --bg-tr-hover: rgba(15, 23, 42, 0.02);
+  --bg-scrollbar-thumb: #cbd5e1;
+  --bg-sidebar-hover: rgba(15, 23, 42, 0.04);
+  --bg-btn-secondary: rgba(15, 23, 42, 0.05);
+  --bg-btn-secondary-hover: rgba(15, 23, 42, 0.1);
+  --bg-channel: rgba(255, 255, 255, 0.7);
+  --bg-channel-hover: rgba(255, 255, 255, 0.9);
+  --bg-channel-active: rgba(99, 102, 241, 0.06);
+  --bg-upload: rgba(255, 255, 255, 0.5);
+  --bg-pagination: rgba(15, 23, 42, 0.03);
+  --bg-progress-track: rgba(15, 23, 42, 0.05);
+  
+  --border-light: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(99, 102, 241, 0.4);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --shadow-premium: 0 8px 32px 0 rgba(15, 23, 42, 0.06);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -53,6 +97,14 @@ body {
     radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.08) 0px, transparent 50%),
     radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
   background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="light"] body {
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.04) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.03) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.02) 0px, transparent 50%);
 }
 
 /* Scrollbars */
@@ -64,7 +116,7 @@ body {
   background: var(--bg-main);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--bg-scrollbar-thumb);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -85,6 +137,7 @@ body {
   flex-direction: column;
   padding: 24px;
   flex-shrink: 0;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .sidebar-brand {
@@ -122,7 +175,7 @@ body {
 
 .sidebar-link:hover {
   color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--bg-sidebar-hover);
 }
 
 .sidebar-link.active {
@@ -248,7 +301,7 @@ textarea,
 select {
   width: 100%;
   padding: 12px 16px;
-  background-color: rgba(15, 23, 42, 0.8);
+  background-color: var(--bg-input);
   border: 1px solid var(--border-light);
   border-radius: 8px;
   color: var(--text-primary);
@@ -293,13 +346,13 @@ select:focus {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-btn-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-light);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-btn-secondary-hover);
 }
 
 .btn-danger {
@@ -331,11 +384,11 @@ table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  background-color: rgba(15, 22, 42, 0.3);
+  background-color: var(--bg-table);
 }
 
 th {
-  background-color: rgba(15, 22, 42, 0.7);
+  background-color: var(--bg-th);
   padding: 16px;
   font-size: 12px;
   font-weight: 600;
@@ -358,7 +411,7 @@ tr:last-child td {
 }
 
 tr:hover td {
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: var(--bg-tr-hover);
 }
 
 /* Badges */
@@ -493,7 +546,7 @@ tr:hover td {
 }
 
 .channel-card {
-  background: rgba(15, 22, 42, 0.4);
+  background: var(--bg-channel);
   border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 24px;
@@ -518,13 +571,13 @@ tr:hover td {
 
 .channel-card:hover {
   border-color: var(--border-hover);
-  background: rgba(15, 22, 42, 0.6);
+  background: var(--bg-channel-hover);
   transform: translateY(-2px);
 }
 
 .channel-card.active {
   border-color: var(--color-primary);
-  background: rgba(99, 102, 241, 0.05);
+  background: var(--bg-channel-active);
 }
 
 .channel-card.active::before {
@@ -568,7 +621,7 @@ tr:hover td {
   border-radius: 12px;
   padding: 40px;
   text-align: center;
-  background-color: rgba(15, 22, 42, 0.2);
+  background-color: var(--bg-upload);
   cursor: pointer;
   transition: var(--transition-smooth);
   margin-bottom: 24px;
@@ -630,7 +683,7 @@ tr:hover td {
 
 .pagination-btn {
   padding: 8px 16px;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--bg-pagination);
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
   border-radius: 6px;
@@ -651,7 +704,7 @@ tr:hover td {
 .progress-bar-container {
   width: 100%;
   height: 4px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--bg-progress-track);
   border-radius: 2px;
   margin-top: 8px;
   overflow: hidden;

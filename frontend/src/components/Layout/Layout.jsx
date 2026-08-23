@@ -1,10 +1,30 @@
 import "./Layout.css";
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from 'react';
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Initialize theme from local storage or system preference, default to dark
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      return savedTheme;
+    }
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  // Apply theme to document element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'));
+  };
 
   const handleLogout = async () => {
     try {
@@ -60,6 +80,15 @@ const Layout = ({ children }) => {
           )}
         </nav>
         <div className="sidebar-footer">
+          <div className="theme-toggle-container">
+            <button 
+              onClick={toggleTheme} 
+              className="theme-toggle-btn"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            </button>
+          </div>
           <div className="sidebar-user">
             <div className="sidebar-user-name">{user?.name || 'User'}</div>
             <div className="sidebar-user-email">{user?.email || 'email@example.com'}</div>
