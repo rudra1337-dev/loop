@@ -25,3 +25,5 @@ export const ingestChannel = (channel) => api.post('/feedback/ingest/channel', {
 export const getThemes = () => api.get('/feedback/themes');
 
 export const updateFeedbackStatus = (id, status) => api.patch(`/feedback/${id}/status`, { status });
+
+export const reclassifyFeedbacks = (feedbackIds) => api.post('/feedback/reclassify', { feedbackIds });
