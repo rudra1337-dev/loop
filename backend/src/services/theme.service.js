@@ -54,18 +54,24 @@ export async function resolveTheme(themeData, themesCache, workspaceId) {
 
 /**
  * Resolves and attaches a theme to a single already-created feedback item.
- * Used by ingestSingle, and reusable as-is by the future manual re-classify
- * endpoint (#21).
+ * Used by ingestSingle and by reclassifyFeedbacks.
+ *
+ * Returns { theme, feedbackTheme } (not just the join row) so callers that
+ * need to report back the theme's name/color — e.g. the reclassify response,
+ * which has to tell the frontend what the new theme actually is — don't
+ * need a second lookup.
  */
 export async function attachThemeToFeedback(feedbackId, themeData, themesCache, workspaceId) {
   const resolved = await resolveTheme(themeData, themesCache, workspaceId);
   if (!resolved) return null;
 
-  return FeedbackTheme.create({
+  const feedbackTheme = await FeedbackTheme.create({
     feedbackId,
     themeId: resolved.id,
     confidence: themeData.confidence ?? 0.5,
   });
+
+  return { theme: resolved, feedbackTheme };
 }
 
 /**
@@ -88,5 +94,21 @@ export async function attachResolvedThemesToFeedbacks(createdFeedbacks, themeRes
 
   if (rows.length > 0) {
     await FeedbackTheme.bulkCreate(rows);
+  }
+}
+
+/**
+ * Deletes any theme in the given id list that no longer has any feedback
+ * attached to it. Intended to run once, after a full reclassify batch
+ * finishes — not per-item mid-loop — since two items in the same batch
+ * could share an old theme; deleting it after the first item would orphan
+ * the second item's data before that item even runs.
+ */
+export async function cleanupOrphanedThemes(themeIds) {
+  for (const themeId of themeIds) {
+    const remaining = await FeedbackTheme.count({ where: { themeId } });
+    if (remaining === 0) {
+      await Theme.destroy({ where: { id: themeId } });
+    }
   }
 }

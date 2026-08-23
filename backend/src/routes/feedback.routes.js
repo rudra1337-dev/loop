@@ -74,6 +74,7 @@ router.get('/themes', themeController.getThemes);
 router.post('/ingest/single', authorize('ADMIN', 'ANALYST'), ingestionController.ingestSingle);
 router.post('/ingest/csv', authorize('ADMIN', 'ANALYST'), upload.single('file'), ingestionController.ingestCSV);
 router.post('/ingest/channel', authorize('ADMIN', 'ANALYST'), ingestionController.ingestChannel);
+router.post('/reclassify', authorize('ADMIN', 'ANALYST'), feedbackController.reclassifyFeedbacks);
 router.patch('/:id/status', authorize('ADMIN', 'ANALYST'), feedbackController.updateStatus);
 router.delete('/:id', authorize('ADMIN', 'ANALYST'), feedbackController.deleteFeedback);
 

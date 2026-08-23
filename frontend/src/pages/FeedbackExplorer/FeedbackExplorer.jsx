@@ -1,7 +1,7 @@
 import "./FeedbackExplorer.css";
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus } from '../../services/feedbackService';
+import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus, reclassifyFeedbacks } from '../../services/feedbackService';
 import { useAuth } from '../../context/AuthContext';
 
 const FeedbackExplorer = () => {
@@ -30,6 +30,10 @@ const FeedbackExplorer = () => {
   const [error, setError] = useState('');
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1, limit: 10 });
   const [statusUpdatingId, setStatusUpdatingId] = useState(null);
+
+  // Reclassify selection state
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [reclassifying, setReclassifying] = useState(false);
 
   const isReadOnly = user?.role === 'VIEWER';
 
@@ -127,6 +131,13 @@ const FeedbackExplorer = () => {
     loadFeedbacks();
   }, [searchParams]);
 
+  // Clear selection whenever the page/filters change — selected ids from a
+  // previous page/filter view shouldn't silently carry over and surprise
+  // the user on the next reclassify click.
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [searchParams]);
+
   // Handle status update
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -162,6 +173,77 @@ const FeedbackExplorer = () => {
     setFromInput('');
     setToInput('');
     setSearchParams({ page: 1 });
+  };
+
+  // --- Reclassify selection handlers ---
+
+  const toggleSelected = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const allOnPageSelected = feedbacks.length > 0 && feedbacks.every(f => selectedIds.has(f.id));
+
+  const toggleSelectAllOnPage = () => {
+    setSelectedIds(prev => {
+      if (allOnPageSelected) {
+        // Deselect just this page's ids, leave any others untouched
+        const next = new Set(prev);
+        feedbacks.forEach(f => next.delete(f.id));
+        return next;
+      }
+      const next = new Set(prev);
+      feedbacks.forEach(f => next.add(f.id));
+      return next;
+    });
+  };
+
+  const handleReclassify = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    const confirmMessage = ids.length === 1
+      ? 'Re-run AI classification for this feedback item? This will overwrite its current sentiment and theme.'
+      : `Re-run AI classification for ${ids.length} feedback items? This will overwrite their current sentiment and theme.`;
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      setReclassifying(true);
+      const res = await reclassifyFeedbacks(ids);
+
+      if (res.data.success) {
+        const resultsById = new Map(res.data.results.map(r => [r.feedbackId, r]));
+
+        setFeedbacks(prev => prev.map(f => {
+          const result = resultsById.get(f.id);
+          if (!result) return f;
+          return {
+            ...f,
+            sentiment: result.sentiment,
+            sentimentScore: result.sentimentScore,
+            Themes: result.theme ? [result.theme] : [],
+          };
+        }));
+
+        if (res.data.errors && res.data.errors.length > 0) {
+          alert(
+            `Reclassified ${res.data.results.length} item(s). ${res.data.errors.length} failed:\n` +
+            res.data.errors.map(e => `• ${e.error}`).join('\n')
+          );
+        }
+      }
+
+      setSelectedIds(new Set());
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to reclassify feedback. Please try again.');
+    } finally {
+      setReclassifying(false);
+    }
   };
 
   const getSentimentBadge = (sentVal, score) => {
@@ -322,6 +404,52 @@ const FeedbackExplorer = () => {
         </div>
       </div>
 
+      {/* Selection bar — only shown once something is selected, and never for Viewers */}
+      {!isReadOnly && selectedIds.size > 0 && (
+        <div
+          className="glass-card"
+          style={{
+            padding: '12px 20px',
+            marginBottom: '16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            border: '1px solid var(--color-primary)',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <span style={{ fontSize: '13px', fontWeight: '600' }}>
+            {selectedIds.size} selected
+          </span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="btn btn-secondary"
+              disabled={reclassifying}
+              style={{ padding: '8px 14px', fontSize: '12px' }}
+            >
+              Clear
+            </button>
+            <button
+              onClick={handleReclassify}
+              className="btn btn-primary"
+              disabled={reclassifying}
+              style={{ padding: '8px 14px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              {reclassifying ? (
+                <>
+                  <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>🌀</span>
+                  Reclassifying...
+                </>
+              ) : (
+                <>🔄 Reclassify with AI</>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Feed Table */}
       <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
@@ -343,6 +471,17 @@ const FeedbackExplorer = () => {
               <table>
                 <thead>
                   <tr>
+                    {!isReadOnly && (
+                      <th style={{ width: '36px' }}>
+                        <input
+                          type="checkbox"
+                          checked={allOnPageSelected}
+                          onChange={toggleSelectAllOnPage}
+                          disabled={reclassifying}
+                          title="Select all on this page"
+                        />
+                      </th>
+                    )}
                     <th style={{ width: '40%' }}>Feedback Content</th>
                     <th>Source</th>
                     <th>Sentiment</th>
@@ -354,7 +493,17 @@ const FeedbackExplorer = () => {
                 </thead>
                 <tbody>
                   {feedbacks.map((f) => (
-                    <tr key={f.id}>
+                    <tr key={f.id} style={{ backgroundColor: selectedIds.has(f.id) ? 'rgba(99, 102, 241, 0.06)' : undefined }}>
+                      {!isReadOnly && (
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(f.id)}
+                            onChange={() => toggleSelected(f.id)}
+                            disabled={reclassifying}
+                          />
+                        </td>
+                      )}
                       <td style={{ lineHeight: '1.5', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '13.5px' }}>
                         <div style={{ fontWeight: '500', marginBottom: '4px' }}>{f.content}</div>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
