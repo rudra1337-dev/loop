@@ -17,6 +17,25 @@ const Landing = () => {
   const [inboxFeed, setInboxFeed] = useState(MOCK_INBOX_ITEMS);
   const [logs, setLogs] = useState([]);
 
+  // Initialize theme from local storage or system preference, default to dark
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      return savedTheme;
+    }
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  // Apply theme to document element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'));
+  };
+
   useEffect(() => {
     if (analyzing) {
       setLogs([]);
@@ -117,6 +136,33 @@ const Landing = () => {
             <a href="#analytics" className="nav-link" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '13.5px', fontWeight: '500', transition: 'color 0.2s', position: 'relative' }}>Workspace Preview</a>
             
             <div className="landing-nav-divider" />
+
+            <button
+              onClick={toggleTheme}
+              className="landing-theme-toggle"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: '18px',
+                padding: '4px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'color 0.2s, transform 0.2s'
+              }}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = 'var(--text-primary)';
+                e.currentTarget.style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
 
             {user ? (
               <Link to="/dashboard" className="btn btn-primary premium-cta" style={{ padding: '8px 22px', borderRadius: '20px', fontSize: '13.5px' }}>
