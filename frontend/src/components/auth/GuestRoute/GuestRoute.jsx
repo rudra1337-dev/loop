@@ -1,4 +1,4 @@
-import "./GuestRoute.css";
+import LoadingSpinner from "../../LoadingSpinner/LoadingSpinner";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -6,7 +6,7 @@ const GuestRoute = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (user) {

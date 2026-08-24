@@ -361,7 +361,7 @@ const Dashboard = () => {
       ) : (
         <>
           {/* Charts Row 1: Volume (2/3 width) and Sentiment (1/3 width) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 0.8fr)', gap: '24px', marginBottom: '24px' }}>
+          <div className="dashboard-charts-grid dashboard-charts-split">
             
             <div className="glass-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
               <h2>Feedback Volume Over Time</h2>
@@ -382,7 +382,7 @@ const Dashboard = () => {
           </div>
 
           {/* Charts Row 2: Top Themes and Ingest Channels */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '24px', marginBottom: '24px' }}>
+          <div className="dashboard-charts-grid dashboard-charts-equal">
             
             <div className="glass-card" style={{ margin: 0 }}>
               <h2>Top Themes Frequency</h2>

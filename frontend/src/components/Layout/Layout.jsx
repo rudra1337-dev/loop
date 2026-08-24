@@ -1,10 +1,33 @@
 import "./Layout.css";
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect, useRef } from 'react';
+import ThemeSelector from '../ThemeSelector/ThemeSelector';
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close mobile menu on Escape press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    if (isMobileMenuOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen]);
 
   const handleLogout = async () => {
     try {
@@ -15,55 +38,116 @@ const Layout = ({ children }) => {
     }
   };
 
+  const navLinks = [
+    { to: "/dashboard", label: "Dashboard", icon: "📊" },
+    { to: "/trends", label: "Trends", icon: "📈" },
+    { to: "/feedback", label: "Feedback Inbox", icon: "📥" },
+  ];
+
+  const hasAccess = (item) => {
+    if (!item.roles) return true;
+    return item.roles.includes(user?.role);
+  };
+
+  const extraLinks = [
+    { to: "/ingestion", label: "Ingest Feedback", icon: "📥", roles: ["ADMIN", "ANALYST"] },
+    { to: "/settings/workspace", label: "Workspace Settings", icon: "⚙️", roles: ["ADMIN"] }
+  ];
+
+  const allLinks = [...navLinks, ...extraLinks].filter(hasAccess);
+
   return (
     <div className="app-container">
-      <aside className="sidebar">
+      {/* Mobile Header / Navbar */}
+      <header className="mobile-header d-lg-none">
+        <div className="mobile-header-brand">
+          <span className="brand-logo">🌀</span>
+          <span className="brand-name">LOOP</span>
+        </div>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={`mobile-menu-toggle ${isMobileMenuOpen ? 'open' : ''}`}
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-navigation"
+          aria-label="Toggle navigation menu"
+        >
+          <span className="bar"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
+        </button>
+      </header>
+
+      {/* Mobile Drawer Navigation */}
+      <div
+        id="mobile-navigation"
+        className={`mobile-navigation d-lg-none ${isMobileMenuOpen ? 'show' : ''}`}
+        ref={mobileMenuRef}
+      >
+        <nav className="mobile-nav-menu">
+          {allLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="link-icon">{link.icon}</span>
+              <span className="link-label">{link.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <div className="mobile-nav-footer">
+          <div className="mobile-theme-selector-container">
+            <span className="footer-label">Theme</span>
+            <ThemeSelector />
+          </div>
+          <div className="mobile-user-info">
+            <div className="user-name">{user?.name || 'User'}</div>
+            <div className="user-email">{user?.email || 'email@example.com'}</div>
+            <div className="user-workspace">
+              💼 {user?.workspaceName || 'Default Workspace'} ({user?.role})
+            </div>
+          </div>
+          <button onClick={handleLogout} className="btn-logout w-100">
+            Log Out
+          </button>
+        </div>
+      </div>
+
+      {/* Backdrop for mobile drawer */}
+      {isMobileMenuOpen && (
+        <div
+          className="mobile-nav-backdrop d-lg-none"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Desktop Sidebar */}
+      <aside className="sidebar d-none d-lg-flex">
         <div className="sidebar-brand">
           <span>🌀</span> LOOP
         </div>
         <nav className="sidebar-menu">
-          <NavLink 
-            to="/dashboard" 
-            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-          >
-            <span>📊</span> Dashboard
-          </NavLink>
-          <NavLink 
-            to="/trends" 
-            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-          >
-            <span>📈</span> Trends
-          </NavLink>
-          <NavLink 
-            to="/feedback" 
-            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-          >
-            <span>📥</span> Feedback Inbox
-          </NavLink>
-          {/* Viewers are read-only per brief C2 — hide ingest link so they don't
-              hit a dead-end 403 by clicking into a page they can't use. */}
-          {['ADMIN', 'ANALYST'].includes(user?.role) && (
-            <NavLink 
-              to="/ingestion" 
+          {allLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
-              <span>📥</span> Ingest Feedback
+              <span className="link-icon">{link.icon}</span>
+              <span className="link-label">{link.label}</span>
             </NavLink>
-          )}
-          {user?.role === 'ADMIN' && (
-            <NavLink 
-              to="/settings/workspace" 
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-            >
-              <span>⚙️</span> Workspace Settings
-            </NavLink>
-          )}
+          ))}
         </nav>
         <div className="sidebar-footer">
+          <div className="sidebar-theme-selector-container">
+            <ThemeSelector />
+          </div>
           <div className="sidebar-user">
             <div className="sidebar-user-name">{user?.name || 'User'}</div>
             <div className="sidebar-user-email">{user?.email || 'email@example.com'}</div>
-            <div style={{ color: 'var(--color-primary)', fontSize: '10px', marginTop: '2px', fontWeight: 'bold' }}>
+            <div className="sidebar-user-workspace">
               💼 {user?.workspaceName || 'Default Workspace'} ({user?.role})
             </div>
           </div>
@@ -72,6 +156,8 @@ const Layout = ({ children }) => {
           </button>
         </div>
       </aside>
+
+      {/* Main Content Area */}
       <main className="main-content">
         {children}
       </main>

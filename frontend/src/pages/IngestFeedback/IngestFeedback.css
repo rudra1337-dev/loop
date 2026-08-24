@@ -1,0 +1,147 @@
+/* Ingestion Methods grid */
+.ingest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.channel-card {
+  background: var(--bg-channel);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.channel-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: transparent;
+  transition: var(--transition-smooth);
+}
+
+.channel-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-channel-hover);
+  transform: translateY(-1px);
+}
+
+.channel-card.active {
+  border-color: var(--color-primary);
+  background: var(--bg-channel-active);
+}
+
+.channel-card.active::before {
+  background-color: var(--color-primary);
+}
+
+.channel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.channel-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--color-primary);
+}
+
+.channel-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.channel-desc {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* CSV Upload Area */
+.upload-zone {
+  border: 2px dashed var(--border-light);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  background-color: var(--bg-upload);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  margin-bottom: 24px;
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.03);
+}
+
+.upload-icon {
+  font-size: 40px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.upload-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.file-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.file-remove:hover {
+  color: #ef4444;
+}
+
+/* Responsive Form Row */
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 576px) {
+  .form-row-2col {
+    grid-template-columns: 1fr 1fr;
+  }
+}

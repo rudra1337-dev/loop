@@ -538,7 +538,7 @@ const IngestFeedback = () => {
               ></textarea>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="form-row-2col">
               <div className="form-group">
                 <label className="form-label">Channel Source</label>
                 <select 

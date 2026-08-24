@@ -24,11 +24,24 @@ const Unauthorized = () => (
   </div>
 );
 
+import { useAuth } from "./context/AuthContext";
+import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
+
+const RootRoute = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  return user ? <Navigate to="/dashboard" replace /> : <Landing />;
+};
+
 function App() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<RootRoute />} />
 
       {/* Guest-only routes */}
       <Route element={<GuestRoute />}>
