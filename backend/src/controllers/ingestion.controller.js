@@ -9,6 +9,7 @@ import {
   attachResolvedThemesToFeedbacks,
 } from '../services/theme.service.js';
 import { getSimulatedItems, channelTemplates } from '../data/channelTemplates.js';
+import { embedAndStoreFeedback, embedAndStoreFeedbackBatch } from '../services/embedding.service.js';
 
 /**
  * Ingest a single feedback item.
@@ -55,6 +56,12 @@ export const ingestSingle = async (req, res) => {
       await attachThemeToFeedback(feedback.id, classification.theme, themesCache, workspaceId);
     } catch (err) {
       console.error('Failed to assign theme to manual feedback:', err);
+    }
+
+    try {
+      await embedAndStoreFeedback(feedback);
+    } catch (err) {
+      console.error('Failed to generate embedding for manual feedback:', err);
     }
 
     res.status(201).json({ success: true, message: 'Feedback ingested successfully', feedback });
@@ -158,6 +165,12 @@ export const ingestCSV = async (req, res) => {
       } catch (err) {
         console.error('Failed to bulk-assign themes to CSV feedback:', err);
       }
+      
+      try {
+        await embedAndStoreFeedbackBatch(created);
+      } catch (err) {
+        console.error('Failed to generate embeddings for CSV feedback:', err);
+      }
     }
 
     res.json({
@@ -230,6 +243,12 @@ export const ingestChannel = async (req, res) => {
       await attachResolvedThemesToFeedbacks(created, themeResolutions);
     } catch (err) {
       console.error('Failed to auto-assign themes to channel feedback:', err);
+    }
+
+    try {
+      await embedAndStoreFeedbackBatch(created);
+    } catch (err) {
+      console.error('Failed to generate embeddings for channel feedback:', err);
     }
 
     res.status(201).json({ success: true, message: `Simulated ${created.length} items from ${channel}`, count: created.length });

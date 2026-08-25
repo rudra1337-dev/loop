@@ -8,6 +8,7 @@ import * as themeController from '../controllers/theme.controller.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import * as askController from '../controllers/ask.controller.js';
 
 const router = express.Router();
 
@@ -69,6 +70,7 @@ router.get('/', feedbackController.getFeedbacks);
 router.get('/stats', statsController.getStats);
 router.get('/trends', statsController.getTrends);
 router.get('/themes', themeController.getThemes);
+router.post('/ask', askController.askFeedback);
 
 // Write access — ADMIN/ANALYST only
 router.post('/ingest/single', authorize('ADMIN', 'ANALYST'), ingestionController.ingestSingle);

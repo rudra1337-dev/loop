@@ -10,6 +10,7 @@ import FeedbackExplorer from "./pages/FeedbackExplorer/FeedbackExplorer";
 import IngestFeedback from "./pages/IngestFeedback/IngestFeedback";
 import Landing from "./pages/Landing/Landing";
 import Layout from "./components/Layout/Layout";
+import AskLoop from './pages/AskLoop/AskLoop';
 
 
 const Unauthorized = () => (
@@ -74,6 +75,15 @@ function App() {
           element={
             <Layout>
               <FeedbackExplorer />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/ask"
+          element={
+            <Layout>
+              <AskLoop />
             </Layout>
           }
         />
