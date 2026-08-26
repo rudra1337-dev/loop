@@ -45,9 +45,6 @@ export const signup = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, passwordHash, role, workspaceId });
 
-    const token = signToken({ id: user.id, workspaceId: user.workspaceId, role: user.role });
-    res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
-
     res.status(201).json({ user: await buildUserResponse(user) });
   } catch (err) {
     res.status(500).json({ error: 'Signup failed', detail: err.message });
