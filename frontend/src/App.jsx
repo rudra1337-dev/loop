@@ -11,6 +11,7 @@ import IngestFeedback from "./pages/IngestFeedback/IngestFeedback";
 import Landing from "./pages/Landing/Landing";
 import Layout from "./components/Layout/Layout";
 import AskLoop from './pages/AskLoop/AskLoop';
+import Reports from "./pages/Reports/Reports";
 
 
 const Unauthorized = () => (
@@ -88,6 +89,15 @@ function App() {
           }
         />
       </Route>
+
+      <Route
+        path="/reports"
+        element={
+          <Layout>
+            <Reports />
+          </Layout>
+        }
+      />
 
       {/* Analyst + Admin only — Viewers cannot ingest */}
       <Route

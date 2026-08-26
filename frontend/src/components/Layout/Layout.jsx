@@ -48,6 +48,7 @@ const Layout = ({ children }) => {
     { to: "/trends", label: "Trends", icon: "📈" },
     { to: "/feedback", label: "Feedback Inbox", icon: "📥" },
     { to: "/ask", label: "Ask LOOP", icon: "💬" },
+    { to: "/reports", label: "Reports", icon: "🗂️" },
   ];
 
   // Role-based navigation

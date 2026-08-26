@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import passport from "./config/passport.js";
 import workspaceRoutes from './routes/workspace.routes.js';
 import feedbackRoutes from './routes/feedback.routes.js';
+import reportRoutes from './routes/report.routes.js';
 
 const app = express();
 const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || "")
@@ -41,5 +42,7 @@ app.get("/", (req, res) => {
     message: "LOOP Backend API is running 🚀",
   });
 });
+
+app.use('/api/reports', reportRoutes);
 
 export default app;
