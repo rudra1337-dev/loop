@@ -1,4 +1,6 @@
 import { createReport, listReports, getReportById } from '../services/report.service.js';
+import { generateReportPDF } from '../services/pdf.service.js';
+
 
 export const generateReport = async (req, res) => {
   try {
@@ -52,5 +54,28 @@ export const getReport = async (req, res) => {
   } catch (error) {
     console.error('Error fetching report:', error);
     res.status(500).json({ error: 'Failed to fetch report' });
+  }
+};
+
+export const exportReport = async (req, res) => {
+  try {
+    const { workspaceId } = req.user;
+    const report = await getReportById(workspaceId, req.params.id);
+    if (!report) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="LOOP-VoC-Report-${report.id}.pdf"`
+    );
+
+    await generateReportPDF(report, res);
+  } catch (error) {
+    console.error('Error exporting PDF report:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to export PDF report' });
+    }
   }
 };
