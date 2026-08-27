@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { getStats, getThemes } from '../../services/feedbackService';
 import { useAuth } from '../../context/AuthContext';
+import { SkeletonMetric, SkeletonChart, SkeletonBlock } from '../../components/Skeleton/Skeleton';
 
 // Chart components
 import FeedbackVolumeChart from '../../components/charts/FeedbackVolumeChart/FeedbackVolumeChart';
@@ -27,6 +28,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
 
   // Local inputs for custom dates to avoid querying instantly while typing
   const [fromInput, setFromInput] = useState(from);
@@ -150,7 +152,7 @@ const Dashboard = () => {
     };
 
     loadDashboardStats();
-  }, [channel, sentiment, status, theme, from, to, dateRange]);
+  }, [channel, sentiment, status, theme, from, to, dateRange, retryCount]);
 
   // Sentiment Glow Helper
   const getSentimentGlow = (score) => {
@@ -298,62 +300,102 @@ const Dashboard = () => {
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '24px' }}>
-          <span>❌</span> {error}
+        <div className="alert alert-error" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>❌</span>
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => setRetryCount(prev => prev + 1)}
+            className="btn btn-secondary"
+            style={{ padding: '6px 12px', fontSize: '13px', height: 'auto', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+          >
+            🔄 Retry
+          </button>
         </div>
       )}
 
       {/* KPI metrics cards grid */}
       <div className="metrics-grid">
-        {/* Card 1: Total Feedback */}
-        <div className="metric-card">
-          <span className="metric-title">Total Feedback</span>
-          <span className="metric-value">{loading ? '...' : stats?.total || 0}</span>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Matching active filters
-          </span>
-        </div>
+        {loading ? (
+          <>
+            <SkeletonMetric />
+            <SkeletonMetric />
+            <SkeletonMetric />
+            <SkeletonMetric />
+          </>
+        ) : (
+          <>
+            {/* Card 1: Total Feedback */}
+            <div className="metric-card">
+              <span className="metric-title">Total Feedback</span>
+              <span className="metric-value">{stats?.total || 0}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Matching active filters
+              </span>
+            </div>
 
-        {/* Card 2: Negative Percentage */}
-        <div className="metric-card">
-          <span className="metric-title">Negative Ratio</span>
-          <span className="metric-value" style={{ color: !loading && stats?.negativePercentage > 25 ? 'var(--color-neg)' : 'var(--text-primary)' }}>
-            {loading ? '...' : `${stats?.negativePercentage || 0}%`}
-          </span>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Percentage categorized NEG
-          </span>
-        </div>
+            {/* Card 2: Negative Percentage */}
+            <div className="metric-card">
+              <span className="metric-title">Negative Ratio</span>
+              <span className="metric-value" style={{ color: stats?.negativePercentage > 25 ? 'var(--color-neg)' : 'var(--text-primary)' }}>
+                {`${stats?.negativePercentage || 0}%`}
+              </span>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Percentage categorized NEG
+              </span>
+            </div>
 
-        {/* Card 3: New This Week */}
-        <div className="metric-card">
-          <span className="metric-title">New This Week</span>
-          <span className="metric-value">{loading ? '...' : stats?.newThisWeek || 0}</span>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Created in last 7 days
-          </span>
-        </div>
+            {/* Card 3: New This Week */}
+            <div className="metric-card">
+              <span className="metric-title">New This Week</span>
+              <span className="metric-value">{stats?.newThisWeek || 0}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Created in last 7 days
+              </span>
+            </div>
 
-        {/* Card 4: Average Sentiment */}
-        <div
-          className="metric-card"
-          style={{
-            boxShadow: loading ? 'none' : `0 0 16px ${getSentimentGlow(stats?.averageSentimentScore || 0)}`,
-            border: loading ? '1px solid var(--border-light)' : `1px solid ${getSentimentGlow(stats?.averageSentimentScore || 0)}`
-          }}
-        >
-          <span className="metric-title">Avg Sentiment</span>
-          <span className="metric-value" style={{ color: loading ? 'var(--text-primary)' : getSentimentColorClass(stats?.averageSentimentScore || 0) }}>
-            {loading ? '...' : (parseFloat(stats?.averageSentimentScore || 0) > 0 ? '+' : '') + (stats?.averageSentimentScore || '0.00')}
-          </span>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Scale: -1.00 (NEG) to +1.00 (POS)
-          </span>
-        </div>
+            {/* Card 4: Average Sentiment */}
+            <div
+              className="metric-card"
+              style={{
+                boxShadow: `0 0 16px ${getSentimentGlow(stats?.averageSentimentScore || 0)}`,
+                border: `1px solid ${getSentimentGlow(stats?.averageSentimentScore || 0)}`
+              }}
+            >
+              <span className="metric-title">Avg Sentiment</span>
+              <span className="metric-value" style={{ color: getSentimentColorClass(stats?.averageSentimentScore || 0) }}>
+                {(parseFloat(stats?.averageSentimentScore || 0) > 0 ? '+' : '') + (stats?.averageSentimentScore || '0.00')}
+              </span>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Scale: -1.00 (NEG) to +1.00 (POS)
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Main Charts Layout */}
-      {!loading && stats?.total === 0 ? (
+      {loading ? (
+        <>
+          <div className="dashboard-charts-grid dashboard-charts-split">
+            <SkeletonChart type="line" />
+            <SkeletonChart type="pie" />
+          </div>
+          <div className="dashboard-charts-grid dashboard-charts-equal">
+            <SkeletonChart type="bar" />
+            <div className="skeleton-chart-card">
+              <SkeletonBlock height="20px" width="40%" />
+              <SkeletonBlock height="12px" width="60%" style={{ marginTop: '8px', marginBottom: '24px' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <SkeletonBlock height="38px" />
+                <SkeletonBlock height="38px" />
+                <SkeletonBlock height="38px" />
+              </div>
+            </div>
+          </div>
+        </>
+      ) : stats?.total === 0 ? (
         // Empty State
         <div className="glass-card" style={{ padding: '64px 24px', textAlign: 'center' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>

@@ -13,19 +13,8 @@ import Layout from "./components/Layout/Layout";
 import AskLoop from './pages/AskLoop/AskLoop';
 import Reports from "./pages/Reports/Reports";
 import ReportView from "./pages/ReportView/ReportView";
-
-
-const Unauthorized = () => (
-  <div style={{ padding: "40px", textAlign: "center" }}>
-    <h1 style={{ color: "var(--color-neg)", marginBottom: "16px" }}>
-      ⚠️ Unauthorized Access
-    </h1>
-
-    <p style={{ color: "var(--text-secondary)" }}>
-      You do not have the required permissions to view this resource.
-    </p>
-  </div>
-);
+import NotFound from "./pages/NotFound/NotFound";
+import Unauthorized from "./pages/Unauthorized/Unauthorized";
 
 import { useAuth } from "./context/AuthContext";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
@@ -89,25 +78,25 @@ function App() {
             </Layout>
           }
         />
+
+        <Route
+          path="/reports"
+          element={
+            <Layout>
+              <Reports />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/reports/:id"
+          element={
+            <Layout>
+              <ReportView />
+            </Layout>
+          }
+        />
       </Route>
-
-      <Route
-        path="/reports"
-        element={
-          <Layout>
-            <Reports />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/reports/:id"
-        element={
-          <Layout>
-            <ReportView />
-          </Layout>
-        }
-      />
 
       {/* Analyst + Admin only — Viewers cannot ingest */}
       <Route
@@ -150,7 +139,7 @@ function App() {
       {/* Unknown routes */}
       <Route
         path="*"
-        element={<Navigate to="/" replace />}
+        element={<NotFound />}
       />
     </Routes>
   );

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus, reclassifyFeedbacks } from '../../services/feedbackService';
 import { useAuth } from '../../context/AuthContext';
+import { SkeletonTable } from '../../components/Skeleton/Skeleton';
 
 const FeedbackExplorer = () => {
   const { user } = useAuth();
@@ -310,8 +311,18 @@ const FeedbackExplorer = () => {
       </div>
 
       {error && (
-        <div className="alert alert-error">
-          <span>⚠️</span> {error}
+        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => loadFeedbacks()}
+            className="btn btn-secondary"
+            style={{ padding: '6px 12px', fontSize: '13px', height: 'auto', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+          >
+            🔄 Retry
+          </button>
         </div>
       )}
 
@@ -453,10 +464,7 @@ const FeedbackExplorer = () => {
       {/* Feed Table */}
       <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px', animation: 'spin 1.5s linear infinite' }}>🌀</div>
-            <p style={{ color: 'var(--text-secondary)' }}>Loading feedback...</p>
-          </div>
+          <SkeletonTable rows={5} showCheckbox={!isReadOnly} showActions={!isReadOnly} />
         ) : feedbacks.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '12px' }}>📭</div>
