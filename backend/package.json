@@ -35,6 +35,7 @@
     "nanoid": "^5.1.16",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "pdfkit": "^0.20.1",
     "sequelize": "^6.37.8",
     "zod": "^4.4.3"
   },

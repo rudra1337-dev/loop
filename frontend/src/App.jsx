@@ -12,6 +12,7 @@ import Landing from "./pages/Landing/Landing";
 import Layout from "./components/Layout/Layout";
 import AskLoop from './pages/AskLoop/AskLoop';
 import Reports from "./pages/Reports/Reports";
+import ReportView from "./pages/ReportView/ReportView";
 
 
 const Unauthorized = () => (
@@ -95,6 +96,15 @@ function App() {
         element={
           <Layout>
             <Reports />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/reports/:id"
+        element={
+          <Layout>
+            <ReportView />
           </Layout>
         }
       />

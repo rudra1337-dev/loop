@@ -116,13 +116,25 @@ const Dashboard = () => {
         setLoading(true);
         setError('');
 
+        let queryFrom = from;
+        let queryTo = to;
+
+        // If from/to are not in URL, default to active dateRange
+        if (!from && !to && dateRange !== 'all') {
+          const days = dateRange === '7d' ? 7 : dateRange === '90d' ? 90 : 30;
+          const d = new Date();
+          queryTo = d.toISOString().split('T')[0];
+          d.setDate(d.getDate() - days);
+          queryFrom = d.toISOString().split('T')[0];
+        }
+
         const params = {
           channel,
           sentiment,
           status,
           theme,
-          from,
-          to
+          from: queryFrom,
+          to: queryTo
         };
 
         const res = await getStats(params);
@@ -138,7 +150,7 @@ const Dashboard = () => {
     };
 
     loadDashboardStats();
-  }, [channel, sentiment, status, theme, from, to]);
+  }, [channel, sentiment, status, theme, from, to, dateRange]);
 
   // Sentiment Glow Helper
   const getSentimentGlow = (score) => {
@@ -178,9 +190,9 @@ const Dashboard = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button 
-            onClick={() => updateParams({ _ref: Date.now() })} 
-            className="btn btn-secondary" 
+          <button
+            onClick={() => updateParams({ _ref: Date.now() })}
+            className="btn btn-secondary"
             style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}
             title="Refresh dashboard stats"
           >
@@ -195,7 +207,7 @@ const Dashboard = () => {
       {/* Filters Toolbar */}
       <div className="glass-card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          
+
           <div style={{ flex: '1 1 180px' }}>
             <label className="form-label">Date Range</label>
             <select value={dateRange} onChange={(e) => handleDateRangeChange(e.target.value)}>
@@ -211,18 +223,18 @@ const Dashboard = () => {
             <>
               <div style={{ flex: '1 1 130px' }}>
                 <label className="form-label">From</label>
-                <input 
-                  type="date" 
-                  value={fromInput} 
-                  onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value }); }} 
+                <input
+                  type="date"
+                  value={fromInput}
+                  onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value }); }}
                 />
               </div>
               <div style={{ flex: '1 1 130px' }}>
                 <label className="form-label">To</label>
-                <input 
-                  type="date" 
-                  value={toInput} 
-                  onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value }); }} 
+                <input
+                  type="date"
+                  value={toInput}
+                  onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value }); }}
                 />
               </div>
             </>
@@ -273,9 +285,9 @@ const Dashboard = () => {
           </div>
 
           <div>
-            <button 
-              onClick={handleResetFilters} 
-              className="btn btn-secondary" 
+            <button
+              onClick={handleResetFilters}
+              className="btn btn-secondary"
               style={{ padding: '0 16px', height: '42px', whiteSpace: 'nowrap' }}
             >
               Clear Filters
@@ -323,9 +335,9 @@ const Dashboard = () => {
         </div>
 
         {/* Card 4: Average Sentiment */}
-        <div 
-          className="metric-card" 
-          style={{ 
+        <div
+          className="metric-card"
+          style={{
             boxShadow: loading ? 'none' : `0 0 16px ${getSentimentGlow(stats?.averageSentimentScore || 0)}`,
             border: loading ? '1px solid var(--border-light)' : `1px solid ${getSentimentGlow(stats?.averageSentimentScore || 0)}`
           }}
@@ -362,7 +374,7 @@ const Dashboard = () => {
         <>
           {/* Charts Row 1: Volume (2/3 width) and Sentiment (1/3 width) */}
           <div className="dashboard-charts-grid dashboard-charts-split">
-            
+
             <div className="glass-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
               <h2>Feedback Volume Over Time</h2>
               <p className="subtitle" style={{ marginBottom: '16px' }}>Dynamic trend matching active query filters</p>
@@ -383,7 +395,7 @@ const Dashboard = () => {
 
           {/* Charts Row 2: Top Themes and Ingest Channels */}
           <div className="dashboard-charts-grid dashboard-charts-equal">
-            
+
             <div className="glass-card" style={{ margin: 0 }}>
               <h2>Top Themes Frequency</h2>
               <p className="subtitle" style={{ marginBottom: '16px' }}>Themes assigned to customer comments sorted by frequency</p>
@@ -393,27 +405,27 @@ const Dashboard = () => {
             <div className="glass-card" style={{ margin: 0 }}>
               <h2>Ingestion Source Volumes</h2>
               <p className="subtitle" style={{ marginBottom: '16px' }}>Feedback density across communication channels</p>
-              
+
               {/* Channels list or simple channels grid */}
               {!loading && stats?.channels && stats.channels.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {stats.channels.map((chan) => (
-                    <div 
-                      key={chan.channel} 
-                      style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        padding: '10px 14px', 
-                        background: 'rgba(255, 255, 255, 0.02)', 
-                        borderRadius: '8px', 
-                        border: '1px solid var(--border-light)' 
+                    <div
+                      key={chan.channel}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '10px 14px',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-light)'
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '15px' }}>
-                          {chan.channel.toLowerCase().includes('slack') ? '💬' : 
-                           chan.channel.toLowerCase().includes('email') ? '✉️' : 
+                          {chan.channel.toLowerCase().includes('slack') ? '💬' :
+                           chan.channel.toLowerCase().includes('email') ? '✉️' :
                            chan.channel.toLowerCase().includes('csv') ? '📄' : '⚙️'}
                         </span>
                         <span style={{ fontWeight: '500', fontSize: '13.5px' }}>{chan.channel}</span>
@@ -443,9 +455,9 @@ const Dashboard = () => {
                   Drill down and inspect the exact customer comments behind these metrics. Your current filters will remain applied!
                 </p>
               </div>
-              <Link 
-                to={`/feedback${explorerQueryString()}`} 
-                className="btn btn-primary" 
+              <Link
+                to={`/feedback${explorerQueryString()}`}
+                className="btn btn-primary"
                 style={{ textDecoration: 'none', padding: '10px 20px', marginLeft: 'auto' }}
               >
                 Inspect in Feedback Explorer →
