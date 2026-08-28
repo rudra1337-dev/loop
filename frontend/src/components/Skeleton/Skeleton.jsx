@@ -3,10 +3,16 @@ import './Skeleton.css';
 /**
  * Basic pulsing block for custom skeleton layouts.
  */
-export const SkeletonBlock = ({ width = '100%', height = '16px', borderRadius, style = {} }) => {
+export const SkeletonBlock = ({
+  width = '100%',
+  height = '16px',
+  borderRadius,
+  className = '',
+  style = {},
+}) => {
   return (
     <div
-      className="skeleton-block"
+      className={`skeleton-block ${className}`}
       style={{
         width,
         height,
