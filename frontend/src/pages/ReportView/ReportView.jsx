@@ -79,6 +79,7 @@ function ReportView() {
   const [exporting, setExporting] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -115,7 +116,7 @@ function ReportView() {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, retryCount]);
 
   const stats = report?.contentJson?.stats || {};
   const narrative = report?.contentJson?.narrative || null;
@@ -229,14 +230,24 @@ function ReportView() {
             deleted or you may not have access to it.
           </p>
 
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => navigate("/reports")}
-          >
-            <ArrowLeft size={16} />
-            Back to Reports
-          </button>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "16px" }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate("/reports")}
+            >
+              <ArrowLeft size={16} />
+              Back to Reports
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setRetryCount((prev) => prev + 1)}
+            >
+              🔄 Retry Load
+            </button>
+          </div>
         </div>
       </div>
     );

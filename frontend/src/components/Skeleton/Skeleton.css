@@ -1,0 +1,205 @@
+/* Premium Glassmorphic Skeleton Loading Styles */
+
+@keyframes skeleton-pulse {
+  0% {
+    opacity: 0.6;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    opacity: 0.35;
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  100% {
+    opacity: 0.6;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+@keyframes skeleton-pulse-light {
+  0% {
+    opacity: 0.6;
+    background-color: rgba(15, 23, 42, 0.04);
+  }
+  50% {
+    opacity: 0.35;
+    background-color: rgba(15, 23, 42, 0.08);
+  }
+  100% {
+    opacity: 0.6;
+    background-color: rgba(15, 23, 42, 0.04);
+  }
+}
+
+[data-theme="light"] .skeleton-block,
+[data-bs-theme="light"] .skeleton-block {
+  animation: skeleton-pulse-light 1.8s ease-in-out infinite;
+}
+
+.skeleton-block {
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+  border-radius: 6px;
+  width: 100%;
+}
+
+/* Metric Card Skeleton */
+.skeleton-metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 105px;
+}
+
+.skeleton-metric-title {
+  height: 12px;
+  width: 50%;
+  margin-bottom: 12px;
+}
+
+.skeleton-metric-value {
+  height: 28px;
+  width: 35%;
+  margin-bottom: 8px;
+}
+
+.skeleton-metric-subtitle {
+  height: 10px;
+  width: 65%;
+}
+
+/* Chart Card Skeleton */
+.skeleton-chart-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-chart-header {
+  height: 20px;
+  width: 40%;
+  margin-bottom: 8px;
+}
+
+.skeleton-chart-subtitle {
+  height: 12px;
+  width: 60%;
+  margin-bottom: 24px;
+}
+
+.skeleton-chart-body {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  height: 220px;
+  padding-top: 16px;
+}
+
+.skeleton-chart-bar {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+}
+
+.skeleton-chart-grid-line {
+  height: 1px;
+  background-color: var(--border-light);
+  width: 100%;
+  margin-top: auto;
+}
+
+/* Table Skeleton */
+.skeleton-table-container {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background-color: var(--bg-table);
+  overflow: hidden;
+}
+
+.skeleton-table-header {
+  height: 48px;
+  background-color: var(--bg-th);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.skeleton-table-row {
+  height: 64px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.skeleton-table-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-col-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+}
+
+.skeleton-col-content {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-col-source {
+  flex: 1;
+  height: 16px;
+}
+
+.skeleton-col-sentiment {
+  flex: 1;
+  height: 22px;
+  border-radius: 9999px;
+}
+
+.skeleton-col-theme {
+  flex: 1;
+  height: 16px;
+}
+
+.skeleton-col-status {
+  flex: 1;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.skeleton-col-date {
+  flex: 1;
+  height: 14px;
+}
+
+.skeleton-col-action {
+  width: 60px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none !important;
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+  [data-theme="light"] .skeleton-block,
+  [data-bs-theme="light"] .skeleton-block {
+    background-color: rgba(15, 23, 42, 0.05);
+  }
+}

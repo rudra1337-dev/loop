@@ -632,13 +632,13 @@
 
   flex: 0 0 auto;
 
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
 
   padding: 0;
 
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
 
   background: var(--bs-primary);
   color: #fff;
@@ -651,8 +651,8 @@
 }
 
 .ask-loop__send svg {
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
 }
 
 .ask-loop__send:hover:not(:disabled) {
