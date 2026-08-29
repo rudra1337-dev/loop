@@ -1,54 +1,58 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import { createContext, useContext, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMe, login as loginThunk, signup as signupThunk, logout as logoutThunk, loginWithGoogle as googleLoginAction } from '../store/slices/authSlice';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { user, loading } = useSelector((state) => state.auth);
 
-  const fetchMe = async () => {
-    try {
-      const res = await api.get('/auth/me');
-      setUser(res.data.user);
-    } catch (err) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+  const fetchMeSession = () => {
+    dispatch(fetchMe());
   };
 
   useEffect(() => {
-    fetchMe();
-  }, []);
+    fetchMeSession();
+  }, [dispatch]);
 
-//   Login
+  // Login
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    setUser(res.data.user);
-    return res.data.user;
+    const resultAction = await dispatch(loginThunk({ email, password }));
+    if (loginThunk.fulfilled.match(resultAction)) {
+      return resultAction.payload;
+    } else {
+      throw new Error(resultAction.payload || 'Login failed');
+    }
   };
 
-//   SignUp
-  const signup = async ({ name, email, password, workspaceName, inviteCode }) => {
-    const res = await api.post('/auth/signup', { name, email, password, workspaceName, inviteCode });
-    return res.data.user;
+  // SignUp
+  const signup = async (payload) => {
+    const resultAction = await dispatch(signupThunk(payload));
+    if (signupThunk.fulfilled.match(resultAction)) {
+      return resultAction.payload;
+    } else {
+      throw new Error(resultAction.payload || 'Signup failed');
+    }
   };
 
-
-//   Logout
+  // Logout
   const logout = async () => {
-    await api.post('/auth/logout');
-    setUser(null);
+    const resultAction = await dispatch(logoutThunk());
+    if (logoutThunk.fulfilled.match(resultAction)) {
+      return null;
+    } else {
+      throw new Error(resultAction.payload || 'Logout failed');
+    }
   };
 
-//   Login with Google
+  // Login with Google
   const loginWithGoogle = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google`;
+    dispatch(googleLoginAction());
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, loginWithGoogle, refetch: fetchMe }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, loginWithGoogle, refetch: fetchMeSession }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,6 +2,8 @@ import "./WorkspaceSettings.css";
 import { useState, useEffect } from 'react';
 import * as workspaceService from '../../services/workspaceService';
 import { useAuth } from '../../context/AuthContext';
+import PageHeader from '../../components/common/PageHeader/PageHeader';
+import ErrorState from '../../components/common/ErrorState/ErrorState';
 
 const WorkspaceSettings = () => {
     const { user, refetch } = useAuth(); // refetch lets us refresh the name in AuthContext after rename
@@ -105,12 +107,12 @@ const WorkspaceSettings = () => {
 
   return (
     <div style={{ maxWidth: '800px' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h1>Workspace Settings</h1>
-        <p className="subtitle">Manage member permissions and invite collaborators to {user?.workspaceName}</p>
-      </div>
+      <PageHeader
+        title="Workspace Settings"
+        subtitle={`Manage member permissions and invite collaborators to ${user?.workspaceName}`}
+      />
 
-      {error && <div className="alert alert-error"><span>⚠️</span> {error}</div>}
+      {error && <ErrorState message={error} />}
 
       <div className="glass-card">
         <h2>Rename Workspace</h2>

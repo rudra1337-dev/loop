@@ -1,0 +1,38 @@
+.empty-state-container {
+  padding: 64px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-state-title {
+  margin-bottom: 8px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+}
+
+.empty-state-desc {
+  max-width: 480px;
+  margin: 0 auto 24px auto !important;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.empty-state-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,46 @@
+.filters-toolbar {
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.filters-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  flex: 1 1 140px;
+  min-width: 120px;
+}
+
+.filter-item-custom {
+  flex: 1 1 130px;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.reset-btn {
+  padding: 0 16px;
+  height: 42px;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .filter-item {
+    flex: 1 1 100%;
+  }
+  
+  .filter-item-custom {
+    flex: 1 1 100%;
+  }
+
+  .reset-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+}
