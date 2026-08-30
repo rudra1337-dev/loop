@@ -818,6 +818,8 @@ const FeedbackExplorer = () => {
                               padding: '6px 10px', 
                               fontSize: '12px', 
                               width: '100%', 
+                              minWidth: '110px',
+                              color: 'var(--text-primary)',
                               backgroundColor: 'rgba(15, 23, 42, 0.9)',
                               borderColor: statusUpdatingId === f.id ? 'var(--color-primary)' : 'var(--border-light)'
                             }}

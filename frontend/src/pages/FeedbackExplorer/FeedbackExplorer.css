@@ -4,7 +4,7 @@
 }
 
 .mobile-only {
-  display: none;
+  display: none !important;
 }
 
 @media (max-width: 991.98px) {
@@ -14,6 +14,14 @@
   
   .mobile-only {
     display: block !important;
+  }
+  
+  .mobile-only.mobile-filter-bar {
+    display: flex !important;
+  }
+  
+  .mobile-only.feedback-card-list {
+    display: flex !important;
   }
 }
 
