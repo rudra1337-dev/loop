@@ -112,7 +112,7 @@ const WorkspaceSettings = () => {
 
       <div className="glass-card">
         <h2>Rename Workspace</h2>
-        <form onSubmit={handleRename} style={{ display: 'flex', gap: '12px' }}>
+        <form onSubmit={handleRename} className="rename-form">
           <input
             type="text"
             value={workspaceName}
@@ -174,11 +174,10 @@ const WorkspaceSettings = () => {
       <div className="glass-card">
         <h2>Invite Collaborators</h2>
         <p className="subtitle">Generate secure invite links with predefined roles for new team members.</p>
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        <div className="invite-form">
           <select 
             value={newInviteRole} 
             onChange={(e) => setNewInviteRole(e.target.value)}
-            style={{ width: '160px' }}
           >
             <option value="ADMIN">Admin</option>
             <option value="ANALYST">Analyst</option>
@@ -194,16 +193,16 @@ const WorkspaceSettings = () => {
         ) : (
           <div>
             <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '8px' }}>Active Invites</h3>
-            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <ul className="invite-list">
               {invites.map((invite) => (
-                <li key={invite.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-light)', borderRadius: '8px' }}>
-                  <div>
-                    <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.1)', marginRight: '12px' }}>
+                <li key={invite.id} className="invite-item">
+                  <div className="invite-info">
+                    <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.1)', marginRight: '0' }}>
                       {invite.role}
                     </span>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Code: {invite.code}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className="invite-actions">
                     <button onClick={() => copyInviteLink(invite.code)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>
                       Copy
                     </button>

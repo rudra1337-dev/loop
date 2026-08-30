@@ -1,0 +1,72 @@
+/* Workspace Settings Responsive Styles */
+.rename-form {
+  display: flex;
+  gap: 12px;
+}
+
+.invite-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.invite-form select {
+  width: 160px;
+}
+
+.invite-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.invite-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 575.98px) {
+  .rename-form {
+    flex-direction: column;
+  }
+  
+  .invite-form {
+    flex-direction: column;
+  }
+  
+  .invite-form select {
+    width: 100%;
+  }
+  
+  .invite-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .invite-info {
+    justify-content: space-between;
+  }
+  
+  .invite-actions {
+    justify-content: flex-end;
+  }
+}
