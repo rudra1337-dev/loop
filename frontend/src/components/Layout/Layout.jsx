@@ -1,7 +1,8 @@
 import "./Layout.css";
 
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../store/hooks";
+import logger from "../../utils/logger";
 import { useState, useEffect, useRef } from "react";
 import ThemeSelector from "../ThemeSelector/ThemeSelector";
 
@@ -38,7 +39,7 @@ const Layout = ({ children }) => {
       await logout();
       navigate("/login");
     } catch (err) {
-      console.error("Logout failed:", err);
+      logger.error("Logout failed", { err });
     }
   };
 

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { sequelize, Workspace, User, Feedback, Theme } from '../models/index.js';
+import { sequelize, Workspace, User, Feedback, Theme, FeedbackTheme } from '../models/index.js';
 import { initialThemes, generate120FeedbackItems } from './mockData.js';
-import { assignThemesToFeedbacks } from '../services/theme.service.js';
+import { matchThemeByKeywords, pickRandomFallbackTheme } from '../utils/themeMatcher.js';
 
 async function seedDatabase() {
   try {
@@ -58,8 +58,24 @@ async function seedDatabase() {
 
     // 5. Associate Feedbacks with Themes using keyword mapping
     console.log('Associating feedbacks with themes...');
-    await assignThemesToFeedbacks(feedback, workspace.id);
-    console.log('Feedback-theme associations complete.');
+    const feedbackThemesToCreate = [];
+
+    for (const item of feedback) {
+      const keywordMatch = matchThemeByKeywords(item.content, themes);
+      const matchedTheme = keywordMatch || pickRandomFallbackTheme(themes);
+      if (!matchedTheme) continue;
+
+      feedbackThemesToCreate.push({
+        feedbackId: item.id,
+        themeId: matchedTheme.id,
+        confidence: keywordMatch ? 1.0 : 0.3,
+      });
+    }
+
+    if (feedbackThemesToCreate.length > 0) {
+      await FeedbackTheme.bulkCreate(feedbackThemesToCreate);
+      console.log(`Associated ${feedbackThemesToCreate.length} feedback-theme relations.`);
+    }
 
     console.log('\n--- SEEDING COMPLETE ---');
     console.log('Demo Credentials for README:');

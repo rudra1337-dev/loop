@@ -16,6 +16,7 @@ import {
   exportReportPDF,
 } from "../../services/reportService";
 
+import logger from "../../utils/logger";
 import "./ReportView.css";
 
 const formatDate = (date) => {
@@ -95,7 +96,7 @@ function ReportView() {
           setReport(response.data?.report);
         }
       } catch (err) {
-        console.error("Failed to load report:", err);
+        logger.error("Failed to load report", { err, id });
 
         if (mounted) {
           if (err.response?.status === 404) {
@@ -168,7 +169,7 @@ function ReportView() {
 
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Failed to export report:", err);
+      logger.error("Failed to export report", { err, id: report?.id });
       alert("Failed to export the report.");
     } finally {
       setExporting(false);
@@ -197,7 +198,7 @@ function ReportView() {
         setSharing(false);
       }, 1500);
     } catch (err) {
-      console.error("Failed to share report:", err);
+      logger.error("Failed to share report", { err, id: report?.id });
       setSharing(false);
     }
   };

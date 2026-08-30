@@ -2,8 +2,13 @@ import "./FeedbackExplorer.css";
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus, reclassifyFeedbacks } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
+import logger from '../../utils/logger';
 import { SkeletonTable } from '../../components/Skeleton/Skeleton';
+import PageHeader from '../../components/common/PageHeader/PageHeader';
+import ErrorState from '../../components/common/ErrorState/ErrorState';
+import EmptyState from '../../components/common/EmptyState/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge/StatusBadge';
 
 const FeedbackExplorer = () => {
   const { user } = useAuth();
@@ -60,7 +65,7 @@ const FeedbackExplorer = () => {
           setThemesList(res.data.themes || []);
         }
       } catch (err) {
-        console.error('Failed to load themes:', err);
+        logger.error('Failed to load themes', { err });
       }
     };
     loadThemes();
@@ -121,7 +126,7 @@ const FeedbackExplorer = () => {
         });
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to load feedbacks', { err, searchParams: searchParams.toString() });
       setError('Unable to load feedback. Please try again.');
     } finally {
       setLoading(false);
@@ -148,7 +153,7 @@ const FeedbackExplorer = () => {
         setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to update status', { err, id, newStatus });
       alert(err.response?.data?.error || 'Failed to update status. Please try again.');
     } finally {
       setStatusUpdatingId(null);
@@ -163,7 +168,7 @@ const FeedbackExplorer = () => {
       await deleteFeedback(id);
       loadFeedbacks();
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to delete feedback item', { err, id });
       alert('Failed to delete feedback item');
     }
   };
@@ -240,7 +245,7 @@ const FeedbackExplorer = () => {
 
       setSelectedIds(new Set());
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to reclassify feedback items', { err, selectedIds: Array.from(selectedIds) });
       alert(err.response?.data?.error || 'Failed to reclassify feedback. Please try again.');
     } finally {
       setReclassifying(false);
@@ -305,25 +310,16 @@ const FeedbackExplorer = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '32px' }}>
-        <h1>Feedback Inbox</h1>
-        <p className="subtitle">Search, filter, and manage customer insights in your secure tenant database</p>
-      </div>
+      <PageHeader
+        title="Feedback Inbox"
+        subtitle="Search, filter, and manage customer insights in your secure tenant database"
+      />
 
       {error && (
-        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>⚠️</span>
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => loadFeedbacks()}
-            className="btn btn-secondary"
-            style={{ padding: '6px 12px', fontSize: '13px', height: 'auto', border: '1px solid rgba(239, 68, 68, 0.3)' }}
-          >
-            🔄 Retry
-          </button>
-        </div>
+        <ErrorState
+          message={error}
+          onRetry={() => loadFeedbacks()}
+        />
       )}
 
       {/* Filter Toolbar */}
@@ -466,13 +462,11 @@ const FeedbackExplorer = () => {
         {loading ? (
           <SkeletonTable rows={5} showCheckbox={!isReadOnly} showActions={!isReadOnly} />
         ) : feedbacks.length === 0 ? (
-          <div style={{ padding: '60px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}>📭</div>
-            <p style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>No feedback found.</p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px' }}>
-              Try removing filters, searching other terms, or ingesting feedback.
-            </p>
-          </div>
+          <EmptyState
+            icon="📭"
+            title="No feedback found"
+            description="Try removing filters, searching other terms, or ingesting feedback."
+          />
         ) : (
           <>
             <div className="table-container" style={{ border: 'none', borderRadius: 0, margin: 0 }}>
@@ -551,16 +545,7 @@ const FeedbackExplorer = () => {
                       </td>
                       <td>
                         {isReadOnly ? (
-                          <span 
-                            className="badge" 
-                            style={{ 
-                              backgroundColor: f.status === 'ACTIONED' ? 'rgba(16, 185, 129, 0.15)' : f.status === 'REVIEWED' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                              color: f.status === 'ACTIONED' ? '#10b981' : f.status === 'REVIEWED' ? '#6366f1' : 'var(--text-secondary)',
-                              border: '1px solid var(--border-light)'
-                            }}
-                          >
-                            {f.status}
-                          </span>
+                          <StatusBadge status={f.status} />
                         ) : (
                           <select 
                             value={f.status} 

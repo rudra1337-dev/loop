@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getTrends } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
+import PageHeader from '../../components/common/PageHeader/PageHeader';
+import ErrorState from '../../components/common/ErrorState/ErrorState';
+import EmptyState from '../../components/common/EmptyState/EmptyState';
 import {
   ResponsiveContainer,
   LineChart,
@@ -12,6 +14,7 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
+import logger from '../../utils/logger';
 import './Trends.css';
 
 const CustomTooltip = ({ active, payload }) => {
@@ -52,7 +55,6 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 const Trends = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -81,7 +83,7 @@ const Trends = () => {
         setError(res.data.error || 'Failed to retrieve trends');
       }
     } catch (err) {
-      console.error('Error loading trends:', err);
+      logger.error('Error loading trends:', err);
 
       setError(
         err.response?.data?.error ||
@@ -196,55 +198,20 @@ const Trends = () => {
   return (
     <div>
       {/* Page Header */}
-      <div className="trends-header-row">
-        <div>
-          <h1 className="trends-header-title">
-            Trends
-          </h1>
-
-          <p className="subtitle trends-header-subtitle">
-            Identify which customer feedback themes are emerging
-            and spiking compared to the previous period
-          </p>
-        </div>
-
-        <div className="trends-header-actions">
-          <button
-            onClick={loadTrends}
-            disabled={loading}
-            className="btn btn-secondary trends-refresh-btn"
-            title="Refresh trends data"
-          >
-            🔄 Refresh
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Trends"
+        subtitle="Identify which customer feedback themes are emerging and spiking compared to the previous period"
+      />
 
       {/* Period Selection Toolbar */}
       <div className="glass-card trends-period-toolbar">
         <div className="trends-period-toolbar-inner">
           <div className="trends-period-select-container">
-            <label className="form-label">
-              Comparison Period
-            </label>
-
-            <select
-              value={period}
-              onChange={(e) =>
-                handlePeriodChange(e.target.value)
-              }
-            >
-              <option value="7d">
-                Last 7 Days (vs previous 7 days)
-              </option>
-
-              <option value="30d">
-                Last 30 Days (vs previous 30 days)
-              </option>
-
-              <option value="90d">
-                Last 90 Days (vs previous 90 days)
-              </option>
+            <label className="form-label">Comparison Period</label>
+            <select value={period} onChange={(e) => handlePeriodChange(e.target.value)}>
+              <option value="7d">Last 7 Days (vs previous 7 days)</option>
+              <option value="30d">Last 30 Days (vs previous 30 days)</option>
+              <option value="90d">Last 90 Days (vs previous 90 days)</option>
             </select>
           </div>
         </div>
@@ -252,62 +219,35 @@ const Trends = () => {
 
       {/* Error State */}
       {error && (
-        <div className="alert alert-error trends-error">
-          <span>❌</span>
-          {error}
-        </div>
+        <ErrorState
+          message={error}
+          onRetry={() => loadTrends()}
+        />
       )}
 
       {/* Loading State */}
       {loading ? (
         <div className="glass-card trends-loading-container">
-          <div className="trends-loading-spinner">
-            🌀
-          </div>
-
-          <h3>
-            Analyzing feedback trends...
-          </h3>
-
+          <div className="trends-loading-spinner">🌀</div>
+          <h3>Analyzing feedback trends...</h3>
           <p className="trends-loading-description">
-            Calculating theme volume comparisons and identifying
-            spikes.
+            Calculating theme volume comparisons and identifying spikes.
           </p>
         </div>
       ) : themes.length === 0 ? (
         /* Empty State: No themes exist */
-        <div className="glass-card trends-empty-container">
-          <div className="trends-empty-icon">
-            📈
-          </div>
-
-          <h2>
-            No themes found
-          </h2>
-
-          <p className="subtitle trends-empty-description">
-            There are no feedback themes defined in this
-            workspace yet. Make sure you have ingested
-            categorized feedback.
-          </p>
-        </div>
+        <EmptyState
+          icon="📈"
+          title="No themes found"
+          description="There are no feedback themes defined in this workspace yet. Make sure you have ingested categorized feedback."
+        />
       ) : totalFeedbackCount === 0 ? (
         /* Empty State: Feedback exists but count is zero */
-        <div className="glass-card trends-empty-container">
-          <div className="trends-empty-icon">
-            📭
-          </div>
-
-          <h2>
-            No feedback data available yet
-          </h2>
-
-          <p className="subtitle trends-empty-description">
-            We couldn't find any feedback comments matching
-            this period. Try changing your comparison period
-            or ingesting more feedback.
-          </p>
-        </div>
+        <EmptyState
+          icon="📭"
+          title="No feedback data available yet"
+          description="We couldn't find any feedback comments matching this period. Try changing your comparison period or ingesting more feedback."
+        />
       ) : (
         <>
           {/* Trends Summary Stats */}

@@ -1,8 +1,11 @@
 import "./IngestFeedback.css";
 import { useState, useRef } from 'react';
 import { ingestCSV, ingestSingle } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
+import logger from '../../utils/logger';
 import { ingestChannel } from '../../services/feedbackService';
+import PageHeader from '../../components/common/PageHeader/PageHeader';
+import ErrorState from '../../components/common/ErrorState/ErrorState';
 
 const IngestFeedback = () => {
   const { user } = useAuth();
@@ -97,7 +100,7 @@ const IngestFeedback = () => {
         setCsvFile(null);
       }
     } catch (err) {
-      console.error(err);
+      logger.error('CSV import failed', { err, fileName: csvFile?.name });
       setCsvError(err.response?.data?.error || 'Failed to import CSV file. Ensure format is correct.');
     } finally {
       setCsvLoading(false);
@@ -127,7 +130,7 @@ const IngestFeedback = () => {
         });
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Manual feedback ingestion failed', { err, channel: manualData.channel });
       setManualError(err.response?.data?.error || 'Failed to ingest feedback item');
     } finally {
       setManualLoading(false);
@@ -152,10 +155,10 @@ const IngestFeedback = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '32px' }}>
-        <h1>Ingest Customer Feedback</h1>
-        <p className="subtitle">Import user testimonials, support tickets, and reviews into your isolation workspace</p>
-      </div>
+      <PageHeader
+        title="Ingest Customer Feedback"
+        subtitle="Import user testimonials, support tickets, and reviews into your isolation workspace"
+      />
 
       {/* Tabs */}
       <div className="tabs">
@@ -185,11 +188,7 @@ const IngestFeedback = () => {
           <h2>Upload CSV Document</h2>
           <p className="subtitle">Upload a batch list of feedback. The importer detects <strong>content</strong> (or <strong>description</strong> / <strong>desc</strong>), <strong>channel</strong>, <strong>customerLabel</strong>, and <strong>sentiment</strong> columns.</p>
 
-          {csvError && (
-            <div className="alert alert-error">
-              <span>⚠️</span> {csvError}
-            </div>
-          )}
+          {csvError && <ErrorState message={csvError} />}
 
           {csvResult && (
             <div className="alert alert-success" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
@@ -343,11 +342,7 @@ const IngestFeedback = () => {
               </div>
             )}
 
-            {simulateError && (
-              <div className="alert alert-error">
-                <span>⚠️</span> {simulateError}
-              </div>
-            )}
+            {simulateError && <ErrorState message={simulateError} />}
 
             <div
               className="ingest-grid"
@@ -514,11 +509,7 @@ const IngestFeedback = () => {
           <h2>Ingest Feedback Record Manually</h2>
           <p className="subtitle">Manually record a client note, call snippet, or testimonial. Gemini AI will run classification after saving.</p>
 
-          {manualError && (
-            <div className="alert alert-error">
-              <span>⚠️</span> {manualError}
-            </div>
-          )}
+          {manualError && <ErrorState message={manualError} />}
 
           {manualSuccess && (
             <div className="alert alert-success">

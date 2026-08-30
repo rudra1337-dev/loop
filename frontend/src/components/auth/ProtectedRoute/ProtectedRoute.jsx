@@ -1,6 +1,6 @@
 import "./ProtectedRoute.css";
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../store/hooks';
 import LoadingSpinner from "../../LoadingSpinner/LoadingSpinner";
 
 const ProtectedRoute = ({ allowedRoles }) => {

@@ -2,8 +2,15 @@ import "./Dashboard.css";
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { getStats, getThemes } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
+import logger from '../../utils/logger';
 import { SkeletonMetric, SkeletonChart, SkeletonBlock } from '../../components/Skeleton/Skeleton';
+
+// Reusable / Extracted Components
+import PageHeader from '../../components/common/PageHeader/PageHeader';
+import ErrorState from '../../components/common/ErrorState/ErrorState';
+import EmptyState from '../../components/common/EmptyState/EmptyState';
+import DashboardFilters from './components/DashboardFilters/DashboardFilters';
 
 // Chart components
 import FeedbackVolumeChart from '../../components/charts/FeedbackVolumeChart/FeedbackVolumeChart';
@@ -52,7 +59,7 @@ const Dashboard = () => {
           setThemesList(res.data.themes || []);
         }
       } catch (err) {
-        console.error('Failed to load themes for dashboard filters:', err);
+        logger.error('Failed to load themes for dashboard filters', { err });
       }
     };
     loadThemes();
@@ -144,7 +151,7 @@ const Dashboard = () => {
           setStats(res.data.stats);
         }
       } catch (err) {
-        console.error('Error loading dashboard stats:', err);
+        logger.error('Error loading dashboard stats', { err, filters: { channel, sentiment, status, theme, from, to } });
         setError('Failed to retrieve feedback stats. Try adjusting date ranges or filters.');
       } finally {
         setLoading(false);
@@ -184,135 +191,37 @@ const Dashboard = () => {
   return (
     <div>
       {/* Page Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ margin: 0 }}>Feedback Analytics</h1>
-          <p className="subtitle" style={{ margin: '4px 0 0 0' }}>
-            Intelligent customer feedback insights for {user?.workspaceName || 'your workspace'}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={() => updateParams({ _ref: Date.now() })}
-            className="btn btn-secondary"
-            style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}
-            title="Refresh dashboard stats"
-          >
-            🔄 Refresh
-          </button>
-          <Link to="/ingestion" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-            📥 Ingest Feedback
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        title="Feedback Analytics"
+        subtitle={`Intelligent customer feedback insights for ${user?.workspaceName || 'your workspace'}`}
+      >
+        <Link to="/ingestion" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+          📥 Ingest Feedback
+        </Link>
+      </PageHeader>
 
       {/* Filters Toolbar */}
-      <div className="glass-card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-
-          <div style={{ flex: '1 1 180px' }}>
-            <label className="form-label">Date Range</label>
-            <select value={dateRange} onChange={(e) => handleDateRangeChange(e.target.value)}>
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-              <option value="90d">Last 90 Days</option>
-              <option value="all">All Time</option>
-              <option value="custom">Custom Range...</option>
-            </select>
-          </div>
-
-          {dateRange === 'custom' && (
-            <>
-              <div style={{ flex: '1 1 130px' }}>
-                <label className="form-label">From</label>
-                <input
-                  type="date"
-                  value={fromInput}
-                  onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value }); }}
-                />
-              </div>
-              <div style={{ flex: '1 1 130px' }}>
-                <label className="form-label">To</label>
-                <input
-                  type="date"
-                  value={toInput}
-                  onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value }); }}
-                />
-              </div>
-            </>
-          )}
-
-          <div style={{ flex: '1 1 140px' }}>
-            <label className="form-label">Channel</label>
-            <select value={channel} onChange={(e) => updateParams({ channel: e.target.value })}>
-              <option value="">All Channels</option>
-              <option value="Slack Chat">Slack Chat</option>
-              <option value="Support Email">Support Email</option>
-              <option value="API">REST API</option>
-              <option value="CSV Import">CSV Import</option>
-              <option value="Client Call">Client Call</option>
-              <option value="Intercom Chat">Intercom Chat</option>
-              <option value="Play Store Review">Play Store Review</option>
-            </select>
-          </div>
-
-          <div style={{ flex: '1 1 120px' }}>
-            <label className="form-label">Sentiment</label>
-            <select value={sentiment} onChange={(e) => updateParams({ sentiment: e.target.value })}>
-              <option value="">All Sentiments</option>
-              <option value="POS">Positive (POS)</option>
-              <option value="NEU">Neutral (NEU)</option>
-              <option value="NEG">Negative (NEG)</option>
-            </select>
-          </div>
-
-          <div style={{ flex: '1 1 140px' }}>
-            <label className="form-label">Theme</label>
-            <select value={theme} onChange={(e) => updateParams({ theme: e.target.value })}>
-              <option value="">All Themes</option>
-              {themesList.map((t) => (
-                <option key={t.id} value={t.name}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ flex: '1 1 120px' }}>
-            <label className="form-label">Status</label>
-            <select value={status} onChange={(e) => updateParams({ status: e.target.value })}>
-              <option value="">All Statuses</option>
-              <option value="NEW">NEW</option>
-              <option value="REVIEWED">REVIEWED</option>
-              <option value="ACTIONED">ACTIONED</option>
-            </select>
-          </div>
-
-          <div>
-            <button
-              onClick={handleResetFilters}
-              className="btn btn-secondary"
-              style={{ padding: '0 16px', height: '42px', whiteSpace: 'nowrap' }}
-            >
-              Clear Filters
-            </button>
-          </div>
-
-        </div>
-      </div>
+      <DashboardFilters
+        dateRange={dateRange}
+        fromInput={fromInput}
+        toInput={toInput}
+        setFromInput={setFromInput}
+        setToInput={setToInput}
+        channel={channel}
+        sentiment={sentiment}
+        theme={theme}
+        status={status}
+        themesList={themesList}
+        updateParams={updateParams}
+        handleDateRangeChange={handleDateRangeChange}
+        handleResetFilters={handleResetFilters}
+      />
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>❌</span>
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => setRetryCount(prev => prev + 1)}
-            className="btn btn-secondary"
-            style={{ padding: '6px 12px', fontSize: '13px', height: 'auto', border: '1px solid rgba(239, 68, 68, 0.3)' }}
-          >
-            🔄 Retry
-          </button>
-        </div>
+        <ErrorState
+          message={error}
+          onRetry={() => setRetryCount((prev) => prev + 1)}
+        />
       )}
 
       {/* KPI metrics cards grid */}
@@ -397,21 +306,18 @@ const Dashboard = () => {
         </>
       ) : stats?.total === 0 ? (
         // Empty State
-        <div className="glass-card" style={{ padding: '64px 24px', textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
-          <h2>No matching feedback found</h2>
-          <p className="subtitle" style={{ maxWidth: '480px', margin: '0 auto 24px auto' }}>
-            There are no feedback records for the selected filters. Try broadening your date range, removing channel filters, or ingesting more data.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <button onClick={handleResetFilters} className="btn btn-secondary">
-              Clear All Filters
-            </button>
-            <Link to="/ingestion" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-              Ingest Simulated Data
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          icon="📊"
+          title="No matching feedback found"
+          description="There are no feedback records for the selected filters. Try broadening your date range, removing channel filters, or ingesting more data."
+        >
+          <button onClick={handleResetFilters} className="btn btn-secondary">
+            Clear All Filters
+          </button>
+          <Link to="/ingestion" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+            Ingest Simulated Data
+          </Link>
+        </EmptyState>
       ) : (
         <>
           {/* Charts Row 1: Volume (2/3 width) and Sentiment (1/3 width) */}
