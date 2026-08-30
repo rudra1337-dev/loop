@@ -1,26 +1,28 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute/ProtectedRoute";
-import Login from "./pages/Login/Login";
-import Signup from "./pages/Signup/Signup";
 import GuestRoute from "./components/auth/GuestRoute/GuestRoute";
-import WorkspaceSettings from "./pages/WorkspaceSettings/WorkspaceSettings";
-import Dashboard from "./pages/Dashboard/Dashboard";
-import Trends from "./pages/Trends/Trends";
-import FeedbackExplorer from "./pages/FeedbackExplorer/FeedbackExplorer";
-import IngestFeedback from "./pages/IngestFeedback/IngestFeedback";
-import Landing from "./pages/Landing/Landing";
 import Layout from "./components/Layout/Layout";
-import AskLoop from './pages/AskLoop/AskLoop';
-import Reports from "./pages/Reports/Reports";
-import ReportView from "./pages/ReportView/ReportView";
-import NotFound from "./pages/NotFound/NotFound";
-import Unauthorized from "./pages/Unauthorized/Unauthorized";
 
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useDispatch } from "react-redux";
 import { fetchMe } from "./store/slices/authSlice";
 import { useAuth } from "./store/hooks";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
+
+// Lazy-loaded page components
+const Login = lazy(() => import("./pages/Login/Login"));
+const Signup = lazy(() => import("./pages/Signup/Signup"));
+const WorkspaceSettings = lazy(() => import("./pages/WorkspaceSettings/WorkspaceSettings"));
+const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
+const Trends = lazy(() => import("./pages/Trends/Trends"));
+const FeedbackExplorer = lazy(() => import("./pages/FeedbackExplorer/FeedbackExplorer"));
+const IngestFeedback = lazy(() => import("./pages/IngestFeedback/IngestFeedback"));
+const Landing = lazy(() => import("./pages/Landing/Landing"));
+const AskLoop = lazy(() => import("./pages/AskLoop/AskLoop"));
+const Reports = lazy(() => import("./pages/Reports/Reports"));
+const ReportView = lazy(() => import("./pages/ReportView/ReportView"));
+const NotFound = lazy(() => import("./pages/NotFound/NotFound"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized/Unauthorized"));
 
 const RootRoute = () => {
   const { user, loading } = useAuth();
@@ -40,6 +42,7 @@ function App() {
   }, [dispatch]);
 
   return (
+    <Suspense fallback={<LoadingSpinner />}>
 
     <Routes>
       {/* Public routes */}
@@ -152,6 +155,7 @@ function App() {
         element={<NotFound />}
       />
     </Routes>
+    </Suspense>
   );
 }
 

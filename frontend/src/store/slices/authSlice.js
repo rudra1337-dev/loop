@@ -90,7 +90,7 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(signup.fulfilled, (state, action) => {
+      .addCase(signup.fulfilled, (state) => {
         // Signup does not log the user in immediately, per auth redirects refactor
         state.loading = false;
       })

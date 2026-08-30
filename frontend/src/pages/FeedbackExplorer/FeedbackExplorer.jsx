@@ -233,6 +233,7 @@ const FeedbackExplorer = () => {
     }, 400);
 
     return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, search]);
 
   // Fetch feedback records based on searchParams
@@ -273,6 +274,7 @@ const FeedbackExplorer = () => {
 
   useEffect(() => {
     loadFeedbacks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // Clear selection whenever the page/filters change — selected ids from a

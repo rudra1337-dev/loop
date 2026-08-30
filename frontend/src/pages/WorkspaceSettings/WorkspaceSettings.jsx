@@ -33,6 +33,7 @@ const WorkspaceSettings = () => {
       clearError();
       clearRenameSuccess();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -49,7 +50,7 @@ const WorkspaceSettings = () => {
     try {
       await rename(workspaceName.trim());
       await refetch(); // pulls the new name into Redux so Dashboard updates too
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     } finally {
       setRenaming(false);
@@ -60,7 +61,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await updateRole(userId, newRole);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };
@@ -70,7 +71,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await removeMember(userId);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };
@@ -79,7 +80,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await createInvite(newInviteRole);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };
@@ -88,7 +89,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await revokeInvite(id);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };

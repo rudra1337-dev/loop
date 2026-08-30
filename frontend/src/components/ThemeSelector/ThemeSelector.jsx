@@ -3,7 +3,7 @@ import { useTheme } from '../../context/ThemeContext';
 import './ThemeSelector.css';
 
 const ThemeSelector = () => {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 

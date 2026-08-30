@@ -1,14 +1,12 @@
 import "./IngestFeedback.css";
 import { useState, useRef } from 'react';
 import { ingestCSV, ingestSingle } from '../../services/feedbackService';
-import { useAuth } from '../../store/hooks';
 import logger from '../../utils/logger';
 import { ingestChannel } from '../../services/feedbackService';
 import PageHeader from '../../components/common/PageHeader/PageHeader';
 import ErrorState from '../../components/common/ErrorState/ErrorState';
 
 const IngestFeedback = () => {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('csv'); // csv, channels, manual
   
   // CSV Ingestion State
@@ -144,7 +142,6 @@ const IngestFeedback = () => {
     setTimeout(() => setCopiedText(''), 2000);
   };
 
-  const mockWebhookUrl = `${window.location.origin}/api/feedback/ingest/webhook?token=${user?.workspaceId || 'workspace_id'}`;
   const mockApiCode = `curl -X POST "${window.location.origin}/api/feedback/ingest/single" \\
   -H "Content-Type: application/json" \\
   -d '{
