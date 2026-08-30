@@ -5,6 +5,7 @@ import {
   getReports,
   exportReportPDF,
 } from '../../services/reportService';
+import logger from '../../utils/logger';
 import './Reports.css';
 
 const PRESETS = [
@@ -62,7 +63,7 @@ function ReportActions({ report, onExported }) {
       window.URL.revokeObjectURL(url);
       onExported?.();
     } catch (error) {
-      console.error('[PDF] Export failed:', error);
+      logger.error('[PDF] Export failed', { error, reportId: report.id });
       window.alert('Failed to export the report PDF. Please try again.');
     } finally {
       setExporting(false);

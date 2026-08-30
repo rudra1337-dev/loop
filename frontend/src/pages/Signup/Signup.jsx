@@ -1,7 +1,7 @@
 import "./Signup.css";
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
 import { getInviteByCode } from '../../services/workspaceService';
 
 const Signup = () => {

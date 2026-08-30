@@ -1,99 +1,95 @@
 import "./WorkspaceSettings.css";
 import { useState, useEffect } from 'react';
-import * as workspaceService from '../../services/workspaceService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, useWorkspace } from '../../store/hooks';
 import PageHeader from '../../components/common/PageHeader/PageHeader';
 import ErrorState from '../../components/common/ErrorState/ErrorState';
 
 const WorkspaceSettings = () => {
-    const { user, refetch } = useAuth(); // refetch lets us refresh the name in AuthContext after rename
-    const [members, setMembers] = useState([]);
-    const [invites, setInvites] = useState([]);
-    const [newInviteRole, setNewInviteRole] = useState('ANALYST');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(true);
+  const { user, refetch } = useAuth();
+  const {
+    workspace,
+    members,
+    invites,
+    loading,
+    error: workspaceError,
+    renameSuccess,
+    loadWorkspace,
+    rename,
+    updateRole,
+    removeMember,
+    createInvite,
+    revokeInvite,
+    clearError,
+    clearRenameSuccess
+  } = useWorkspace();
 
-    // Rename state
-    const [workspaceName, setWorkspaceName] = useState('');
-    const [renaming, setRenaming] = useState(false);
-    const [renameSuccess, setRenameSuccess] = useState(false);
+  const [newInviteRole, setNewInviteRole] = useState('ANALYST');
+  const [workspaceName, setWorkspaceName] = useState('');
+  const [renaming, setRenaming] = useState(false);
 
-  // Load members + invites together on mount
-    const loadData = async () => {
-        try {
-        const [workspaceRes, membersRes, invitesRes] = await Promise.all([
-            workspaceService.getWorkspace(),
-            workspaceService.getMembers(),
-            workspaceService.listInvites(),
-        ]);
-        setWorkspaceName(workspaceRes.data.workspace?.name || user?.workspaceName || '');
-        setMembers(membersRes.data.members);
-        setInvites(invitesRes.data.invites);
-        } catch (err) {
-        setError('Failed to load workspace data.');
-        } finally {
-        setLoading(false);
-        }
+  useEffect(() => {
+    loadWorkspace();
+    return () => {
+      clearError();
+      clearRenameSuccess();
     };
+  }, []);
 
-    useEffect(() => {
-        loadData();
-    }, []);
+  useEffect(() => {
+    if (workspace) {
+      setWorkspaceName(workspace.name || user?.workspaceName || '');
+    }
+  }, [workspace, user]);
 
-    const handleRename = async (e) => {
-        e.preventDefault();
-        setError('');
-        setRenameSuccess(false);
-        setRenaming(true);
-        try {
-        await workspaceService.renameWorkspace(workspaceName.trim());
-        await refetch(); // pulls the new name into AuthContext so Dashboard updates too
-        setRenameSuccess(true);
-        } catch (err) {
-        setError(err.response?.data?.error || 'Failed to rename workspace');
-        } finally {
-        setRenaming(false);
-        }
-    };
-
- 
-  const handleRoleChange = async (userId, newRole) => {
-    setError('');
+  const handleRename = async (e) => {
+    e.preventDefault();
+    clearRenameSuccess();
+    clearError();
+    setRenaming(true);
     try {
-      await workspaceService.updateMemberRole(userId, newRole);
-      await loadData(); // re-fetch to reflect the change — simple, avoids state-sync bugs
+      await rename(workspaceName.trim());
+      await refetch(); // pulls the new name into Redux so Dashboard updates too
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update role');
+      // Error is caught and stored in Redux workspace state
+    } finally {
+      setRenaming(false);
+    }
+  };
+
+  const handleRoleChange = async (userId, newRole) => {
+    clearError();
+    try {
+      await updateRole(userId, newRole);
+    } catch (err) {
+      // Error is caught and stored in Redux workspace state
     }
   };
 
   const handleRemove = async (userId) => {
     if (!window.confirm('Remove this member from the workspace?')) return;
-    setError('');
+    clearError();
     try {
-      await workspaceService.removeMember(userId);
-      await loadData();
+      await removeMember(userId);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to remove member');
+      // Error is caught and stored in Redux workspace state
     }
   };
 
   const handleCreateInvite = async () => {
-    setError('');
+    clearError();
     try {
-      await workspaceService.createInvite(newInviteRole);
-      await loadData();
+      await createInvite(newInviteRole);
     } catch (err) {
-      setError('Failed to generate invite');
+      // Error is caught and stored in Redux workspace state
     }
   };
 
   const handleRevoke = async (id) => {
+    clearError();
     try {
-      await workspaceService.revokeInvite(id);
-      await loadData();
+      await revokeInvite(id);
     } catch (err) {
-      setError('Failed to revoke invite');
+      // Error is caught and stored in Redux workspace state
     }
   };
 
@@ -103,7 +99,7 @@ const WorkspaceSettings = () => {
     alert('Invite link copied!');
   };
 
-  if (loading) return <p>Loading workspace settings...</p>;
+  if (loading && !workspace) return <p>Loading workspace settings...</p>;
 
   return (
     <div style={{ maxWidth: '800px' }}>
@@ -112,7 +108,7 @@ const WorkspaceSettings = () => {
         subtitle={`Manage member permissions and invite collaborators to ${user?.workspaceName}`}
       />
 
-      {error && <ErrorState message={error} />}
+      {workspaceError && <ErrorState message={workspaceError} />}
 
       <div className="glass-card">
         <h2>Rename Workspace</h2>

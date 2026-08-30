@@ -2,7 +2,8 @@ import "./FeedbackExplorer.css";
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus, reclassifyFeedbacks } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
+import logger from '../../utils/logger';
 import { SkeletonTable } from '../../components/Skeleton/Skeleton';
 import PageHeader from '../../components/common/PageHeader/PageHeader';
 import ErrorState from '../../components/common/ErrorState/ErrorState';
@@ -64,7 +65,7 @@ const FeedbackExplorer = () => {
           setThemesList(res.data.themes || []);
         }
       } catch (err) {
-        console.error('Failed to load themes:', err);
+        logger.error('Failed to load themes', { err });
       }
     };
     loadThemes();
@@ -125,7 +126,7 @@ const FeedbackExplorer = () => {
         });
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to load feedbacks', { err, searchParams: searchParams.toString() });
       setError('Unable to load feedback. Please try again.');
     } finally {
       setLoading(false);
@@ -152,7 +153,7 @@ const FeedbackExplorer = () => {
         setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to update status', { err, id, newStatus });
       alert(err.response?.data?.error || 'Failed to update status. Please try again.');
     } finally {
       setStatusUpdatingId(null);
@@ -167,7 +168,7 @@ const FeedbackExplorer = () => {
       await deleteFeedback(id);
       loadFeedbacks();
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to delete feedback item', { err, id });
       alert('Failed to delete feedback item');
     }
   };
@@ -244,7 +245,7 @@ const FeedbackExplorer = () => {
 
       setSelectedIds(new Set());
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to reclassify feedback items', { err, selectedIds: Array.from(selectedIds) });
       alert(err.response?.data?.error || 'Failed to reclassify feedback. Please try again.');
     } finally {
       setReclassifying(false);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
 import MockBrowser from './MockBrowser';
 import { PRESETS, INTEGRATIONS, MOCK_INBOX_ITEMS } from './constants';
 import "./Landing.css";

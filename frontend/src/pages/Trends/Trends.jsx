@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getTrends } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader/PageHeader';
 import ErrorState from '../../components/common/ErrorState/ErrorState';
 import EmptyState from '../../components/common/EmptyState/EmptyState';
@@ -15,6 +14,7 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
+import logger from '../../utils/logger';
 import './Trends.css';
 
 const CustomTooltip = ({ active, payload }) => {
@@ -55,7 +55,6 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 const Trends = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -84,7 +83,7 @@ const Trends = () => {
         setError(res.data.error || 'Failed to retrieve trends');
       }
     } catch (err) {
-      console.error('Error loading trends:', err);
+      logger.error('Error loading trends:', err);
 
       setError(
         err.response?.data?.error ||

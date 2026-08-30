@@ -2,7 +2,8 @@ import "./Dashboard.css";
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { getStats, getThemes } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
+import logger from '../../utils/logger';
 import { SkeletonMetric, SkeletonChart, SkeletonBlock } from '../../components/Skeleton/Skeleton';
 
 // Reusable / Extracted Components
@@ -58,7 +59,7 @@ const Dashboard = () => {
           setThemesList(res.data.themes || []);
         }
       } catch (err) {
-        console.error('Failed to load themes for dashboard filters:', err);
+        logger.error('Failed to load themes for dashboard filters', { err });
       }
     };
     loadThemes();
@@ -150,7 +151,7 @@ const Dashboard = () => {
           setStats(res.data.stats);
         }
       } catch (err) {
-        console.error('Error loading dashboard stats:', err);
+        logger.error('Error loading dashboard stats', { err, filters: { channel, sentiment, status, theme, from, to } });
         setError('Failed to retrieve feedback stats. Try adjusting date ranges or filters.');
       } finally {
         setLoading(false);

@@ -1,7 +1,8 @@
 import "./IngestFeedback.css";
 import { useState, useRef } from 'react';
 import { ingestCSV, ingestSingle } from '../../services/feedbackService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../store/hooks';
+import logger from '../../utils/logger';
 import { ingestChannel } from '../../services/feedbackService';
 import PageHeader from '../../components/common/PageHeader/PageHeader';
 import ErrorState from '../../components/common/ErrorState/ErrorState';
@@ -99,7 +100,7 @@ const IngestFeedback = () => {
         setCsvFile(null);
       }
     } catch (err) {
-      console.error(err);
+      logger.error('CSV import failed', { err, fileName: csvFile?.name });
       setCsvError(err.response?.data?.error || 'Failed to import CSV file. Ensure format is correct.');
     } finally {
       setCsvLoading(false);
@@ -129,7 +130,7 @@ const IngestFeedback = () => {
         });
       }
     } catch (err) {
-      console.error(err);
+      logger.error('Manual feedback ingestion failed', { err, channel: manualData.channel });
       setManualError(err.response?.data?.error || 'Failed to ingest feedback item');
     } finally {
       setManualLoading(false);

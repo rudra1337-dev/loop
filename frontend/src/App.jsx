@@ -16,7 +16,10 @@ import ReportView from "./pages/ReportView/ReportView";
 import NotFound from "./pages/NotFound/NotFound";
 import Unauthorized from "./pages/Unauthorized/Unauthorized";
 
-import { useAuth } from "./context/AuthContext";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { fetchMe } from "./store/slices/authSlice";
+import { useAuth } from "./store/hooks";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
 
 const RootRoute = () => {
@@ -30,7 +33,14 @@ const RootRoute = () => {
 };
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchMe());
+  }, [dispatch]);
+
   return (
+
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<RootRoute />} />
