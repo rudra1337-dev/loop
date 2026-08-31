@@ -103,7 +103,7 @@ const WorkspaceSettings = () => {
   if (loading && !workspace) return <p>Loading workspace settings...</p>;
 
   return (
-    <div style={{ maxWidth: '800px' }}>
+    <div className="workspace-settings-page">
       <PageHeader
         title="Workspace Settings"
         subtitle={`Manage member permissions and invite collaborators to ${user?.workspaceName}`}
@@ -120,32 +120,32 @@ const WorkspaceSettings = () => {
             onChange={(e) => setWorkspaceName(e.target.value)}
             required
             placeholder="Workspace Name"
-            style={{ flex: 1 }}
+            className="rename-input"
           />
           <button type="submit" className="btn btn-primary" disabled={renaming}>
             {renaming ? 'Saving...' : 'Rename'}
           </button>
         </form>
-        {renameSuccess && <p style={{ color: 'var(--color-pos)', marginTop: '8px', fontSize: '13px' }}>✓ Workspace renamed successfully!</p>}
+        {renameSuccess && <p className="rename-success-msg">✓ Workspace renamed successfully!</p>}
       </div>
 
       <div className="glass-card">
         <h2>Workspace Members</h2>
-        <div className="table-container" style={{ margin: 0 }}>
+        <div className="table-container workspace-members-table">
           <table>
             <thead>
               <tr>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th style={{ width: '100px' }}></th>
+                <th className="action-col"></th>
               </tr>
             </thead>
             <tbody>
               {members.map((member) => (
                 <tr key={member.id}>
                   <td><strong>{member.name}</strong></td>
-                  <td style={{ color: 'var(--text-secondary)' }}>{member.email}</td>
+                  <td className="member-email">{member.email}</td>
                   <td>
                     <select
                       value={member.role}
@@ -158,9 +158,9 @@ const WorkspaceSettings = () => {
                       <option value="VIEWER">Viewer</option>
                     </select>
                   </td>
-                  <td>
+                  <td className="action-col">
                     {member.id !== user.id && (
-                      <button onClick={() => handleRemove(member.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                      <button onClick={() => handleRemove(member.id)} className="btn btn-danger btn-sm">
                         Remove
                       </button>
                     )}
@@ -190,24 +190,24 @@ const WorkspaceSettings = () => {
         </div>
 
         {invites.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No active invite links generated yet.</p>
+          <p className="empty-invites-text">No active invite links generated yet.</p>
         ) : (
           <div>
-            <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '8px' }}>Active Invites</h3>
+            <h3 className="active-invites-heading">Active Invites</h3>
             <ul className="invite-list">
               {invites.map((invite) => (
                 <li key={invite.id} className="invite-item">
                   <div className="invite-info">
-                    <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.1)', marginRight: '0' }}>
+                    <span className="badge badge-neu invite-role-badge">
                       {invite.role}
                     </span>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Code: {invite.code}</span>
+                    <span className="invite-code">Code: {invite.code}</span>
                   </div>
                   <div className="invite-actions">
-                    <button onClick={() => copyInviteLink(invite.code)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                    <button onClick={() => copyInviteLink(invite.code)} className="btn btn-secondary btn-sm">
                       Copy
                     </button>
-                    <button onClick={() => handleRevoke(invite.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                    <button onClick={() => handleRevoke(invite.id)} className="btn btn-danger btn-sm">
                       Revoke
                     </button>
                   </div>

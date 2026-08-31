@@ -1,7 +1,64 @@
-/* Workspace Settings Responsive Styles */
+/* Workspace Settings Page Styles */
+.workspace-settings-page {
+  max-width: 800px;
+}
+
 .rename-form {
   display: flex;
   gap: 12px;
+}
+
+.rename-input {
+  flex: 1;
+}
+
+.rename-success-msg {
+  color: var(--color-pos);
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.workspace-members-table {
+  margin: 0;
+}
+
+.workspace-members-table .member-email {
+  color: var(--text-secondary);
+}
+
+.workspace-members-table .action-col {
+  width: 100px;
+  text-align: right;
+}
+
+.workspace-members-table select.member-role-select {
+  padding: 6px 20px 6px 8px;
+  font-size: 13px;
+  min-width: 95px;
+  width: 95px;
+  height: 32px;
+  color: var(--color-text);
+  background-color: var(--bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.workspace-members-table select.member-role-select:disabled {
+  opacity: 0.6;
+  color: var(--color-text-secondary);
+  -webkit-text-fill-color: var(--color-text-secondary);
+  background-color: var(--bg-input);
+  cursor: not-allowed;
+}
+
+.workspace-members-table select.member-role-select option {
+  background-color: var(--bg-main);
+  color: var(--color-text);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
 .invite-form {
@@ -12,6 +69,18 @@
 
 .invite-form select {
   width: 160px;
+}
+
+.empty-invites-text {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.active-invites-heading {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
 }
 
 .invite-list {
@@ -37,6 +106,19 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.invite-role-badge {
+  color: var(--text-primary);
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  margin-right: 0;
+}
+
+.invite-code {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: monospace;
 }
 
 .invite-actions {
@@ -69,29 +151,8 @@
   .invite-actions {
     justify-content: flex-end;
   }
-}
 
-.member-role-select {
-  padding: 6px 20px 6px 8px !important;
-  font-size: 13px !important;
-  min-width: 95px !important;
-  width: 95px !important;
-  height: 32px !important;
-  color: var(--color-text) !important;
-  background-color: var(--bg-input) !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: 6px !important;
-}
-
-.member-role-select:disabled {
-  opacity: 0.6 !important;
-  color: var(--color-text-secondary) !important;
-  -webkit-text-fill-color: var(--color-text-secondary) !important;
-  background-color: var(--bg-input) !important;
-  cursor: not-allowed !important;
-}
-
-.member-role-select option {
-  background-color: var(--bg-main) !important;
-  color: var(--color-text) !important;
+  .workspace-members-table .action-col {
+    width: auto;
+  }
 }

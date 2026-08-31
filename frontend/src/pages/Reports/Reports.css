@@ -1,4 +1,43 @@
+/* Reports Page Styles */
+.reports-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.report-generator-card {
+  margin-bottom: 0;
+}
+
+.report-generator-subtitle {
+  margin-bottom: 16px;
+}
+
+.report-generate-btn {
+  height: 42px;
+}
+
+.report-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.report-history-heading {
+  margin: 0;
+}
+
+.report-history-count {
+  margin: 4px 0 0 0;
+}
+
 .report-history-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition: var(--transition-smooth);
 }
 
@@ -8,5 +47,36 @@
 }
 
 .report-history-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
   overflow-wrap: anywhere;
+}
+
+.report-history-date {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+}
+
+.report-badge {
+  color: var(--text-primary);
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.report-actions-wrapper {
+  margin-top: 16px;
+}
+
+.pagination-centered {
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 0 8px;
 }

@@ -185,16 +185,16 @@ function Reports() {
       setGenerating(false);
     }
   };  return (
-    <div>
+    <div className="reports-page">
       {/* Page Header */}
       <PageHeader
         title="Voice of Customer Reports"
         subtitle="Generate leadership-ready reports backed by real feedback data."
       />
 
-      <div className="glass-card">
+      <div className="glass-card report-generator-card">
         <h2>Generate a Report</h2>
-        <p className="subtitle" style={{ marginBottom: '16px' }}>
+        <p className="subtitle report-generator-subtitle">
           Choose a predefined period or set a custom range.
         </p>
 
@@ -259,9 +259,8 @@ function Reports() {
             <div className="col-12 col-md-4">
               <button
                 type="submit"
-                className="btn btn-primary w-100"
+                className="btn btn-primary w-100 report-generate-btn"
                 disabled={generating}
-                style={{ height: '45px' }}
               >
                 {generating ? 'Generating…' : 'Generate Report'}
               </button>
@@ -277,13 +276,13 @@ function Reports() {
       </div>
 
       <section aria-labelledby="report-history-heading">
-        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div className="report-history-header">
           <div>
-            <h2 id="report-history-heading" style={{ margin: 0 }}>
+            <h2 id="report-history-heading" className="report-history-heading">
               Report History
             </h2>
             {pagination && (
-              <p className="subtitle" style={{ margin: 0, marginTop: '4px' }}>
+              <p className="subtitle report-history-count">
                 {pagination.total} report{pagination.total === 1 ? '' : 's'} generated
               </p>
             )}
@@ -293,7 +292,7 @@ function Reports() {
         {listLoading && (
           <div className="glass-card text-center py-5">
             <div className="spinner-border spinner-border-sm me-2 text-primary" role="status" aria-hidden="true" />
-            <span style={{ color: 'var(--text-secondary)' }}>Loading report history…</span>
+            <span className="text-secondary">Loading report history…</span>
           </div>
         )}
 
@@ -317,24 +316,24 @@ function Reports() {
             <div className="row g-3">
               {reports.map((report) => (
                 <div className="col-12 col-md-6" key={report.id}>
-                  <article className="glass-card report-history-card h-100 mb-0" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <article className="glass-card report-history-card h-100 mb-0">
                     <div>
                       <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
                         <div className="min-w-0">
-                          <h3 className="report-history-title" style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>
+                          <h3 className="report-history-title">
                             {report.title}
                           </h3>
-                          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, marginTop: '4px' }}>
+                          <p className="report-history-date">
                             Generated {new Date(report.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.08)' }}>
+                        <span className="badge badge-neu report-badge">
                           VoC
                         </span>
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '16px' }}>
+                    <div className="report-actions-wrapper">
                       <ReportActions report={report} />
                     </div>
                   </article>
@@ -343,8 +342,8 @@ function Reports() {
             </div>
 
             {pagination && pagination.totalPages > 1 && (
-              <div className="pagination-container" style={{ justifyContent: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="pagination-container pagination-centered">
+                <div className="d-flex align-items-center gap-2">
                   <button
                     type="button"
                     className="pagination-btn"
@@ -353,7 +352,7 @@ function Reports() {
                   >
                     ← Previous
                   </button>
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)', padding: '0 8px' }}>
+                  <span className="pagination-info">
                     {page} / {pagination.totalPages}
                   </span>
                   <button
