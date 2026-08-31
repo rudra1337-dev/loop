@@ -33,6 +33,25 @@
   margin-bottom: 20px;
 }
 
+@media (max-width: 991.98px) {
+  .mobile-filter-bar {
+    position: sticky;
+    top: 64px;
+    z-index: 990;
+    background-color: var(--bg-main);
+    padding: 10px 0;
+    margin-bottom: 10px;
+  }
+
+  .txn-filter-pills-bar {
+    position: sticky;
+    top: 126px;
+    z-index: 989;
+    background-color: var(--bg-sidebar);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
 .mobile-search-wrapper {
   flex-grow: 1;
 }
