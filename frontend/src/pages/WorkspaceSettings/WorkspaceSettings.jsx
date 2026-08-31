@@ -135,8 +135,7 @@ const WorkspaceSettings = () => {
           <table>
             <thead>
               <tr>
-                <th className="member-name-th">Name</th>
-                <th className="member-email-th">Email</th>
+                <th className="member-name-th">Name & Email</th>
                 <th className="member-role-th">Role</th>
                 <th className="action-col"></th>
               </tr>
