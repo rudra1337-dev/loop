@@ -313,31 +313,31 @@ function Reports() {
 
         {!listLoading && !listError && reports.length > 0 && (
           <>
-            <div className="row g-3">
+            <div className="reports-history-list">
               {reports.map((report) => (
-                <div className="col-12 col-md-6" key={report.id}>
-                  <article className="glass-card report-history-card h-100 mb-0">
-                    <div>
-                      <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
-                        <div className="min-w-0">
-                          <h3 className="report-history-title">
-                            {report.title}
-                          </h3>
-                          <p className="report-history-date">
-                            Generated {new Date(report.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <span className="badge badge-neu report-badge">
-                          VoC
-                        </span>
+                <article className="report-history-item-compact" key={report.id}>
+                  <div className="report-item-avatar" aria-hidden="true">
+                    📊
+                  </div>
+                  <div className="report-item-main">
+                    <div className="report-item-header">
+                      <h3 className="report-history-title">
+                        {report.title}
+                      </h3>
+                      <span className="badge badge-neu report-badge">
+                        VoC
+                      </span>
+                    </div>
+                    <div className="report-item-footer">
+                      <span className="report-history-date">
+                        Generated {new Date(report.createdAt).toLocaleDateString()}
+                      </span>
+                      <div className="report-actions-wrapper">
+                        <ReportActions report={report} />
                       </div>
                     </div>
-
-                    <div className="report-actions-wrapper">
-                      <ReportActions report={report} />
-                    </div>
-                  </article>
-                </div>
+                  </div>
+                </article>
               ))}
             </div>
 
