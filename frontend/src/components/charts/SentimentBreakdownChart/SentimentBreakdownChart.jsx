@@ -1,5 +1,5 @@
 import "./SentimentBreakdownChart.css";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 
 const SentimentBreakdownChart = ({ data, loading }) => {
   if (loading) {
@@ -26,23 +26,7 @@ const SentimentBreakdownChart = ({ data, loading }) => {
     { name: 'Negative', value: data?.NEG || 0, color: 'var(--color-neg)' }
   ].filter(item => item.value > 0);
 
-  const renderLegend = (props) => {
-    const { payload } = props;
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginLeft: '16px', justifyContent: 'center' }}>
-        {payload.map((entry, index) => {
-          const pct = total > 0 ? Math.round((entry.payload.value / total) * 100) : 0;
-          return (
-            <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: entry.color }} />
-              <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{entry.value}</span>
-              <span style={{ color: 'var(--text-secondary)' }}>({pct}%)</span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
+
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -59,31 +43,41 @@ const SentimentBreakdownChart = ({ data, loading }) => {
   };
 
   return (
-    <div style={{ width: '100%', height: 240, display: 'flex', alignItems: 'center' }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="35%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={80}
-            paddingAngle={3}
-            dataKey="value"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} style={{ outline: 'none' }} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            verticalAlign="middle" 
-            align="right" 
-            layout="vertical"
-            content={renderLegend} 
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <div className="sentiment-chart-container">
+      <div className="sentiment-chart-visual">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius="60%"
+              outerRadius="85%"
+              paddingAngle={3}
+              dataKey="value"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} style={{ outline: 'none' }} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="sentiment-chart-legend">
+        {chartData.map((entry, index) => {
+          const pct = total > 0 ? Math.round((entry.value / total) * 100) : 0;
+          return (
+            <div key={`item-${index}`} className="sentiment-legend-item">
+              <div className="sentiment-legend-color-dot" style={{ backgroundColor: entry.color }} />
+              <span className="sentiment-legend-name">{entry.name}</span>
+              <span className="sentiment-legend-value">{entry.value}</span>
+              <span className="sentiment-legend-pct">({pct}%)</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -1,25 +1,12 @@
-.reports-page {
-  min-width: 0;
-}
-
 .report-history-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: var(--transition-smooth);
 }
 
 .report-history-card:hover {
   transform: translateY(-2px);
+  border-color: var(--border-hover);
 }
 
 .report-history-title {
   overflow-wrap: anywhere;
-}
-
-@media (max-width: 575.98px) {
-  .reports-page {
-    padding-top: 1rem !important;
-  }
-
-  .reports-page .card-body {
-    padding: 1rem !important;
-  }
 }

@@ -151,7 +151,7 @@ const WorkspaceSettings = () => {
                       value={member.role}
                       disabled={member.id === user.id}
                       onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                      style={{ padding: '6px 12px', fontSize: '13px' }}
+                      className="member-role-select"
                     >
                       <option value="ADMIN">Admin</option>
                       <option value="ANALYST">Analyst</option>
