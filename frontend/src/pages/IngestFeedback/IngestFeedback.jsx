@@ -272,16 +272,16 @@ const IngestFeedback = () => {
               our AI will classify that row automatically. Filling them in yourself skips the AI call for
               that row entirely, which is faster and uses less API quota on large files.
             </p>
-            <div className="table-container" style={{ margin: 0 }}>
-              <table>
+            <div className="table-container csv-sample-table-container">
+              <table className="csv-sample-table">
                 <thead>
                   <tr>
-                    <th>description <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(required)</span></th>
-                    <th>channel <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(required)</span></th>
-                    <th>customerLabel <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
-                    <th>sentiment <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
-                    <th>sentimentScore <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
-                    <th>theme <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span></th>
+                    <th>description <span className="sample-tag">(required)</span></th>
+                    <th>channel <span className="sample-tag">(required)</span></th>
+                    <th>customerLabel <span className="sample-tag">(optional)</span></th>
+                    <th>sentiment <span className="sample-tag">(optional)</span></th>
+                    <th>sentimentScore <span className="sample-tag">(optional)</span></th>
+                    <th>theme <span className="sample-tag">(optional)</span></th>
                   </tr>
                 </thead>
                 <tbody>
