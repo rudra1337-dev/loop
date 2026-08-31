@@ -463,21 +463,53 @@ const FeedbackExplorer = () => {
       )}
 
       {/* Filter Toolbar - Desktop (visible on desktop only) */}
-      <div className="glass-card desktop-only" style={{ padding: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '24px' }}>
-        <div style={{ flex: '2 1 240px', minWidth: '200px' }}>
-          <label className="form-label">Search Content</label>
-          <input 
-            type="text" 
-            value={searchInput} 
-            onChange={(e) => setSearchInput(e.target.value)} 
-            placeholder="Search feedback..."
-          />
+      <div className="glass-card desktop-only filter-toolbar-card">
+        <div className="filter-toolbar-header">
+          <div className="filter-search-wrapper">
+            <input 
+              type="text" 
+              value={searchInput} 
+              onChange={(e) => setSearchInput(e.target.value)} 
+              placeholder="Search feedback content or customer..."
+              className="filter-search-input"
+            />
+          </div>
+
+          <div className="filter-date-inputs">
+            <input 
+              type="date" 
+              value={fromInput} 
+              onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value, page: 1 }); }}
+              className="filter-date-picker"
+              title="From date"
+            />
+            <span className="filter-date-sep">to</span>
+            <input 
+              type="date" 
+              value={toInput} 
+              onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value, page: 1 }); }}
+              className="filter-date-picker"
+              title="To date"
+            />
+          </div>
+
+          {activeFiltersCount > 0 && (
+            <button 
+              onClick={handleResetFilters} 
+              className="btn btn-secondary filter-clear-btn"
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
 
-        <div style={{ flex: '1 1 150px' }}>
-          <label className="form-label">Channel</label>
-          <select value={channel} onChange={(e) => { updateParams({ channel: e.target.value, page: 1 }); }}>
-            <option value="">All Channels</option>
+        <div className="filter-pills-row">
+          <select 
+            value={channel} 
+            onChange={(e) => { updateParams({ channel: e.target.value, page: 1 }); }}
+            className="filter-pill-select"
+          >
+            <option value="">Channel ▾</option>
             <option value="CSV Import">CSV Import</option>
             <option value="Manual Ingest">Manual Entry</option>
             <option value="Slack Chat">Slack Chat</option>
@@ -490,64 +522,39 @@ const FeedbackExplorer = () => {
             <option value="Sales Call Note">Sales Call Note</option>
             <option value="Community Post">Community Post</option>
           </select>
-        </div>
 
-        <div style={{ flex: '1 1 150px' }}>
-          <label className="form-label">Sentiment</label>
-          <select value={sentiment} onChange={(e) => { updateParams({ sentiment: e.target.value, page: 1 }); }}>
-            <option value="">All Sentiments</option>
+          <select 
+            value={sentiment} 
+            onChange={(e) => { updateParams({ sentiment: e.target.value, page: 1 }); }}
+            className="filter-pill-select"
+          >
+            <option value="">Sentiment ▾</option>
             <option value="POS">Positive</option>
             <option value="NEU">Neutral</option>
             <option value="NEG">Negative</option>
           </select>
-        </div>
 
-        <div style={{ flex: '1 1 150px' }}>
-          <label className="form-label">Theme</label>
-          <select value={theme} onChange={(e) => { updateParams({ theme: e.target.value, page: 1 }); }}>
-            <option value="">All Themes</option>
+          <select 
+            value={theme} 
+            onChange={(e) => { updateParams({ theme: e.target.value, page: 1 }); }}
+            className="filter-pill-select"
+          >
+            <option value="">Categories ▾</option>
             {themesList.map((t) => (
               <option key={t.id} value={t.name}>{t.name}</option>
             ))}
           </select>
-        </div>
 
-        <div style={{ flex: '1 1 150px' }}>
-          <label className="form-label">Status</label>
-          <select value={status} onChange={(e) => { updateParams({ status: e.target.value, page: 1 }); }}>
-            <option value="">All Statuses</option>
+          <select 
+            value={status} 
+            onChange={(e) => { updateParams({ status: e.target.value, page: 1 }); }}
+            className="filter-pill-select"
+          >
+            <option value="">Status ▾</option>
             <option value="NEW">New</option>
             <option value="REVIEWED">Reviewed</option>
             <option value="ACTIONED">Actioned</option>
           </select>
-        </div>
-
-        <div style={{ flex: '1 1 130px' }}>
-          <label className="form-label">From</label>
-          <input 
-            type="date" 
-            value={fromInput} 
-            onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value, page: 1 }); }}
-          />
-        </div>
-
-        <div style={{ flex: '1 1 130px' }}>
-          <label className="form-label">To</label>
-          <input 
-            type="date" 
-            value={toInput} 
-            onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value, page: 1 }); }}
-          />
-        </div>
-
-        <div>
-          <button 
-            onClick={handleResetFilters} 
-            className="btn btn-secondary"
-            style={{ height: '42px', padding: '0 16px', whiteSpace: 'nowrap' }}
-          >
-            Clear Filters
-          </button>
         </div>
       </div>
 
@@ -733,53 +740,6 @@ const FeedbackExplorer = () => {
           />
         ) : (
           <>
-            {/* Filter Pills Bar (Transaction History Style) */}
-            <div className="txn-filter-pills-bar">
-              <div className="txn-pill-select-wrapper">
-                <select value={channel} onChange={(e) => updateParams({ channel: e.target.value, page: 1 })} className="txn-pill-select">
-                  <option value="">Channel ▾</option>
-                  <option value="CSV Import">CSV Import</option>
-                  <option value="Manual Ingest">Manual Entry</option>
-                  <option value="Slack Chat">Slack Chat</option>
-                  <option value="Support Email">Support Email</option>
-                  <option value="Client Call">Client Call</option>
-                  <option value="Intercom Chat">Intercom Chat</option>
-                  <option value="Support Ticket">Support Ticket</option>
-                  <option value="App Store Review">App Store Review</option>
-                  <option value="NPS Survey">NPS Survey</option>
-                  <option value="Sales Call Note">Sales Call Note</option>
-                  <option value="Community Post">Community Post</option>
-                </select>
-              </div>
-
-              <div className="txn-pill-select-wrapper">
-                <select value={sentiment} onChange={(e) => updateParams({ sentiment: e.target.value, page: 1 })} className="txn-pill-select">
-                  <option value="">Sentiment ▾</option>
-                  <option value="POS">Positive</option>
-                  <option value="NEU">Neutral</option>
-                  <option value="NEG">Negative</option>
-                </select>
-              </div>
-
-              <div className="txn-pill-select-wrapper">
-                <select value={theme} onChange={(e) => updateParams({ theme: e.target.value, page: 1 })} className="txn-pill-select">
-                  <option value="">Categories ▾</option>
-                  {themesList.map((t) => (
-                    <option key={t.id} value={t.name}>{t.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="txn-pill-select-wrapper">
-                <select value={status} onChange={(e) => updateParams({ status: e.target.value, page: 1 })} className="txn-pill-select">
-                  <option value="">Status ▾</option>
-                  <option value="NEW">New</option>
-                  <option value="REVIEWED">Reviewed</option>
-                  <option value="ACTIONED">Actioned</option>
-                </select>
-              </div>
-            </div>
-
             {/* Desktop Table View */}
             <div className="table-container desktop-only" style={{ border: 'none', borderRadius: 0, margin: 0 }}>
               <table>
@@ -796,13 +756,13 @@ const FeedbackExplorer = () => {
                         />
                       </th>
                     )}
-                    <th style={{ width: '40%' }}>Feedback Content</th>
-                    <th>Source</th>
-                    <th>Sentiment</th>
-                    <th>Theme</th>
-                    <th style={{ width: '130px' }}>Status</th>
-                    <th>Date</th>
-                    {!isReadOnly && <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>}
+                    <th style={{ width: '40%' }}>FEEDBACK CONTENT</th>
+                    <th>SOURCE</th>
+                    <th>SENTIMENT</th>
+                    <th>THEME</th>
+                    <th style={{ width: '130px' }}>STATUS</th>
+                    <th>DATE</th>
+                    {!isReadOnly && <th style={{ width: '80px', textAlign: 'center' }}>ACTIONS</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -897,47 +857,32 @@ const FeedbackExplorer = () => {
               </table>
             </div>
 
-            {/* Mobile Cards View (Transaction History Style) */}
+            {/* Mobile Cards View */}
             <div className="mobile-only feedback-card-list">
               {feedbacks.map((f) => (
                 <div 
                   key={f.id} 
-                  className={`txn-feedback-card ${selectedIds.has(f.id) ? 'selected' : ''}`}
+                  className={`feedback-mobile-card ${selectedIds.has(f.id) ? 'selected' : ''}`}
                 >
-                  <div className="txn-card-left">
-                    {!isReadOnly && (
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(f.id)}
-                        onChange={() => toggleSelected(f.id)}
-                        disabled={reclassifying}
-                        className="txn-card-checkbox"
-                      />
-                    )}
-
-                    <div className={`txn-icon-circle ${f.sentiment === 'POS' ? 'pos' : f.sentiment === 'NEG' ? 'neg' : 'neu'}`}>
-                      <span className="txn-icon-arrow">
-                        {f.sentiment === 'POS' ? '↗' : f.sentiment === 'NEG' ? '↘' : '➔'}
+                  <div className="feedback-mobile-card-header">
+                    <div className="feedback-mobile-card-header-left">
+                      {!isReadOnly && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(f.id)}
+                          onChange={() => toggleSelected(f.id)}
+                          disabled={reclassifying}
+                          className="feedback-mobile-card-checkbox"
+                        />
+                      )}
+                      <span className="feedback-mobile-card-channel">
+                        {f.channel.toLowerCase().includes('slack') ? '💬' : 
+                         f.channel.toLowerCase().includes('email') ? '✉️' : 
+                         f.channel.toLowerCase().includes('csv') ? '📂' : '🔌'} {f.channel}
                       </span>
                     </div>
-
-                    <div className="txn-card-main-info">
-                      <div className="txn-card-title">{f.content}</div>
-                      <div className="txn-card-subtitle">
-                        {f.customerLabel || 'Anonymous'} • <span className="txn-channel-name">{f.channel}</span>
-                      </div>
-                      <div className="txn-card-date">{formatDate(f.createdAt)}</div>
-                    </div>
-                  </div>
-
-                  <div className="txn-card-right">
-                    <div className="txn-card-badge-row">
-                      {getSentimentBadge(f.sentiment, f.sentimentScore)}
-                    </div>
-                    <div className="txn-card-footer-row">
-                      <span className="txn-status-label">
-                        <StatusBadge status={f.status} />
-                      </span>
+                    <div className="feedback-mobile-card-header-right">
+                      <span className="feedback-mobile-card-date">{formatDate(f.createdAt)}</span>
                       {!isReadOnly && (
                         <FeedbackActionsMenu 
                           feedback={f}
@@ -945,6 +890,34 @@ const FeedbackExplorer = () => {
                           onDelete={() => handleDelete(f.id)}
                         />
                       )}
+                    </div>
+                  </div>
+                  
+                  <div className="feedback-mobile-card-body">
+                    {f.content}
+                  </div>
+                  
+                  <div className="feedback-mobile-card-footer">
+                    <div className="feedback-mobile-card-tags">
+                      {getSentimentBadge(f.sentiment, f.sentimentScore)}
+                      {f.Themes && f.Themes.map((t) => (
+                        <span 
+                          key={t.id} 
+                          className="badge" 
+                          style={{ 
+                            backgroundColor: `${t.color || '#6366f1'}20`, 
+                            color: t.color || '#6366f1',
+                            border: `1px solid ${t.color || '#6366f1'}40`
+                          }}
+                        >
+                          {t.name}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className="feedback-mobile-card-metadata">
+                      <span>Customer: <strong>{f.customerLabel || 'Anonymous'}</strong></span>
+                      <StatusBadge status={f.status} />
                     </div>
                   </div>
                 </div>
