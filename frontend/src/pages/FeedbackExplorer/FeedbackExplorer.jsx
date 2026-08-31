@@ -750,13 +750,11 @@ const FeedbackExplorer = () => {
                         />
                       </th>
                     )}
-                    <th style={{ width: '40%' }}>Feedback Content</th>
-                    <th>Source</th>
-                    <th>Sentiment</th>
+                    <th style={{ width: '48%' }}>Feedback Content</th>
+                    <th style={{ width: '150px' }}>Sentiment</th>
                     <th>Theme</th>
-                    <th style={{ width: '130px' }}>Status</th>
-                    <th>Date</th>
-                    {!isReadOnly && <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>}
+                    <th style={{ width: '110px' }}>Status</th>
+                    {!isReadOnly && <th style={{ width: '60px', textAlign: 'center' }}>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -773,17 +771,19 @@ const FeedbackExplorer = () => {
                         </td>
                       )}
                       <td style={{ lineHeight: '1.5', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '13.5px' }}>
-                        <div style={{ fontWeight: '500', marginBottom: '4px' }}>{f.content}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                          Customer: <span style={{ color: 'var(--text-secondary)' }}>{f.customerLabel || 'Anonymous'}</span>
+                        <div style={{ fontWeight: '500', marginBottom: '5px', color: 'var(--text-primary)' }}>{f.content}</div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span>Customer: <strong style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{f.customerLabel || 'Anonymous'}</strong></span>
+                          <span>•</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            {f.channel.toLowerCase().includes('slack') ? '💬' : 
+                             f.channel.toLowerCase().includes('email') ? '✉️' : 
+                             f.channel.toLowerCase().includes('csv') ? '📂' : '🔌'}
+                            <strong style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{f.channel}</strong>
+                          </span>
+                          <span>•</span>
+                          <span>{formatDate(f.createdAt)}</span>
                         </div>
-                      </td>
-                      <td>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: '500' }}>
-                          {f.channel.toLowerCase().includes('slack') ? '💬' : 
-                           f.channel.toLowerCase().includes('email') ? '✉️' : 
-                           f.channel.toLowerCase().includes('csv') ? '📂' : '🔌'} {f.channel}
-                        </span>
                       </td>
                       <td>
                         {getSentimentBadge(f.sentiment, f.sentimentScore)}
@@ -811,9 +811,6 @@ const FeedbackExplorer = () => {
                       </td>
                       <td>
                         <StatusBadge status={f.status} />
-                      </td>
-                      <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
-                        {formatDate(f.createdAt)}
                       </td>
                       {!isReadOnly && (
                         <td style={{ textAlign: 'center' }}>
