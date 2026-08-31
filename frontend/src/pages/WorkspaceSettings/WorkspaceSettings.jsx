@@ -152,7 +152,6 @@ const WorkspaceSettings = () => {
                       disabled={member.id === user.id}
                       onChange={(e) => handleRoleChange(member.id, e.target.value)}
                       className="member-role-select"
-                      title={member.id === user.id ? "You cannot modify your own role" : "Change member role"}
                     >
                       <option value="ADMIN">Admin</option>
                       <option value="ANALYST">Analyst</option>
