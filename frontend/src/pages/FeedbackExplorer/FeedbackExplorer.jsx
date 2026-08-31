@@ -463,53 +463,21 @@ const FeedbackExplorer = () => {
       )}
 
       {/* Filter Toolbar - Desktop (visible on desktop only) */}
-      <div className="glass-card desktop-only filter-toolbar-card">
-        <div className="filter-toolbar-header">
-          <div className="filter-search-wrapper">
-            <input 
-              type="text" 
-              value={searchInput} 
-              onChange={(e) => setSearchInput(e.target.value)} 
-              placeholder="Search feedback content or customer..."
-              className="filter-search-input"
-            />
-          </div>
-
-          <div className="filter-date-inputs">
-            <input 
-              type="date" 
-              value={fromInput} 
-              onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value, page: 1 }); }}
-              className="filter-date-picker"
-              title="From date"
-            />
-            <span className="filter-date-sep">to</span>
-            <input 
-              type="date" 
-              value={toInput} 
-              onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value, page: 1 }); }}
-              className="filter-date-picker"
-              title="To date"
-            />
-          </div>
-
-          {activeFiltersCount > 0 && (
-            <button 
-              onClick={handleResetFilters} 
-              className="btn btn-secondary filter-clear-btn"
-            >
-              Clear Filters
-            </button>
-          )}
+      <div className="glass-card desktop-only" style={{ padding: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '24px' }}>
+        <div style={{ flex: '2 1 240px', minWidth: '200px' }}>
+          <label className="form-label">Search Content</label>
+          <input 
+            type="text" 
+            value={searchInput} 
+            onChange={(e) => setSearchInput(e.target.value)} 
+            placeholder="Search feedback..."
+          />
         </div>
 
-        <div className="filter-pills-row">
-          <select 
-            value={channel} 
-            onChange={(e) => { updateParams({ channel: e.target.value, page: 1 }); }}
-            className="filter-pill-select"
-          >
-            <option value="">Channel ▾</option>
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Channel</label>
+          <select value={channel} onChange={(e) => { updateParams({ channel: e.target.value, page: 1 }); }}>
+            <option value="">All Channels</option>
             <option value="CSV Import">CSV Import</option>
             <option value="Manual Ingest">Manual Entry</option>
             <option value="Slack Chat">Slack Chat</option>
@@ -522,63 +490,94 @@ const FeedbackExplorer = () => {
             <option value="Sales Call Note">Sales Call Note</option>
             <option value="Community Post">Community Post</option>
           </select>
+        </div>
 
-          <select 
-            value={sentiment} 
-            onChange={(e) => { updateParams({ sentiment: e.target.value, page: 1 }); }}
-            className="filter-pill-select"
-          >
-            <option value="">Sentiment ▾</option>
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Sentiment</label>
+          <select value={sentiment} onChange={(e) => { updateParams({ sentiment: e.target.value, page: 1 }); }}>
+            <option value="">All Sentiments</option>
             <option value="POS">Positive</option>
             <option value="NEU">Neutral</option>
             <option value="NEG">Negative</option>
           </select>
+        </div>
 
-          <select 
-            value={theme} 
-            onChange={(e) => { updateParams({ theme: e.target.value, page: 1 }); }}
-            className="filter-pill-select"
-          >
-            <option value="">Categories ▾</option>
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Theme</label>
+          <select value={theme} onChange={(e) => { updateParams({ theme: e.target.value, page: 1 }); }}>
+            <option value="">All Themes</option>
             {themesList.map((t) => (
               <option key={t.id} value={t.name}>{t.name}</option>
             ))}
           </select>
+        </div>
 
-          <select 
-            value={status} 
-            onChange={(e) => { updateParams({ status: e.target.value, page: 1 }); }}
-            className="filter-pill-select"
-          >
-            <option value="">Status ▾</option>
+        <div style={{ flex: '1 1 150px' }}>
+          <label className="form-label">Status</label>
+          <select value={status} onChange={(e) => { updateParams({ status: e.target.value, page: 1 }); }}>
+            <option value="">All Statuses</option>
             <option value="NEW">New</option>
             <option value="REVIEWED">Reviewed</option>
             <option value="ACTIONED">Actioned</option>
           </select>
         </div>
+
+        <div style={{ flex: '1 1 130px' }}>
+          <label className="form-label">From</label>
+          <input 
+            type="date" 
+            value={fromInput} 
+            onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value, page: 1 }); }}
+          />
+        </div>
+
+        <div style={{ flex: '1 1 130px' }}>
+          <label className="form-label">To</label>
+          <input 
+            type="date" 
+            value={toInput} 
+            onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value, page: 1 }); }}
+          />
+        </div>
+
+        <div>
+          <button 
+            onClick={handleResetFilters} 
+            className="btn btn-secondary"
+            style={{ height: '42px', padding: '0 16px', whiteSpace: 'nowrap' }}
+          >
+            Clear Filters
+          </button>
+        </div>
       </div>
 
-      {/* Filter Toolbar - Mobile (visible on mobile/tablet only) */}
-      <div className="mobile-only mobile-filter-bar">
-        <div className="mobile-search-wrapper">
+      {/* Filter Toolbar - Mobile (PhonePe Style) */}
+      <div className="mobile-only phonepe-mobile-filter-bar">
+        <div className="phonepe-search-pill">
+          <span className="phonepe-search-icon">🔍</span>
           <input 
             type="text" 
             value={searchInput} 
             onChange={(e) => setSearchInput(e.target.value)} 
             placeholder="Search feedback..."
+            className="phonepe-search-input"
           />
+          <div className="phonepe-search-divider" />
+          <button 
+            type="button"
+            className="phonepe-filter-btn"
+            onClick={() => setIsFilterSheetOpen(true)}
+            aria-label="Open filters"
+          >
+            <span className="phonepe-filter-icon">🎛️</span>
+            {activeFiltersCount > 0 && <span className="phonepe-filter-badge">{activeFiltersCount}</span>}
+          </button>
         </div>
-        <button 
-          className="btn btn-secondary mobile-filter-toggle-btn"
-          onClick={() => setIsFilterSheetOpen(true)}
-        >
-          🔍 Filters {activeFiltersCount > 0 && <span className="badge">{activeFiltersCount}</span>}
-        </button>
         {activeFiltersCount > 0 && (
           <button 
+            type="button"
             onClick={handleResetFilters} 
-            className="btn btn-danger"
-            style={{ height: '42px', padding: '0 12px' }}
+            className="phonepe-clear-btn"
           >
             Clear
           </button>
@@ -756,13 +755,13 @@ const FeedbackExplorer = () => {
                         />
                       </th>
                     )}
-                    <th style={{ width: '40%' }}>FEEDBACK CONTENT</th>
-                    <th>SOURCE</th>
-                    <th>SENTIMENT</th>
-                    <th>THEME</th>
-                    <th style={{ width: '130px' }}>STATUS</th>
-                    <th>DATE</th>
-                    {!isReadOnly && <th style={{ width: '80px', textAlign: 'center' }}>ACTIONS</th>}
+                    <th style={{ width: '40%' }}>Feedback Content</th>
+                    <th>Source</th>
+                    <th>Sentiment</th>
+                    <th>Theme</th>
+                    <th style={{ width: '130px' }}>Status</th>
+                    <th>Date</th>
+                    {!isReadOnly && <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -857,71 +856,86 @@ const FeedbackExplorer = () => {
               </table>
             </div>
 
-            {/* Mobile Cards View */}
-            <div className="mobile-only feedback-card-list">
-              {feedbacks.map((f) => (
-                <div 
-                  key={f.id} 
-                  className={`feedback-mobile-card ${selectedIds.has(f.id) ? 'selected' : ''}`}
-                >
-                  <div className="feedback-mobile-card-header">
-                    <div className="feedback-mobile-card-header-left">
-                      {!isReadOnly && (
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(f.id)}
-                          onChange={() => toggleSelected(f.id)}
-                          disabled={reclassifying}
-                          className="feedback-mobile-card-checkbox"
-                        />
-                      )}
-                      <span className="feedback-mobile-card-channel">
-                        {f.channel.toLowerCase().includes('slack') ? '💬' : 
-                         f.channel.toLowerCase().includes('email') ? '✉️' : 
-                         f.channel.toLowerCase().includes('csv') ? '📂' : '🔌'} {f.channel}
-                      </span>
-                    </div>
-                    <div className="feedback-mobile-card-header-right">
-                      <span className="feedback-mobile-card-date">{formatDate(f.createdAt)}</span>
-                      {!isReadOnly && (
-                        <FeedbackActionsMenu 
-                          feedback={f}
-                          onStatusChange={(status) => handleStatusChange(f.id, status)}
-                          onDelete={() => handleDelete(f.id)}
-                        />
-                      )}
-                    </div>
-                  </div>
+            {/* Mobile View - PhonePe Transaction History Style List */}
+            <div className="mobile-only phonepe-history-container">
+              {/* Summary Row */}
+              <div className="phonepe-summary-row">
+                <span className="phonepe-summary-title">
+                  {channel ? `${channel}` : 'All Customer Feedback'}
+                </span>
+                <span className="phonepe-summary-count">
+                  {pagination ? `${pagination.total} Records` : `${feedbacks.length} Items`} ›
+                </span>
+              </div>
+
+              {/* Transaction-style List Items */}
+              <div className="phonepe-transaction-list">
+                {feedbacks.map((f) => {
+                  const channelIcon = f.channel.toLowerCase().includes('slack') ? '💬' : 
+                                      f.channel.toLowerCase().includes('email') ? '✉️' : 
+                                      f.channel.toLowerCase().includes('csv') ? '📂' : '🔌';
                   
-                  <div className="feedback-mobile-card-body">
-                    {f.content}
-                  </div>
-                  
-                  <div className="feedback-mobile-card-footer">
-                    <div className="feedback-mobile-card-tags">
-                      {getSentimentBadge(f.sentiment, f.sentimentScore)}
-                      {f.Themes && f.Themes.map((t) => (
-                        <span 
-                          key={t.id} 
-                          className="badge" 
-                          style={{ 
-                            backgroundColor: `${t.color || '#6366f1'}20`, 
-                            color: t.color || '#6366f1',
-                            border: `1px solid ${t.color || '#6366f1'}40`
-                          }}
-                        >
-                          {t.name}
-                        </span>
-                      ))}
+                  return (
+                    <div 
+                      key={f.id} 
+                      className={`phonepe-transaction-item ${selectedIds.has(f.id) ? 'selected' : ''}`}
+                    >
+                      {/* Left: Circle Avatar Icon */}
+                      <div className="phonepe-item-icon-wrapper">
+                        {!isReadOnly ? (
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(f.id)}
+                            onChange={() => toggleSelected(f.id)}
+                            disabled={reclassifying}
+                            className="phonepe-item-checkbox"
+                          />
+                        ) : null}
+                        <div className="phonepe-item-avatar">
+                          {channelIcon}
+                        </div>
+                      </div>
+
+                      {/* Middle: Content & Source info */}
+                      <div className="phonepe-item-content">
+                        <div className="phonepe-item-header">
+                          <span className="phonepe-item-channel">{f.channel}</span>
+                          {f.customerLabel && <span className="phonepe-item-customer">• {f.customerLabel}</span>}
+                        </div>
+                        
+                        <p className="phonepe-item-text">{f.content}</p>
+                        
+                        <div className="phonepe-item-footer font-meta">
+                          <span className="phonepe-item-date">{formatDate(f.createdAt)}</span>
+                          {f.Themes && f.Themes.length > 0 && (
+                            <span className="phonepe-item-theme-tag">
+                              • {f.Themes[0].name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Sentiment Badge & Actions */}
+                      <div className="phonepe-item-right">
+                        <div className="phonepe-item-badge">
+                          {getSentimentBadge(f.sentiment, f.sentimentScore)}
+                        </div>
+                        
+                        <div className="phonepe-item-status-actions">
+                          <StatusBadge status={f.status} />
+                          {!isReadOnly && (
+                            <FeedbackActionsMenu 
+                              feedback={f}
+                              onStatusChange={(status) => handleStatusChange(f.id, status)}
+                              onDelete={() => handleDelete(f.id)}
+                            />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="feedback-mobile-card-metadata">
-                      <span>Customer: <strong>{f.customerLabel || 'Anonymous'}</strong></span>
-                      <StatusBadge status={f.status} />
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
 
             {/* Pagination footer */}
