@@ -427,7 +427,7 @@
 .pagination-controls-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   max-width: 100%;
 }
 
@@ -435,19 +435,21 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  overflow-x: auto;
-  max-width: 100%;
   padding: 2px 0;
-  -webkit-overflow-scrolling: touch;
 }
 
-.pagination-numbers-scroll::-webkit-scrollbar {
-  height: 3px;
-}
-
-.pagination-numbers-scroll::-webkit-scrollbar-thumb {
-  background: var(--border-light, rgba(255, 255, 255, 0.2));
-  border-radius: 4px;
+.pagination-num-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 @media (max-width: 575.98px) {
@@ -466,6 +468,19 @@
   .pagination-controls-wrapper {
     justify-content: center;
     width: 100%;
+    gap: 4px;
+  }
+
+  .pagination-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .pagination-num-btn {
+    min-width: 32px;
+    height: 34px;
+    padding: 0 6px !important;
+    font-size: 12px;
   }
 
   .phonepe-transaction-item {

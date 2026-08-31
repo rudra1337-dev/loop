@@ -428,12 +428,11 @@ const FeedbackExplorer = () => {
       pages.push(
         <button
           key={i}
-          className={`pagination-btn ${i === page ? 'active' : ''}`}
+          className={`pagination-btn pagination-num-btn ${i === page ? 'active' : ''}`}
           style={{
             backgroundColor: i === page ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.03)',
             color: i === page ? '#fff' : 'var(--text-secondary)',
             border: i === page ? '1px solid var(--color-primary)' : '1px solid var(--border-light)',
-            margin: '0 4px',
             fontWeight: i === page ? '600' : 'normal'
           }}
           onClick={() => updateParams({ page: i })}
