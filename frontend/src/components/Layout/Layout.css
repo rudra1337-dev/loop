@@ -3,6 +3,9 @@
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 @media (min-width: 992px) {
@@ -145,6 +148,9 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (max-width: 575.98px) {
@@ -168,18 +174,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
   z-index: 1001;
-}
-
-@media (max-width: 991.98px) {
-  .app-container {
-    padding-top: 64px;
-  }
 }
 
 .mobile-header-brand {
