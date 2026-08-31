@@ -896,40 +896,43 @@ const FeedbackExplorer = () => {
                         </div>
                       </div>
 
-                      {/* Middle: Content & Source info */}
+                      {/* Middle & Main Content */}
                       <div className="phonepe-item-content">
+                        {/* Header: Channel, Customer & Sentiment Badge */}
                         <div className="phonepe-item-header">
-                          <span className="phonepe-item-channel">{f.channel}</span>
-                          {f.customerLabel && <span className="phonepe-item-customer">• {f.customerLabel}</span>}
+                          <div className="phonepe-item-header-left">
+                            <span className="phonepe-item-channel">{f.channel}</span>
+                            {f.customerLabel && <span className="phonepe-item-customer">• {f.customerLabel}</span>}
+                          </div>
+                          <div className="phonepe-item-badge">
+                            {getSentimentBadge(f.sentiment, f.sentimentScore)}
+                          </div>
                         </div>
                         
+                        {/* Feedback snippet */}
                         <p className="phonepe-item-text">{f.content}</p>
                         
-                        <div className="phonepe-item-footer font-meta">
-                          <span className="phonepe-item-date">{formatDate(f.createdAt)}</span>
-                          {f.Themes && f.Themes.length > 0 && (
-                            <span className="phonepe-item-theme-tag">
-                              • {f.Themes[0].name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                        {/* Footer: Date, Theme & Status Actions */}
+                        <div className="phonepe-item-footer">
+                          <div className="phonepe-item-footer-left">
+                            <span className="phonepe-item-date">{formatDate(f.createdAt)}</span>
+                            {f.Themes && f.Themes.length > 0 && (
+                              <span className="phonepe-item-theme-tag">
+                                • {f.Themes[0].name}
+                              </span>
+                            )}
+                          </div>
 
-                      {/* Right: Sentiment Badge & Actions */}
-                      <div className="phonepe-item-right">
-                        <div className="phonepe-item-badge">
-                          {getSentimentBadge(f.sentiment, f.sentimentScore)}
-                        </div>
-                        
-                        <div className="phonepe-item-status-actions">
-                          <StatusBadge status={f.status} />
-                          {!isReadOnly && (
-                            <FeedbackActionsMenu 
-                              feedback={f}
-                              onStatusChange={(status) => handleStatusChange(f.id, status)}
-                              onDelete={() => handleDelete(f.id)}
-                            />
-                          )}
+                          <div className="phonepe-item-status-actions">
+                            <StatusBadge status={f.status} />
+                            {!isReadOnly && (
+                              <FeedbackActionsMenu 
+                                feedback={f}
+                                onStatusChange={(status) => handleStatusChange(f.id, status)}
+                                onDelete={() => handleDelete(f.id)}
+                              />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -939,12 +942,12 @@ const FeedbackExplorer = () => {
             </div>
 
             {/* Pagination footer */}
-            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            <div className="feedback-pagination-container">
+              <span className="pagination-info-text">
                 Showing <strong>{showingStart}</strong>–<strong>{showingEnd}</strong> of <strong>{pagination.total}</strong> feedback items
               </span>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="pagination-controls-wrapper">
                 <button 
                   className="pagination-btn"
                   disabled={page <= 1}
@@ -953,7 +956,9 @@ const FeedbackExplorer = () => {
                   ← Previous
                 </button>
                 
-                {renderPageNumbers()}
+                <div className="pagination-numbers-scroll">
+                  {renderPageNumbers()}
+                </div>
 
                 <button 
                   className="pagination-btn"
