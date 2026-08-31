@@ -1,43 +1,44 @@
+/* Compact Dashboard Filters Toolbar */
 .filters-toolbar {
-  padding: 16px 20px;
-  margin-bottom: 24px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
   min-width: 0;
   max-width: 100%;
+  border-radius: 14px;
 }
 
 .filters-layout {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-end;
   flex-wrap: wrap;
   min-width: 0;
 }
 
 .filter-item {
-  flex: 1 1 140px;
+  flex: 1 1 125px;
   min-width: 0;
 }
 
-.filter-item-custom {
-  flex: 1 1 130px;
-}
-
-.filter-item .form-label,
-.filter-item-custom .form-label {
+.filter-item .form-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
   margin-bottom: 4px;
-  display: block;
 }
 
 .filter-item select,
-.filter-item-custom input {
-  height: 38px;
-  font-size: 13px;
+.filter-item input {
+  height: 36px;
+  padding: 4px 10px;
+  font-size: 12.5px;
   border-radius: 8px;
+}
+
+.filter-item-custom {
+  flex: 1 1 120px;
 }
 
 .filter-actions {
@@ -46,58 +47,45 @@
 }
 
 .reset-btn {
-  padding: 0 16px;
-  height: 38px;
-  white-space: nowrap;
-  font-size: 13px;
+  padding: 0 14px;
+  height: 36px;
+  font-size: 12.5px;
   font-weight: 500;
   border-radius: 8px;
+  white-space: nowrap;
 }
 
-/* Compact Mobile Grid View */
 @media (max-width: 768px) {
   .filters-toolbar {
     padding: 12px 14px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     border-radius: 12px;
   }
 
   .filters-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px 8px;
-    align-items: end;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
-
-  .filter-item,
-  .filter-item-custom {
-    flex: unset;
+  
+  .filter-item {
+    flex: none;
     width: 100%;
-    min-width: 0;
   }
-
-  .filter-item .form-label,
-  .filter-item-custom .form-label {
-    font-size: 10px;
-    margin-bottom: 2px;
-  }
-
-  .filter-item select,
-  .filter-item-custom input {
-    height: 34px;
-    padding: 4px 8px;
-    font-size: 12px;
+  
+  .filter-item-custom {
+    flex: none;
+    width: 100%;
   }
 
   .filter-actions {
-    width: 100%;
+    grid-column: span 2;
   }
 
   .reset-btn {
     width: 100%;
+    margin-top: 2px;
     height: 34px;
-    padding: 0 8px;
     font-size: 12px;
-    margin-top: 0;
   }
 }
