@@ -20,10 +20,23 @@
 
 .workspace-members-table {
   margin: 0;
+  width: 100%;
+}
+
+.workspace-members-table .member-info-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-members-table .member-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .workspace-members-table .member-email {
-  color: var(--text-secondary);
+  color: var(--text-muted);
+  font-size: 12.5px;
 }
 
 .workspace-members-table .action-col {
@@ -152,7 +165,80 @@
     justify-content: flex-end;
   }
 
+  /* Remove horizontal scrollbar for Workspace Members on mobile */
+  .workspace-members-table {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .workspace-members-table table {
+    display: block;
+    width: 100%;
+  }
+
+  .workspace-members-table thead {
+    display: none;
+  }
+
+  .workspace-members-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .workspace-members-table tbody tr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .workspace-members-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .workspace-members-table td {
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .workspace-members-table .member-info-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .workspace-members-table .member-name {
+    font-size: 13.5px;
+  }
+
+  .workspace-members-table .member-email {
+    font-size: 11.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+  }
+
+  .workspace-members-table .member-role-col {
+    flex-shrink: 0;
+  }
+
+  .workspace-members-table select.member-role-select {
+    width: 85px;
+    min-width: 85px;
+    height: 30px;
+    padding: 4px 14px 4px 6px;
+    font-size: 12px;
+  }
+
   .workspace-members-table .action-col {
     width: auto;
+    flex-shrink: 0;
+    text-align: right;
   }
 }

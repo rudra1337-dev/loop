@@ -135,18 +135,20 @@ const WorkspaceSettings = () => {
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
+                <th className="member-name-th">Name</th>
+                <th className="member-email-th">Email</th>
+                <th className="member-role-th">Role</th>
                 <th className="action-col"></th>
               </tr>
             </thead>
             <tbody>
               {members.map((member) => (
                 <tr key={member.id}>
-                  <td><strong>{member.name}</strong></td>
-                  <td className="member-email">{member.email}</td>
-                  <td>
+                  <td className="member-info-col">
+                    <strong className="member-name">{member.name}</strong>
+                    <span className="member-email">{member.email}</span>
+                  </td>
+                  <td className="member-role-col">
                     <select
                       value={member.role}
                       disabled={member.id === user.id}
