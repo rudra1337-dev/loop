@@ -275,21 +275,51 @@ const IngestFeedback = () => {
             <div className="table-container csv-sample-table-container">
               <table className="csv-sample-table">
                 <colgroup>
-                  <col style={{ width: '28%' }} />
+                  <col style={{ width: '26%' }} />
                   <col style={{ width: '12%' }} />
                   <col style={{ width: '22%' }} />
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '14%' }} />
                   <col style={{ width: '14%' }} />
                 </colgroup>
                 <thead>
                   <tr>
-                    <th>description <span className="sample-tag">(required)</span></th>
-                    <th>channel <span className="sample-tag">(required)</span></th>
-                    <th>customerLabel <span className="sample-tag">(optional)</span></th>
-                    <th>sentiment <span className="sample-tag">(optional)</span></th>
-                    <th>sentimentScore <span className="sample-tag">(optional)</span></th>
-                    <th>theme <span className="sample-tag">(optional)</span></th>
+                    <th>
+                      <div className="th-content">
+                        <span className="th-title">description</span>
+                        <span className="sample-tag required">(required)</span>
+                      </div>
+                    </th>
+                    <th>
+                      <div className="th-content">
+                        <span className="th-title">channel</span>
+                        <span className="sample-tag required">(required)</span>
+                      </div>
+                    </th>
+                    <th>
+                      <div className="th-content">
+                        <span className="th-title">customerLabel</span>
+                        <span className="sample-tag optional">(optional)</span>
+                      </div>
+                    </th>
+                    <th>
+                      <div className="th-content">
+                        <span className="th-title">sentiment</span>
+                        <span className="sample-tag optional">(optional)</span>
+                      </div>
+                    </th>
+                    <th>
+                      <div className="th-content">
+                        <span className="th-title">sentimentScore</span>
+                        <span className="sample-tag optional">(optional)</span>
+                      </div>
+                    </th>
+                    <th>
+                      <div className="th-content">
+                        <span className="th-title">theme</span>
+                        <span className="sample-tag optional">(optional)</span>
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

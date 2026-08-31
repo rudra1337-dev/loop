@@ -146,55 +146,73 @@
   }
 }
 
-/* CSV Sample Format Table - Static Non-Scrolling Fit */
+/* CSV Sample Format Table - Clean & Non-Overlapping Layout */
 .csv-sample-table-container {
-  overflow-x: hidden !important;
-  width: 100% !important;
+  overflow-x: auto;
+  width: 100%;
   margin: 0 !important;
   border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
 }
 
 .csv-sample-table {
-  width: 100% !important;
-  table-layout: fixed !important;
-  font-size: 11.5px;
+  width: 100%;
+  min-width: 660px;
+  border-collapse: collapse;
+  font-size: 12.5px;
 }
 
 .csv-sample-table th {
-  padding: 10px 6px !important;
-  font-size: 11.5px !important;
+  padding: 10px 12px !important;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.csv-sample-table .th-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.csv-sample-table .th-title {
+  font-family: var(--font-mono, monospace);
   font-weight: 600;
   color: var(--text-primary);
-  vertical-align: top;
-  line-height: 1.3;
+  font-size: 12.5px;
+}
+
+.csv-sample-table .sample-tag {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.csv-sample-table .sample-tag.required {
+  color: var(--color-neg, #ef4444);
+}
+
+.csv-sample-table .sample-tag.optional {
+  color: var(--text-muted);
 }
 
 .csv-sample-table td {
-  padding: 10px 6px !important;
+  padding: 10px 12px !important;
+  font-size: 12px !important;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
   word-break: break-word;
   overflow-wrap: anywhere;
-  font-size: 11.5px !important;
-  vertical-align: top;
-  line-height: 1.4;
 }
 
-.csv-sample-table th .sample-tag {
-  display: block;
-  font-weight: 400;
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-@media (max-width: 768px) {
-  .csv-sample-table th,
-  .csv-sample-table td {
-    padding: 6px 3px !important;
-    font-size: 10px !important;
-  }
-
-  .csv-sample-table th .sample-tag {
-    font-size: 8.5px;
+@media (min-width: 992px) {
+  .csv-sample-table {
+    min-width: 0;
+    table-layout: fixed;
   }
 }
+
 
