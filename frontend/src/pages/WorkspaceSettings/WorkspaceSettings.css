@@ -1,4 +1,4 @@
-/* Workspace Settings Page Compact Styles */
+/* Workspace Settings Page Styles - Compact High-Density Theme */
 .workspace-settings-page {
   width: 100%;
   display: flex;
@@ -7,14 +7,23 @@
 }
 
 .workspace-settings-page .glass-card {
-  padding: 16px 20px;
+  padding: 18px 20px;
+  margin-bottom: 0;
   border-radius: 12px;
 }
 
 .workspace-settings-page h2 {
-  font-size: 16.5px;
-  font-weight: 700;
-  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.workspace-settings-page .subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
 }
 
 .rename-form {
@@ -25,32 +34,56 @@
 .rename-input {
   flex: 1;
   height: 38px;
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 13.5px;
-  border-radius: 8px;
 }
 
-.rename-form .btn-primary {
+.workspace-settings-page .btn-primary {
   height: 38px;
-  padding: 6px 16px;
+  padding: 8px 16px;
   font-size: 13px;
+  font-weight: 600;
   border-radius: 8px;
 }
 
 .rename-success-msg {
   color: var(--color-pos);
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 12.5px;
 }
 
+/* Workspace Members Table */
 .workspace-members-table {
   margin: 0;
   width: 100%;
 }
 
+.workspace-members-table table {
+  width: 100%;
+}
+
+.workspace-members-table th {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.workspace-members-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.workspace-members-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .workspace-members-table .member-info-col {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .workspace-members-table .member-name {
@@ -95,30 +128,23 @@
 }
 
 .btn-sm {
-  padding: 4px 10px;
+  padding: 5px 10px;
   font-size: 12px;
   border-radius: 6px;
 }
 
+/* Invites Section */
 .invite-form {
   display: flex;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .invite-form select {
-  width: 150px;
+  width: 140px;
   height: 38px;
-  padding: 6px 10px;
   font-size: 13px;
-  border-radius: 8px;
-}
-
-.invite-form .btn-primary {
-  height: 38px;
-  padding: 6px 16px;
-  font-size: 13px;
-  border-radius: 8px;
+  padding: 6px 12px;
 }
 
 .empty-invites-text {
@@ -128,9 +154,11 @@
 
 .active-invites-heading {
   font-size: 12.5px;
-  font-weight: bold;
+  font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .invite-list {
@@ -139,6 +167,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin: 0;
 }
 
 .invite-item {
@@ -163,12 +192,12 @@
   border: none;
   background: rgba(255, 255, 255, 0.1);
   margin-right: 0;
-  padding: 2px 8px;
   font-size: 11px;
+  padding: 3px 8px;
 }
 
 .invite-code {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-muted);
   font-family: monospace;
 }
@@ -179,16 +208,24 @@
 }
 
 @media (max-width: 575.98px) {
+  .workspace-settings-page {
+    gap: 12px;
+  }
+
   .workspace-settings-page .glass-card {
     padding: 14px 14px;
+    border-radius: 12px;
   }
 
   .rename-form {
     flex-direction: column;
+    gap: 8px;
   }
   
   .invite-form {
     flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
   }
   
   .invite-form select {
@@ -198,6 +235,7 @@
   .invite-item {
     flex-direction: column;
     align-items: stretch;
+    padding: 10px 12px;
   }
   
   .invite-info {
@@ -208,7 +246,7 @@
     justify-content: flex-end;
   }
 
-  /* Remove horizontal scrollbar for Workspace Members on mobile */
+  /* Non-scrolling mobile layout */
   .workspace-members-table {
     overflow-x: hidden !important;
     width: 100% !important;
@@ -234,7 +272,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 10px 0;
     border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
     gap: 8px;
     width: 100%;
@@ -260,11 +298,11 @@
   }
 
   .workspace-members-table .member-email {
-    font-size: 11px;
+    font-size: 11.5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 140px;
+    max-width: 150px;
   }
 
   .workspace-members-table .member-role-col {
@@ -272,10 +310,10 @@
   }
 
   .workspace-members-table select.member-role-select {
-    width: 80px;
-    min-width: 80px;
+    width: 82px;
+    min-width: 82px;
     height: 28px;
-    padding: 2px 12px 2px 4px;
+    padding: 3px 12px 3px 6px;
     font-size: 11.5px;
   }
 
