@@ -274,6 +274,14 @@ const IngestFeedback = () => {
             </p>
             <div className="table-container csv-sample-table-container">
               <table className="csv-sample-table">
+                <colgroup>
+                  <col style={{ width: '28%' }} />
+                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '22%' }} />
+                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '14%' }} />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>description <span className="sample-tag">(required)</span></th>
