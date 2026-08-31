@@ -115,7 +115,6 @@ const FeedbackExplorer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1, limit: 10 });
-  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
 
   // Reclassify selection state
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -287,7 +286,6 @@ const FeedbackExplorer = () => {
   // Handle status update
   const handleStatusChange = async (id, newStatus) => {
     try {
-      setStatusUpdatingId(id);
       const res = await updateFeedbackStatus(id, newStatus);
       if (res.data.success) {
         setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
@@ -295,8 +293,6 @@ const FeedbackExplorer = () => {
     } catch (err) {
       logger.error('Failed to update status', { err, id, newStatus });
       alert(err.response?.data?.error || 'Failed to update status. Please try again.');
-    } finally {
-      setStatusUpdatingId(null);
     }
   };
 
@@ -814,28 +810,7 @@ const FeedbackExplorer = () => {
                         </div>
                       </td>
                       <td>
-                        {isReadOnly ? (
-                          <StatusBadge status={f.status} />
-                        ) : (
-                          <select 
-                            value={f.status} 
-                            disabled={statusUpdatingId === f.id}
-                            onChange={(e) => handleStatusChange(f.id, e.target.value)}
-                            style={{ 
-                              padding: '6px 10px', 
-                              fontSize: '12px', 
-                              width: '100%', 
-                              minWidth: '110px',
-                              color: 'var(--text-primary)',
-                              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                              borderColor: statusUpdatingId === f.id ? 'var(--color-primary)' : 'var(--border-light)'
-                            }}
-                          >
-                            <option value="NEW">NEW</option>
-                            <option value="REVIEWED">REVIEWED</option>
-                            <option value="ACTIONED">ACTIONED</option>
-                          </select>
-                        )}
+                        <StatusBadge status={f.status} />
                       </td>
                       <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
                         {formatDate(f.createdAt)}
