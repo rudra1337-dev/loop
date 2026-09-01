@@ -1,0 +1,325 @@
+/* Workspace Settings Page Styles - Compact High-Density Theme */
+.workspace-settings-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.workspace-settings-page .glass-card {
+  padding: 18px 20px;
+  margin-bottom: 0;
+  border-radius: 12px;
+}
+
+.workspace-settings-page h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.workspace-settings-page .subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.rename-form {
+  display: flex;
+  gap: 10px;
+}
+
+.rename-input {
+  flex: 1;
+  height: 38px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+}
+
+.workspace-settings-page .btn-primary {
+  height: 38px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.rename-success-msg {
+  color: var(--color-pos);
+  margin-top: 8px;
+  font-size: 12.5px;
+}
+
+/* Workspace Members Table */
+.workspace-members-table {
+  margin: 0;
+  width: 100%;
+}
+
+.workspace-members-table table {
+  width: 100%;
+}
+
+.workspace-members-table th {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.workspace-members-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.workspace-members-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.workspace-members-table .member-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.workspace-members-table .member-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.workspace-members-table .member-email {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.workspace-members-table .action-col {
+  width: 90px;
+  text-align: right;
+}
+
+.workspace-members-table select.member-role-select {
+  padding: 4px 18px 4px 8px;
+  font-size: 12.5px;
+  min-width: 90px;
+  width: 90px;
+  height: 30px;
+  color: var(--color-text);
+  background-color: var(--bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.workspace-members-table select.member-role-select:disabled {
+  opacity: 0.6;
+  color: var(--color-text-secondary);
+  -webkit-text-fill-color: var(--color-text-secondary);
+  background-color: var(--bg-input);
+  cursor: not-allowed;
+}
+
+.workspace-members-table select.member-role-select option {
+  background-color: var(--bg-main);
+  color: var(--color-text);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* Invites Section */
+.invite-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.invite-form select {
+  width: 140px;
+  height: 38px;
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.empty-invites-text {
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.active-invites-heading {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.invite-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.invite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  gap: 10px;
+}
+
+.invite-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invite-role-badge {
+  color: var(--text-primary);
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  margin-right: 0;
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+.invite-code {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 6px;
+}
+
+@media (max-width: 575.98px) {
+  .workspace-settings-page {
+    gap: 12px;
+  }
+
+  .workspace-settings-page .glass-card {
+    padding: 14px 14px;
+    border-radius: 12px;
+  }
+
+  .rename-form {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .invite-form {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  
+  .invite-form select {
+    width: 100%;
+  }
+  
+  .invite-item {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 12px;
+  }
+  
+  .invite-info {
+    justify-content: space-between;
+  }
+  
+  .invite-actions {
+    justify-content: flex-end;
+  }
+
+  /* Non-scrolling mobile layout */
+  .workspace-members-table {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .workspace-members-table table {
+    display: block;
+    width: 100%;
+  }
+
+  .workspace-members-table thead {
+    display: none;
+  }
+
+  .workspace-members-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .workspace-members-table tbody tr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .workspace-members-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .workspace-members-table td {
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .workspace-members-table .member-info-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .workspace-members-table .member-name {
+    font-size: 13px;
+  }
+
+  .workspace-members-table .member-email {
+    font-size: 11.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+  }
+
+  .workspace-members-table .member-role-col {
+    flex-shrink: 0;
+  }
+
+  .workspace-members-table select.member-role-select {
+    width: 82px;
+    min-width: 82px;
+    height: 28px;
+    padding: 3px 12px 3px 6px;
+    font-size: 11.5px;
+  }
+
+  .workspace-members-table .action-col {
+    width: auto;
+    flex-shrink: 0;
+    text-align: right;
+  }
+}

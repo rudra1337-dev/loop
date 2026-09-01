@@ -33,6 +33,7 @@ const WorkspaceSettings = () => {
       clearError();
       clearRenameSuccess();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -49,7 +50,7 @@ const WorkspaceSettings = () => {
     try {
       await rename(workspaceName.trim());
       await refetch(); // pulls the new name into Redux so Dashboard updates too
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     } finally {
       setRenaming(false);
@@ -60,7 +61,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await updateRole(userId, newRole);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };
@@ -70,7 +71,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await removeMember(userId);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };
@@ -79,7 +80,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await createInvite(newInviteRole);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };
@@ -88,7 +89,7 @@ const WorkspaceSettings = () => {
     clearError();
     try {
       await revokeInvite(id);
-    } catch (err) {
+    } catch {
       // Error is caught and stored in Redux workspace state
     }
   };
@@ -102,7 +103,7 @@ const WorkspaceSettings = () => {
   if (loading && !workspace) return <p>Loading workspace settings...</p>;
 
   return (
-    <div style={{ maxWidth: '800px' }}>
+    <div className="workspace-settings-page">
       <PageHeader
         title="Workspace Settings"
         subtitle={`Manage member permissions and invite collaborators to ${user?.workspaceName}`}
@@ -112,54 +113,55 @@ const WorkspaceSettings = () => {
 
       <div className="glass-card">
         <h2>Rename Workspace</h2>
-        <form onSubmit={handleRename} style={{ display: 'flex', gap: '12px' }}>
+        <form onSubmit={handleRename} className="rename-form">
           <input
             type="text"
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             required
             placeholder="Workspace Name"
-            style={{ flex: 1 }}
+            className="rename-input"
           />
           <button type="submit" className="btn btn-primary" disabled={renaming}>
             {renaming ? 'Saving...' : 'Rename'}
           </button>
         </form>
-        {renameSuccess && <p style={{ color: 'var(--color-pos)', marginTop: '8px', fontSize: '13px' }}>✓ Workspace renamed successfully!</p>}
+        {renameSuccess && <p className="rename-success-msg">✓ Workspace renamed successfully!</p>}
       </div>
 
       <div className="glass-card">
         <h2>Workspace Members</h2>
-        <div className="table-container" style={{ margin: 0 }}>
+        <div className="table-container workspace-members-table">
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th style={{ width: '100px' }}></th>
+                <th className="member-name-th">Name & Email</th>
+                <th className="member-role-th">Role</th>
+                <th className="action-col"></th>
               </tr>
             </thead>
             <tbody>
               {members.map((member) => (
                 <tr key={member.id}>
-                  <td><strong>{member.name}</strong></td>
-                  <td style={{ color: 'var(--text-secondary)' }}>{member.email}</td>
-                  <td>
+                  <td className="member-info-col">
+                    <strong className="member-name">{member.name}</strong>
+                    <span className="member-email">{member.email}</span>
+                  </td>
+                  <td className="member-role-col">
                     <select
                       value={member.role}
                       disabled={member.id === user.id}
                       onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                      style={{ padding: '6px 12px', fontSize: '13px' }}
+                      className="member-role-select"
                     >
                       <option value="ADMIN">Admin</option>
                       <option value="ANALYST">Analyst</option>
                       <option value="VIEWER">Viewer</option>
                     </select>
                   </td>
-                  <td>
+                  <td className="action-col">
                     {member.id !== user.id && (
-                      <button onClick={() => handleRemove(member.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                      <button onClick={() => handleRemove(member.id)} className="btn btn-danger btn-sm">
                         Remove
                       </button>
                     )}
@@ -174,11 +176,10 @@ const WorkspaceSettings = () => {
       <div className="glass-card">
         <h2>Invite Collaborators</h2>
         <p className="subtitle">Generate secure invite links with predefined roles for new team members.</p>
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        <div className="invite-form">
           <select 
             value={newInviteRole} 
             onChange={(e) => setNewInviteRole(e.target.value)}
-            style={{ width: '160px' }}
           >
             <option value="ADMIN">Admin</option>
             <option value="ANALYST">Analyst</option>
@@ -190,24 +191,24 @@ const WorkspaceSettings = () => {
         </div>
 
         {invites.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No active invite links generated yet.</p>
+          <p className="empty-invites-text">No active invite links generated yet.</p>
         ) : (
           <div>
-            <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '8px' }}>Active Invites</h3>
-            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <h3 className="active-invites-heading">Active Invites</h3>
+            <ul className="invite-list">
               {invites.map((invite) => (
-                <li key={invite.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-light)', borderRadius: '8px' }}>
-                  <div>
-                    <span className="badge badge-neu" style={{ color: 'var(--text-primary)', border: 'none', background: 'rgba(255,255,255,0.1)', marginRight: '12px' }}>
+                <li key={invite.id} className="invite-item">
+                  <div className="invite-info">
+                    <span className="badge badge-neu invite-role-badge">
                       {invite.role}
                     </span>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Code: {invite.code}</span>
+                    <span className="invite-code">Code: {invite.code}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => copyInviteLink(invite.code)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                  <div className="invite-actions">
+                    <button onClick={() => copyInviteLink(invite.code)} className="btn btn-secondary btn-sm">
                       Copy
                     </button>
-                    <button onClick={() => handleRevoke(invite.id)} className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                    <button onClick={() => handleRevoke(invite.id)} className="btn btn-danger btn-sm">
                       Revoke
                     </button>
                   </div>

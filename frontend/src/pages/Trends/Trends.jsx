@@ -68,7 +68,7 @@ const Trends = () => {
    * Load trends data.
    *
    * Using useCallback keeps the function stable until `period`
-   * changes and allows the Refresh button to call it directly.
+   * changes.
    */
   const loadTrends = useCallback(async () => {
     try {

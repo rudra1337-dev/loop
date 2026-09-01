@@ -5,6 +5,9 @@ import {
   getReports,
   exportReportPDF,
 } from '../../services/reportService';
+import PageHeader from '../../components/common/PageHeader/PageHeader';
+import ErrorState from '../../components/common/ErrorState/ErrorState';
+import EmptyState from '../../components/common/EmptyState/EmptyState';
 import logger from '../../utils/logger';
 import './Reports.css';
 
@@ -181,218 +184,191 @@ function Reports() {
     } finally {
       setGenerating(false);
     }
-  };
+  };  return (
+    <div className="reports-page">
+      {/* Page Header */}
+      <PageHeader
+        title="Voice of Customer Reports"
+        subtitle="Generate leadership-ready reports backed by real feedback data."
+      />
 
-  return (
-    <div className="reports-page py-4">
-      <div className="container-fluid px-0">
-        <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
-          <div>
-            <h1 className="h3 mb-1">Voice of Customer Reports</h1>
-            <p className="text-body-secondary mb-0">
-              Generate leadership-ready reports backed by real feedback data.
-            </p>
-          </div>
+      <div className="glass-card report-generator-card">
+        <h2>Generate a Report</h2>
+        <p className="subtitle report-generator-subtitle">
+          Choose a predefined period or set a custom range.
+        </p>
+
+        <div className="d-flex flex-wrap gap-2 mb-4" role="group" aria-label="Report period presets">
+          {PRESETS.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              className={`btn ${
+                selectedPreset === preset.label
+                  ? 'btn-primary'
+                  : 'btn-secondary'
+              }`}
+              onClick={() => selectPreset(preset)}
+            >
+              {preset.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`btn ${
+              selectedPreset === 'Custom'
+                ? 'btn-primary'
+                : 'btn-secondary'
+            }`}
+            onClick={() => setSelectedPreset('Custom')}
+          >
+            Custom range
+          </button>
         </div>
 
-        <div className="card shadow-sm border-0 mb-4">
-          <div className="card-body p-4">
-            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <div>
-                <h2 className="h5 mb-1">Generate a report</h2>
-                <p className="small text-body-secondary mb-0">
-                  Choose a predefined period or set a custom range.
-                </p>
-              </div>
+        <form onSubmit={handleGenerate}>
+          <div className="row g-3 align-items-end">
+            <div className="col-12 col-md-4">
+              <label htmlFor="report-period-start" className="form-label">
+                From
+              </label>
+              <input
+                id="report-period-start"
+                type="date"
+                value={periodStart}
+                max={periodEnd}
+                onChange={handleCustomDateChange(setPeriodStart)}
+                required
+              />
             </div>
 
-            <div className="d-flex flex-wrap gap-2 mb-4" role="group" aria-label="Report period presets">
-              {PRESETS.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  className={`btn ${
-                    selectedPreset === preset.label
-                      ? 'btn-primary'
-                      : 'btn-outline-secondary'
-                  }`}
-                  onClick={() => selectPreset(preset)}
-                >
-                  {preset.label}
-                </button>
-              ))}
+            <div className="col-12 col-md-4">
+              <label htmlFor="report-period-end" className="form-label">
+                To
+              </label>
+              <input
+                id="report-period-end"
+                type="date"
+                value={periodEnd}
+                max={todayISO()}
+                onChange={handleCustomDateChange(setPeriodEnd)}
+                required
+              />
+            </div>
+
+            <div className="col-12 col-md-4">
               <button
-                type="button"
-                className={`btn ${
-                  selectedPreset === 'Custom'
-                    ? 'btn-primary'
-                    : 'btn-outline-secondary'
-                }`}
-                onClick={() => setSelectedPreset('Custom')}
+                type="submit"
+                className="btn btn-primary w-100 report-generate-btn"
+                disabled={generating}
               >
-                Custom range
+                {generating ? 'Generating…' : 'Generate Report'}
               </button>
             </div>
+          </div>
+        </form>
 
-            <form onSubmit={handleGenerate}>
-              <div className="row g-3 align-items-end">
-                <div className="col-12 col-md-4">
-                  <label htmlFor="report-period-start" className="form-label">
-                    From
-                  </label>
-                  <input
-                    id="report-period-start"
-                    type="date"
-                    className="form-control"
-                    value={periodStart}
-                    max={periodEnd}
-                    onChange={handleCustomDateChange(setPeriodStart)}
-                    required
-                  />
-                </div>
+        {generateError && (
+          <div className="alert alert-error mt-3 mb-0" role="alert">
+            {generateError}
+          </div>
+        )}
+      </div>
 
-                <div className="col-12 col-md-4">
-                  <label htmlFor="report-period-end" className="form-label">
-                    To
-                  </label>
-                  <input
-                    id="report-period-end"
-                    type="date"
-                    className="form-control"
-                    value={periodEnd}
-                    max={todayISO()}
-                    onChange={handleCustomDateChange(setPeriodEnd)}
-                    required
-                  />
-                </div>
-
-                <div className="col-12 col-md-4">
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-100"
-                    disabled={generating}
-                  >
-                    {generating ? 'Generating…' : 'Generate Report'}
-                  </button>
-                </div>
-              </div>
-            </form>
-
-            {generateError && (
-              <div className="alert alert-danger mt-3 mb-0" role="alert">
-                {generateError}
-              </div>
+      <section aria-labelledby="report-history-heading">
+        <div className="report-history-header">
+          <div>
+            <h2 id="report-history-heading" className="report-history-heading">
+              Report History
+            </h2>
+            {pagination && (
+              <p className="subtitle report-history-count">
+                {pagination.total} report{pagination.total === 1 ? '' : 's'} generated
+              </p>
             )}
           </div>
         </div>
 
-        <section aria-labelledby="report-history-heading">
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div>
-              <h2 id="report-history-heading" className="h5 mb-1">
-                Report History
-              </h2>
-              {pagination && (
-                <p className="small text-body-secondary mb-0">
-                  {pagination.total} report{pagination.total === 1 ? '' : 's'} generated
-                </p>
-              )}
-            </div>
+        {listLoading && (
+          <div className="glass-card text-center py-5">
+            <div className="spinner-border spinner-border-sm me-2 text-primary" role="status" aria-hidden="true" />
+            <span className="text-secondary">Loading report history…</span>
           </div>
+        )}
 
-          {listLoading && (
-            <div className="card border-0 shadow-sm">
-              <div className="card-body py-5 text-center text-body-secondary">
-                <div className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                Loading report history…
-              </div>
-            </div>
-          )}
+        {!listLoading && listError && (
+          <ErrorState
+            message={listError}
+            onRetry={() => loadReports(page)}
+          />
+        )}
 
-          {!listLoading && listError && (
-            <div className="alert alert-danger" role="alert">
-              {listError}
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-danger ms-3"
-                onClick={() => loadReports(page)}
-              >
-                Retry
-              </button>
-            </div>
-          )}
+        {!listLoading && !listError && reports.length === 0 && (
+          <EmptyState
+            icon="📄"
+            title="No reports yet"
+            description="Generate your first Voice-of-Customer report above."
+          />
+        )}
 
-          {!listLoading && !listError && reports.length === 0 && (
-            <div className="card border-0 shadow-sm">
-              <div className="card-body py-5 text-center">
-                <div className="fs-1 mb-2" aria-hidden="true">📄</div>
-                <h3 className="h5">No reports yet</h3>
-                <p className="text-body-secondary mb-0">
-                  Generate your first Voice-of-Customer report above.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {!listLoading && !listError && reports.length > 0 && (
-            <>
-              <div className="row g-3">
-                {reports.map((report) => (
-                  <div className="col-12 col-xl-6" key={report.id}>
-                    <article className="card report-history-card h-100 border-0 shadow-sm">
-                      <div className="card-body d-flex flex-column">
-                        <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
-                          <div className="min-w-0">
-                            <h3 className="h6 mb-1 report-history-title">
-                              {report.title}
-                            </h3>
-                            <p className="small text-body-secondary mb-0">
-                              Generated {new Date(report.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <span className="badge text-bg-light border flex-shrink-0">
-                            VoC
-                          </span>
-                        </div>
-
-                        <div className="mt-auto pt-2">
-                          <ReportActions report={report} />
-                        </div>
+        {!listLoading && !listError && reports.length > 0 && (
+          <>
+            <div className="reports-history-list">
+              {reports.map((report) => (
+                <article className="report-history-item-compact" key={report.id}>
+                  <div className="report-item-avatar" aria-hidden="true">
+                    📊
+                  </div>
+                  <div className="report-item-main">
+                    <div className="report-item-header">
+                      <h3 className="report-history-title">
+                        {report.title}
+                      </h3>
+                      <span className="badge badge-neu report-badge">
+                        VoC
+                      </span>
+                    </div>
+                    <div className="report-item-footer">
+                      <span className="report-history-date">
+                        Generated {new Date(report.createdAt).toLocaleDateString()}
+                      </span>
+                      <div className="report-actions-wrapper">
+                        <ReportActions report={report} />
                       </div>
-                    </article>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </article>
+              ))}
+            </div>
 
-              {pagination && pagination.totalPages > 1 && (
-                <nav className="d-flex justify-content-center mt-4" aria-label="Report history pagination">
-                  <div className="btn-group" role="group">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      disabled={page <= 1}
-                      onClick={() => setPage((current) => current - 1)}
-                    >
-                      Previous
-                    </button>
-                    <span className="btn btn-outline-secondary disabled">
-                      {page} / {pagination.totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      disabled={page >= pagination.totalPages}
-                      onClick={() => setPage((current) => current + 1)}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </nav>
-              )}
-            </>
-          )}
-        </section>
-      </div>
+            {pagination && pagination.totalPages > 1 && (
+              <div className="pagination-container pagination-centered">
+                <div className="d-flex align-items-center gap-2">
+                  <button
+                    type="button"
+                    className="pagination-btn"
+                    disabled={page <= 1}
+                    onClick={() => setPage((current) => current - 1)}
+                  >
+                    ← Previous
+                  </button>
+                  <span className="pagination-info">
+                    {page} / {pagination.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="pagination-btn"
+                    disabled={page >= pagination.totalPages}
+                    onClick={() => setPage((current) => current + 1)}
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </section>
     </div>
   );
 }

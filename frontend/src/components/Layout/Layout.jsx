@@ -19,16 +19,51 @@ const Layout = ({ children }) => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Close mobile menu on Escape press
+  // Close mobile menu on Escape press and implement focus trap
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         setIsMobileMenuOpen(false);
       }
+
+      if (e.key === "Tab" && isMobileMenuOpen && mobileMenuRef.current) {
+        const focusableElements = mobileMenuRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), select, textarea, input, [tabindex="0"]'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          // Tab
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
     };
 
     if (isMobileMenuOpen) {
       window.addEventListener("keydown", handleKeyDown);
+      // focus the first item when menu opens to set context
+      setTimeout(() => {
+        if (mobileMenuRef.current) {
+          const focusableElements = mobileMenuRef.current.querySelectorAll(
+            'a[href], button:not([disabled]), select, textarea, input, [tabindex="0"]'
+          );
+          if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+          }
+        }
+      }, 100);
     }
 
     return () => window.removeEventListener("keydown", handleKeyDown);

@@ -1,7 +1,7 @@
 /* Ingestion Methods grid */
 .ingest-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   gap: 24px;
 }
 
@@ -145,3 +145,74 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* CSV Sample Format Table - Clean & Non-Overlapping Layout */
+.csv-sample-table-container {
+  overflow-x: auto;
+  width: 100%;
+  margin: 0 !important;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+}
+
+.csv-sample-table {
+  width: 100%;
+  min-width: 660px;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.csv-sample-table th {
+  padding: 10px 12px !important;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.csv-sample-table .th-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.csv-sample-table .th-title {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 12.5px;
+}
+
+.csv-sample-table .sample-tag {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.csv-sample-table .sample-tag.required {
+  color: var(--color-neg, #ef4444);
+}
+
+.csv-sample-table .sample-tag.optional {
+  color: var(--text-muted);
+}
+
+.csv-sample-table td {
+  padding: 10px 12px !important;
+  font-size: 12px !important;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 992px) {
+  .csv-sample-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+}
+
+

@@ -1,5 +1,5 @@
 import "./FeedbackExplorer.css";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getFeedbacks, deleteFeedback, getThemes, updateFeedbackStatus, reclassifyFeedbacks } from '../../services/feedbackService';
 import { useAuth } from '../../store/hooks';
@@ -9,6 +9,86 @@ import PageHeader from '../../components/common/PageHeader/PageHeader';
 import ErrorState from '../../components/common/ErrorState/ErrorState';
 import EmptyState from '../../components/common/EmptyState/EmptyState';
 import StatusBadge from '../../components/common/StatusBadge/StatusBadge';
+
+const FeedbackActionsMenu = ({ feedback, onStatusChange, onDelete }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+  };
+
+  const handleStatusSelect = (status) => {
+    onStatusChange(status);
+    setIsOpen(false);
+  };
+
+  const handleDeleteClick = () => {
+    onDelete();
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="feedback-actions-dropdown" ref={menuRef}>
+      <button 
+        type="button"
+        className="feedback-actions-btn" 
+        onClick={handleToggle}
+        aria-label="Actions"
+        aria-expanded={isOpen}
+      >
+        ⋮
+      </button>
+      {isOpen && (
+        <div className="feedback-actions-menu">
+          <div className="menu-header">Change Status</div>
+          <button 
+            type="button"
+            className={`menu-item ${feedback.status === 'NEW' ? 'active' : ''}`}
+            onClick={() => handleStatusSelect('NEW')}
+          >
+            Mark as New
+          </button>
+          <button 
+            type="button"
+            className={`menu-item ${feedback.status === 'REVIEWED' ? 'active' : ''}`}
+            onClick={() => handleStatusSelect('REVIEWED')}
+          >
+            Mark as Reviewed
+          </button>
+          <button 
+            type="button"
+            className={`menu-item ${feedback.status === 'ACTIONED' ? 'active' : ''}`}
+            onClick={() => handleStatusSelect('ACTIONED')}
+          >
+            Mark as Actioned
+          </button>
+          <div className="menu-divider"></div>
+          <button 
+            type="button"
+            className="menu-item delete-action"
+            onClick={handleDeleteClick}
+          >
+            Delete Record
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const FeedbackExplorer = () => {
   const { user } = useAuth();
@@ -35,13 +115,70 @@ const FeedbackExplorer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1, limit: 10 });
-  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
 
   // Reclassify selection state
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [reclassifying, setReclassifying] = useState(false);
 
   const isReadOnly = user?.role === 'VIEWER';
+
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const filterSheetRef = useRef(null);
+
+  const activeFiltersCount = [
+    channel,
+    sentiment,
+    theme,
+    status,
+    from,
+    to
+  ].filter(Boolean).length;
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsFilterSheetOpen(false);
+      }
+
+      if (e.key === "Tab" && isFilterSheetOpen && filterSheetRef.current) {
+        const focusableElements = filterSheetRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), select, textarea, input, [tabindex="0"]'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (isFilterSheetOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      setTimeout(() => {
+        if (filterSheetRef.current) {
+          const focusableElements = filterSheetRef.current.querySelectorAll(
+            'a[href], button:not([disabled]), select, textarea, input, [tabindex="0"]'
+          );
+          if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+          }
+        }
+      }, 100);
+    }
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFilterSheetOpen]);
 
   // Sync state with URL parameter updates (e.g. back navigation or resets)
   useEffect(() => {
@@ -95,6 +232,7 @@ const FeedbackExplorer = () => {
     }, 400);
 
     return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, search]);
 
   // Fetch feedback records based on searchParams
@@ -135,6 +273,7 @@ const FeedbackExplorer = () => {
 
   useEffect(() => {
     loadFeedbacks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // Clear selection whenever the page/filters change — selected ids from a
@@ -147,7 +286,6 @@ const FeedbackExplorer = () => {
   // Handle status update
   const handleStatusChange = async (id, newStatus) => {
     try {
-      setStatusUpdatingId(id);
       const res = await updateFeedbackStatus(id, newStatus);
       if (res.data.success) {
         setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
@@ -155,8 +293,6 @@ const FeedbackExplorer = () => {
     } catch (err) {
       logger.error('Failed to update status', { err, id, newStatus });
       alert(err.response?.data?.error || 'Failed to update status. Please try again.');
-    } finally {
-      setStatusUpdatingId(null);
     }
   };
 
@@ -288,12 +424,11 @@ const FeedbackExplorer = () => {
       pages.push(
         <button
           key={i}
-          className={`pagination-btn ${i === page ? 'active' : ''}`}
+          className={`pagination-btn pagination-num-btn ${i === page ? 'active' : ''}`}
           style={{
             backgroundColor: i === page ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.03)',
             color: i === page ? '#fff' : 'var(--text-secondary)',
             border: i === page ? '1px solid var(--color-primary)' : '1px solid var(--border-light)',
-            margin: '0 4px',
             fontWeight: i === page ? '600' : 'normal'
           }}
           onClick={() => updateParams({ page: i })}
@@ -322,8 +457,8 @@ const FeedbackExplorer = () => {
         />
       )}
 
-      {/* Filter Toolbar */}
-      <div className="glass-card" style={{ padding: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '24px' }}>
+      {/* Filter Toolbar - Desktop (visible on desktop only) */}
+      <div className="glass-card desktop-only" style={{ padding: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '24px' }}>
         <div style={{ flex: '2 1 240px', minWidth: '200px' }}>
           <label className="form-label">Search Content</label>
           <input 
@@ -411,6 +546,136 @@ const FeedbackExplorer = () => {
         </div>
       </div>
 
+      {/* Filter Toolbar - Mobile (PhonePe Style) */}
+      <div className="mobile-only phonepe-mobile-filter-bar">
+        <div className="phonepe-search-pill">
+          <span className="phonepe-search-icon">🔍</span>
+          <input 
+            type="text" 
+            value={searchInput} 
+            onChange={(e) => setSearchInput(e.target.value)} 
+            placeholder="Search feedback..."
+            className="phonepe-search-input"
+          />
+          <div className="phonepe-search-divider" />
+          <button 
+            type="button"
+            className="phonepe-filter-btn"
+            onClick={() => setIsFilterSheetOpen(true)}
+            aria-label="Open filters"
+          >
+            <span className="phonepe-filter-icon">🎛️</span>
+            {activeFiltersCount > 0 && <span className="phonepe-filter-badge">{activeFiltersCount}</span>}
+          </button>
+        </div>
+        {activeFiltersCount > 0 && (
+          <button 
+            type="button"
+            onClick={handleResetFilters} 
+            className="phonepe-clear-btn"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Mobile Bottom Sheet (only visible when isFilterSheetOpen is true) */}
+      {isFilterSheetOpen && (
+        <div className="mobile-filter-sheet-backdrop" onClick={() => setIsFilterSheetOpen(false)}>
+          <div className="mobile-filter-sheet" ref={filterSheetRef} onClick={e => e.stopPropagation()}>
+            <div className="mobile-filter-sheet-header">
+              <h3>Filters</h3>
+              <button className="mobile-filter-sheet-close" onClick={() => setIsFilterSheetOpen(false)} aria-label="Close filters">
+                &times;
+              </button>
+            </div>
+            
+            <div className="mobile-filter-sheet-body">
+              <div className="form-group">
+                <label className="form-label">Channel</label>
+                <select value={channel} onChange={(e) => { updateParams({ channel: e.target.value, page: 1 }); }}>
+                  <option value="">All Channels</option>
+                  <option value="CSV Import">CSV Import</option>
+                  <option value="Manual Ingest">Manual Entry</option>
+                  <option value="Slack Chat">Slack Chat</option>
+                  <option value="Support Email">Support Email</option>
+                  <option value="Client Call">Client Call</option>
+                  <option value="Intercom Chat">Intercom Chat</option>
+                  <option value="Support Ticket">Support Ticket</option>
+                  <option value="App Store Review">App Store Review</option>
+                  <option value="NPS Survey">NPS Survey</option>
+                  <option value="Sales Call Note">Sales Call Note</option>
+                  <option value="Community Post">Community Post</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Sentiment</label>
+                <select value={sentiment} onChange={(e) => { updateParams({ sentiment: e.target.value, page: 1 }); }}>
+                  <option value="">All Sentiments</option>
+                  <option value="POS">Positive</option>
+                  <option value="NEU">Neutral</option>
+                  <option value="NEG">Negative</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Theme</label>
+                <select value={theme} onChange={(e) => { updateParams({ theme: e.target.value, page: 1 }); }}>
+                  <option value="">All Themes</option>
+                  {themesList.map((t) => (
+                    <option key={t.id} value={t.name}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select value={status} onChange={(e) => { updateParams({ status: e.target.value, page: 1 }); }}>
+                  <option value="">All Statuses</option>
+                  <option value="NEW">New</option>
+                  <option value="REVIEWED">Reviewed</option>
+                  <option value="ACTIONED">Actioned</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">From</label>
+                <input 
+                  type="date" 
+                  value={fromInput} 
+                  onChange={(e) => { setFromInput(e.target.value); updateParams({ from: e.target.value, page: 1 }); }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">To</label>
+                <input 
+                  type="date" 
+                  value={toInput} 
+                  onChange={(e) => { setToInput(e.target.value); updateParams({ to: e.target.value, page: 1 }); }}
+                />
+              </div>
+            </div>
+            
+            <div className="mobile-filter-sheet-footer">
+              <button 
+                onClick={handleResetFilters} 
+                className="btn btn-secondary w-100"
+              >
+                Reset All
+              </button>
+              <button 
+                onClick={() => setIsFilterSheetOpen(false)} 
+                className="btn btn-primary w-100"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Selection bar — only shown once something is selected, and never for Viewers */}
       {!isReadOnly && selectedIds.size > 0 && (
         <div
@@ -469,7 +734,8 @@ const FeedbackExplorer = () => {
           />
         ) : (
           <>
-            <div className="table-container" style={{ border: 'none', borderRadius: 0, margin: 0 }}>
+            {/* Desktop Table View */}
+            <div className="table-container desktop-only" style={{ border: 'none', borderRadius: 0, margin: 0 }}>
               <table>
                 <thead>
                   <tr>
@@ -484,13 +750,11 @@ const FeedbackExplorer = () => {
                         />
                       </th>
                     )}
-                    <th style={{ width: '40%' }}>Feedback Content</th>
-                    <th>Source</th>
-                    <th>Sentiment</th>
+                    <th style={{ width: '48%' }}>Feedback Content</th>
+                    <th style={{ width: '150px' }}>Sentiment</th>
                     <th>Theme</th>
-                    <th style={{ width: '130px' }}>Status</th>
-                    <th>Date</th>
-                    {!isReadOnly && <th style={{ width: '80px' }}></th>}
+                    <th style={{ width: '110px' }}>Status</th>
+                    {!isReadOnly && <th style={{ width: '60px', textAlign: 'center' }}>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -507,17 +771,19 @@ const FeedbackExplorer = () => {
                         </td>
                       )}
                       <td style={{ lineHeight: '1.5', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '13.5px' }}>
-                        <div style={{ fontWeight: '500', marginBottom: '4px' }}>{f.content}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                          Customer: <span style={{ color: 'var(--text-secondary)' }}>{f.customerLabel || 'Anonymous'}</span>
+                        <div style={{ fontWeight: '500', marginBottom: '5px', color: 'var(--text-primary)' }}>{f.content}</div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span>Customer: <strong style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{f.customerLabel || 'Anonymous'}</strong></span>
+                          <span>•</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            {f.channel.toLowerCase().includes('slack') ? '💬' : 
+                             f.channel.toLowerCase().includes('email') ? '✉️' : 
+                             f.channel.toLowerCase().includes('csv') ? '📂' : '🔌'}
+                            <strong style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{f.channel}</strong>
+                          </span>
+                          <span>•</span>
+                          <span>{formatDate(f.createdAt)}</span>
                         </div>
-                      </td>
-                      <td>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: '500' }}>
-                          {f.channel.toLowerCase().includes('slack') ? '💬' : 
-                           f.channel.toLowerCase().includes('email') ? '✉️' : 
-                           f.channel.toLowerCase().includes('csv') ? '📂' : '🔌'} {f.channel}
-                        </span>
                       </td>
                       <td>
                         {getSentimentBadge(f.sentiment, f.sentimentScore)}
@@ -544,39 +810,15 @@ const FeedbackExplorer = () => {
                         </div>
                       </td>
                       <td>
-                        {isReadOnly ? (
-                          <StatusBadge status={f.status} />
-                        ) : (
-                          <select 
-                            value={f.status} 
-                            disabled={statusUpdatingId === f.id}
-                            onChange={(e) => handleStatusChange(f.id, e.target.value)}
-                            style={{ 
-                              padding: '6px 10px', 
-                              fontSize: '12px', 
-                              width: '100%', 
-                              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                              borderColor: statusUpdatingId === f.id ? 'var(--color-primary)' : 'var(--border-light)'
-                            }}
-                          >
-                            <option value="NEW">NEW</option>
-                            <option value="REVIEWED">REVIEWED</option>
-                            <option value="ACTIONED">ACTIONED</option>
-                          </select>
-                        )}
-                      </td>
-                      <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
-                        {formatDate(f.createdAt)}
+                        <StatusBadge status={f.status} />
                       </td>
                       {!isReadOnly && (
-                        <td>
-                          <button 
-                            onClick={() => handleDelete(f.id)} 
-                            className="btn btn-danger" 
-                            style={{ padding: '6px 10px', fontSize: '11px' }}
-                          >
-                            Delete
-                          </button>
+                        <td style={{ textAlign: 'center' }}>
+                          <FeedbackActionsMenu 
+                            feedback={f}
+                            onStatusChange={(status) => handleStatusChange(f.id, status)}
+                            onDelete={() => handleDelete(f.id)}
+                          />
                         </td>
                       )}
                     </tr>
@@ -585,13 +827,98 @@ const FeedbackExplorer = () => {
               </table>
             </div>
 
+            {/* Mobile View - PhonePe Transaction History Style List */}
+            <div className="mobile-only phonepe-history-container">
+              {/* Summary Row */}
+              <div className="phonepe-summary-row">
+                <span className="phonepe-summary-title">
+                  {channel ? `${channel}` : 'All Customer Feedback'}
+                </span>
+                <span className="phonepe-summary-count">
+                  {pagination ? `${pagination.total} Records` : `${feedbacks.length} Items`} ›
+                </span>
+              </div>
+
+              {/* Transaction-style List Items */}
+              <div className="phonepe-transaction-list">
+                {feedbacks.map((f) => {
+                  const channelIcon = f.channel.toLowerCase().includes('slack') ? '💬' : 
+                                      f.channel.toLowerCase().includes('email') ? '✉️' : 
+                                      f.channel.toLowerCase().includes('csv') ? '📂' : '🔌';
+                  
+                  return (
+                    <div 
+                      key={f.id} 
+                      className={`phonepe-transaction-item ${selectedIds.has(f.id) ? 'selected' : ''}`}
+                    >
+                      {/* Left: Circle Avatar Icon */}
+                      <div className="phonepe-item-icon-wrapper">
+                        {!isReadOnly ? (
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(f.id)}
+                            onChange={() => toggleSelected(f.id)}
+                            disabled={reclassifying}
+                            className="phonepe-item-checkbox"
+                          />
+                        ) : null}
+                        <div className="phonepe-item-avatar">
+                          {channelIcon}
+                        </div>
+                      </div>
+
+                      {/* Middle & Main Content */}
+                      <div className="phonepe-item-content">
+                        {/* Header: Channel, Customer & Sentiment Badge */}
+                        <div className="phonepe-item-header">
+                          <div className="phonepe-item-header-left">
+                            <span className="phonepe-item-channel">{f.channel}</span>
+                            {f.customerLabel && <span className="phonepe-item-customer">• {f.customerLabel}</span>}
+                          </div>
+                          <div className="phonepe-item-badge">
+                            {getSentimentBadge(f.sentiment, f.sentimentScore)}
+                          </div>
+                        </div>
+                        
+                        {/* Feedback snippet */}
+                        <p className="phonepe-item-text">{f.content}</p>
+                        
+                        {/* Footer: Date, Theme & Status Actions */}
+                        <div className="phonepe-item-footer">
+                          <div className="phonepe-item-footer-left">
+                            <span className="phonepe-item-date">{formatDate(f.createdAt)}</span>
+                            {f.Themes && f.Themes.length > 0 && (
+                              <span className="phonepe-item-theme-tag">
+                                • {f.Themes[0].name}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="phonepe-item-status-actions">
+                            <StatusBadge status={f.status} />
+                            {!isReadOnly && (
+                              <FeedbackActionsMenu 
+                                feedback={f}
+                                onStatusChange={(status) => handleStatusChange(f.id, status)}
+                                onDelete={() => handleDelete(f.id)}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Pagination footer */}
-            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            <div className="feedback-pagination-container">
+              <span className="pagination-info-text">
                 Showing <strong>{showingStart}</strong>–<strong>{showingEnd}</strong> of <strong>{pagination.total}</strong> feedback items
               </span>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="pagination-controls-wrapper">
                 <button 
                   className="pagination-btn"
                   disabled={page <= 1}
@@ -600,7 +927,9 @@ const FeedbackExplorer = () => {
                   ← Previous
                 </button>
                 
-                {renderPageNumbers()}
+                <div className="pagination-numbers-scroll">
+                  {renderPageNumbers()}
+                </div>
 
                 <button 
                   className="pagination-btn"

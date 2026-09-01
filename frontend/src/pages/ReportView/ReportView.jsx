@@ -627,50 +627,7 @@ function ReportView() {
             </section>
           )}
 
-          {/* Bottom actions */}
-          <footer className="report-document-footer">
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={handleShare}
-              disabled={sharing}
-            >
-              {sharing ? (
-                <>
-                  <Check size={17} />
-                  Link Copied
-                </>
-              ) : (
-                <>
-                  <Share2 size={17} />
-                  Share Report
-                </>
-              )}
-            </button>
 
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleExport}
-              disabled={exporting}
-            >
-              {exporting ? (
-                <>
-                  <span
-                    className="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  Exporting...
-                </>
-              ) : (
-                <>
-                  <Download size={17} />
-                  Export PDF
-                </>
-              )}
-            </button>
-          </footer>
 
         </article>
       </div>
