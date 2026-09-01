@@ -1,0 +1,40 @@
+name: Production Smoke Test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  smoke-test:
+    name: Verify production endpoints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check frontend URL
+        run: |
+          for i in 1 2 3 4 5; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.PROD_FRONTEND_URL }}")
+            if [ "$status" -eq 200 ]; then
+              echo "Frontend OK ($status)"
+              exit 0
+            fi
+            echo "Attempt $i: frontend returned $status — retrying in 20s"
+            sleep 20
+          done
+          echo "Frontend did not return 200 after 5 attempts"
+          exit 1
+
+      - name: Check backend /health
+        run: |
+          for i in 1 2 3 4 5; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.PROD_BACKEND_URL }}/health")
+            if [ "$status" -eq 200 ]; then
+              echo "Backend OK ($status)"
+              exit 0
+            fi
+            echo "Attempt $i: backend returned $status — retrying in 20s"
+            sleep 20
+          done
+          echo "Backend /health did not return 200 after 5 attempts"
+          exit 1
