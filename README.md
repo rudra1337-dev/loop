@@ -1,179 +1,77 @@
 # LOOP – AI Customer Feedback Intelligence Platform
 
-> Transform customer feedback into actionable business insights using AI.
-
-![Status](https://img.shields.io/badge/status-in%20development-blue)
-![Stack](https://img.shields.io/badge/stack-MERN-success)
-![AI](https://img.shields.io/badge/AI-Google%20Gemini-orange)
-![License](https://img.shields.io/badge/license-MIT-green)
+> Transform raw customer feedback into real-time business intelligence using AI.
 
 ---
 
-## Overview
+## About
 
-LOOP is an AI-powered customer feedback intelligence platform that helps organizations collect, organize, analyze, and understand customer feedback from multiple sources.
-
-Instead of manually reviewing hundreds or thousands of feedback entries, LOOP automatically classifies feedback, detects emerging themes, generates analytics, and provides AI-powered insights for better business decisions.
+LOOP is a multi-tenant AI customer-feedback intelligence platform that solves the challenge of fragmented, high-volume feedback across channels like Support, Surveys, Email, and Product Reviews. By centralizing feedback into workspace-isolated environments, LOOP uses Google Gemini to automatically classify sentiment, extract key themes, enable natural language querying via Retrieval-Augmented Generation (Ask LOOP), and generate executive Voice-of-Customer (VoC) reports with downloadable PDF summaries.
 
 ---
 
-## Problem Statement
+## Screenshots
 
-Organizations receive customer feedback through multiple channels such as:
-
-- Customer Support
-- Surveys
-- Email
-- Social Media
-- Product Reviews
-- Sales Conversations
-
-As feedback grows, it becomes difficult to:
-
-- Identify recurring customer problems
-- Understand customer sentiment
-- Prioritize feature requests
-- Track trends over time
-- Generate meaningful business reports
+| Screen | Description | Preview |
+| :--- | :--- | :--- |
+| **Dashboard** | Executive overview of feedback volume, sentiment distribution, and key theme trends. | `![Dashboard](docs/screenshots/dashboard.png)`<br>*(Placeholder — maintainer: replace with actual screenshot)* |
+| **Ask LOOP** | RAG-powered natural language search over customer feedback with source citations. | `![Ask LOOP](docs/screenshots/ask-loop.png)`<br>*(Placeholder — maintainer: replace with actual screenshot)* |
+| **Reports** | Automated Voice-of-Customer narrative reports with metric breakdowns and PDF export. | `![Reports](docs/screenshots/reports.png)`<br>*(Placeholder — maintainer: replace with actual screenshot)* |
 
 ---
 
-## Solution
+## Tech Stack
 
-LOOP centralizes customer feedback into a single platform where AI automatically:
-
-- Analyzes customer sentiment
-- Classifies feedback into categories
-- Detects common themes
-- Identifies emerging trends
-- Answers business questions using AI
-- Generates Voice of Customer reports
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Frontend** | React 19 (Vite), Redux Toolkit, React Router v7, Bootstrap 5, Recharts, Axios |
+| **Backend** | Node.js, Express v5, Sequelize ORM v6, MySQL 8 (`mysql2`), Passport.js, PDFKit |
+| **Authentication** | JWT stored in `httpOnly` secure cookies, Google OAuth 2.0 |
+| **AI Integration** | Google Gemini API (`@google/genai`), `gemini-3.5-flash-lite` (classification & narratives), `gemini-embedding-001` (RAG vector embeddings) |
 
 ---
 
-# Features
+## Quick Start
 
-## Authentication
+```bash
+# 1. Clone repository
+git clone https://github.com/rudra1337-dev/loop.git
+cd loop
 
-- User Registration
-- Secure Login
-- JWT Authentication
-- Role-Based Access Control
-
-## Workspace Management
-
-- Multi-tenant Workspaces
-- User Management
-- Role Management
-
-## Feedback Management
-
-- Manual Feedback Entry
-- CSV Import
-- Feedback Inbox
-- Search & Filters
-- Status Tracking
-
-## AI Features
-
-- Sentiment Analysis
-- Theme Detection
-- Feedback Classification
-- Ask LOOP (AI Chat)
-- Voice of Customer Report Generation
-
-## Analytics
-
-- Dashboard
-- KPI Cards
-- Charts & Graphs
-- Theme Analysis
-- Sentiment Trends
-
----
-
-# Tech Stack
-
-## Frontend
-
-- React.js
-- React Router
-- Bootstrap
-- Axios
-
-## Backend
-
-- Node.js
-- Express.js
-- JWT Authentication
-
-## Database
-
-- MongoDB
-- Mongoose
-
-## AI
-
-- Google Gemini API
-
-## Deployment
-
-- Frontend: Vercel
-- Backend: Render
-- Database: MongoDB Atlas
-
----
-
-# Project Structure
-
-```
-loop-ai-feedback-platform/
-│
-├── frontend/
-├── backend/
-├── docs/
-├── README.md
-└── docker-compose.yml
+# 2. See backend and frontend guides for setup and environment variables
+# Backend setup:   see backend/README.md
+# Frontend setup:  see frontend/README.md
 ```
 
 ---
 
-# Development Roadmap
+## Demo Credentials
 
-- [ ] Project Setup
-- [ ] Authentication
-- [ ] Dashboard
-- [ ] Feedback Management
-- [ ] AI Integration
-- [ ] Theme Analysis
-- [ ] Reports
-- [ ] User Management
-- [ ] Deployment
+The database seed script populates a default workspace (**Acme Corp Demo Workspace**) with the following demo accounts (password: `Password123!`):
 
----
+| Role | Email | Password | Access Level |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@acme.com` | `Password123!` | Full workspace access, user & invite management, feedback ingestion & reports |
+| **Analyst** | `analyst@acme.com` | `Password123!` | Feedback ingestion, manual reclassification, report generation |
+| **Viewer** | `viewer@acme.com` | `Password123!` | Read-only access to dashboards, feedback explorer, Ask LOOP, and reports |
 
-# Future Improvements
-
-- Real-time Notifications
-- Team Collaboration
-- Email Integration
-- Third-party Feedback Sources
-- Mobile Application
-- Advanced Analytics
-- AI Recommendation Engine
+> *Note for maintainers: Ensure database is seeded via `npm run seed` in `backend/` before attempting to log in.*
 
 ---
 
-# License
+## Documentation Links
 
-MIT License
+- [Architecture Overview](docs/architecture-overview.md) — High-level system topology and multi-tenancy model.
+- [Backend Documentation](backend/README.md) — Setup, environment configuration, and service layers.
+- [Frontend Documentation](frontend/README.md) — Component organization, state management, and build steps.
+- [Backend Deep-Dive Architecture](docs/architecture-backend.md) — Database models, AI pipelines, and authorization flows.
+- [Frontend Deep-Dive Architecture](docs/architecture-frontend.md) — Route guards, Redux slices, and data-fetching patterns.
+- [API Reference](docs/api-reference.md) — Complete REST endpoint documentation and payload schemas.
+- [Contributing Guide](docs/CONTRIBUTING.md) — Git workflow, branch naming, and contribution conventions.
+- [AI Agent Rules](AGENTS.md) — Development rules and guidelines for human contributors and AI assistants.
 
 ---
 
-## Author
+## License
 
-## Team
-
-Developed collaboratively by Team 15 as part of Project LOOP.
-
-Built with ❤️ using the MERN Stack and Google Gemini AI.
+This project is licensed under the [MIT License](LICENSE).
