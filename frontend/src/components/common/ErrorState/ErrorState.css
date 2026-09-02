@@ -9,7 +9,7 @@
   border-radius: 8px;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
+  color: #ef4444;
 }
 
 .error-state-message {
@@ -29,7 +29,7 @@
   height: auto !important;
   border: 1px solid rgba(239, 68, 68, 0.3) !important;
   background: transparent !important;
-  color: #fca5a5 !important;
+  color: #ef4444 !important;
   white-space: nowrap;
   transition: all 0.2s ease;
 }

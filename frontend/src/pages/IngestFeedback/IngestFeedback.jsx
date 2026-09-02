@@ -189,19 +189,19 @@ const IngestFeedback = () => {
 
           {csvResult && (
             <div className="alert alert-success" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-pos, #10b981)' }}>
                 <span>✅</span> <strong>{csvResult.message}</strong>
               </div>
-              <div style={{ marginTop: '8px', fontSize: '13px', display: 'flex', gap: '16px' }}>
+              <div style={{ marginTop: '8px', fontSize: '13px', display: 'flex', gap: '16px', color: 'var(--text-primary)' }}>
                 <span>Parsed Rows: {csvResult.stats.totalRows}</span>
                 <span>Success: {csvResult.stats.imported}</span>
                 <span>Failures: {csvResult.stats.failed}</span>
               </div>
-              {csvResult.errors && (
+              {csvResult.errors && csvResult.errors.length > 0 && (
                 <div style={{ marginTop: '8px', fontSize: '11px', maxHeight: '100px', overflowY: 'auto', width: '100%' }}>
-                  <p style={{ fontWeight: 'bold' }}>Failures list:</p>
+                  <p style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>Failures list:</p>
                   {csvResult.errors.map((e, idx) => (
-                    <div key={idx} style={{ color: 'rgba(255,255,255,0.7)' }}>Row {e.row}: {e.error}</div>
+                    <div key={idx} style={{ color: 'var(--color-neg, #ef4444)', marginTop: '2px' }}>Row {e.row}: {e.error}</div>
                   ))}
                 </div>
               )}
