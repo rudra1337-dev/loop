@@ -20,7 +20,7 @@ graph TD
     Pages -->|Consumes Theme| ThemeContext
     ReduxStore -->|HTTP Requests| Services
     Pages -->|Direct Service Calls| Services
-    Services -->|Axios Instance (api.js)| BackendAPI
+    Services -->|"Axios Instance (api.js)"| BackendAPI
 ```
 
 ---
@@ -78,15 +78,15 @@ sequenceDiagram
     participant Backend as Backend API
 
     User->>ReportsPage: Navigates to /reports
-    ReportsPage->>ReportsPage: useEffect triggers loadReports(page)
-    ReportsPage->>ReportService: Calls getReports({ page: 1, limit: 10 })
-    ReportService->>AxiosApi: Calls api.get('/reports', { params })
+    ReportsPage->>ReportsPage: useEffect triggers loadReports
+    ReportsPage->>ReportService: Calls getReports with page and limit
+    ReportService->>AxiosApi: Calls api.get endpoint with params
     AxiosApi->>Backend: Sends GET /api/reports with httpOnly cookie
-    Backend-->>AxiosApi: Returns JSON { data: [...], pagination: {...} }
+    Backend-->>AxiosApi: Returns JSON response with reports and pagination
     AxiosApi-->>ReportService: Resolves Axios response
     ReportService-->>ReportsPage: Resolves promise
-    ReportsPage->>ReportsPage: Updates local state setReports() & setPagination()
-    ReportsPage->>User: Renders Report History list & pagination
+    ReportsPage->>ReportsPage: Updates local state setReports and setPagination
+    ReportsPage->>User: Renders Report History list and pagination
 ```
 
 1. **Service Layer**: `src/services/reportService.js` wraps backend API routes using the centralized Axios instance (`api.js`), which includes `withCredentials: true` to automatically transmit the `httpOnly` session cookie.

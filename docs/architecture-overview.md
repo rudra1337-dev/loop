@@ -12,7 +12,7 @@ graph TD
     API["API Layer<br>(Express.js Routes & Controllers)"]
     Middleware["Security & Auth Middleware<br>(JWT Cookie & Role Authorization)"]
     Services["Service Layer<br>(Business Logic & Multi-Tenant Queries)"]
-    DB[("MySQL Database<br>(Sequelize ORM)")]
+    DB[("MySQL Database<br>Sequelize ORM")]
     Gemini["External AI Engine<br>(Google Gemini API)"]
 
     Client -->|HTTP / REST + Cookie| API
