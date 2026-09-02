@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  frontend:
+    name: Frontend — lint & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+        env:
+          VITE_API_URL: http://localhost:5000/api
+          VITE_GOOGLE_AUTH_URL: http://localhost:5000/api/auth/google
+
+  backend:
+    name: Backend — lint & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+
+      - run: npm test
+        env:
+          NODE_ENV: test
+          PORT: 5001
+          # DB vars are dummy — no real connection is made by anything
+          # these tests exercise (see health.test.js). Values only need
+          # to exist so config/database.js can construct without error.
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: loop_test
+          DB_USER: test
+          DB_PASSWORD: test
+          DB_SSL: 'false'
+          JWT_SECRET: ci-test-secret-not-real
+          JWT_EXPIRES_IN: 7d
+          COOKIE_NAME: token
+          COOKIE_SECURE: 'false'
+          COOKIE_SAME_SITE: lax
+          # Required only so passport.js's GoogleStrategy constructor
+          # doesn't throw at import time — never real credentials.
+          GOOGLE_CLIENT_ID: ci-test-client-id
+          GOOGLE_CLIENT_SECRET: ci-test-client-secret
+          GOOGLE_CALLBACK_URL: http://localhost:5000/api/auth/google/callback
+          FRONTEND_URL: http://localhost:5173
+          GEMINI_API_KEY: ''
+          GEMINI_MODEL: gemini-3.5-flash-lite
+          AI_PROVIDER_NAME: Gemini

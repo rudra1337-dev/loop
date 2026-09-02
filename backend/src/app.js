@@ -43,6 +43,17 @@ app.get("/", (req, res) => {
   });
 });
 
+// Liveness check only — deliberately does not touch the database. A DB
+// hiccup should not make orchestration/monitoring think the process
+// itself is down; that's a separate (readiness) concern if ever needed.
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use('/api/reports', reportRoutes);
 
 export default app;
