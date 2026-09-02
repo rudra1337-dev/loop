@@ -86,7 +86,7 @@ erDiagram
         string name
         string email
         string passwordHash
-        enum role "ADMIN | ANALYST | VIEWER"
+        string role "ADMIN | ANALYST | VIEWER"
         string authProvider
     }
 
@@ -94,10 +94,10 @@ erDiagram
         string id PK
         string workspaceId FK
         text content
-        enum sentiment "POS | NEU | NEG"
+        string sentiment "POS | NEU | NEG"
         float sentimentScore
         string channel
-        enum status "NEW | IN_REVIEW | ACTIONED | ARCHIVED"
+        string status "NEW | IN_REVIEW | ACTIONED | ARCHIVED"
     }
 
     Theme {
@@ -138,7 +138,7 @@ erDiagram
         string workspaceId FK
         string createdBy FK
         string code
-        enum role "ADMIN | ANALYST | VIEWER"
+        string role "ADMIN | ANALYST | VIEWER"
         date expiresAt
     }
 ```
